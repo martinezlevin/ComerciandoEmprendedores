@@ -1,7 +1,7 @@
 /* Lógica de interacción de comercIAndo Emprendedores */
 
 "use strict";
-// Datos ficticios y operación en memoria: no hay comunicación con servidor, cuentas ni pagos reales.
+// Sistema operativo y lógica de interacción de comercIAndo Emprendedores
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (x) =>
@@ -159,6 +159,7 @@ const state = {
     emoji: p[6],
     barcode: p[7],
     published: i < 6,
+    image: "",
   })),
   categories: [...new Set(SEED.map((p) => p[1]))],
   sales: [
@@ -193,7 +194,7 @@ const state = {
       customer: "Juan Pérez",
       sale: "V-1002",
       type: "Envío",
-      address: "Calle Ficticia 120",
+      address: "Av. Belgrano 120",
       status: "Pendiente",
     },
   ],
@@ -209,11 +210,13 @@ let view = "home",
   category = "Todas",
   searchTerm = "",
   editingId = null,
+  editingPhoto = "",
   editingCategory = null,
   payment = "Efectivo",
   delivery = "Retiro",
   salesFilter = "all",
   stockFilter = "all",
+  stockViewMode = "cards",
   globalSearchTerm = "",
   discount = 0,
   modalEscape = null,
@@ -241,6 +244,64 @@ function syncCategories() {
     ),
   ].sort((a, b) => a.localeCompare(b, "es"));
 }
+
+const STATE_STORAGE_KEY = "comerciando_emprendedores_state_v2";
+
+function saveState() {
+  try {
+    const payload = {
+      products: state.products,
+      categories: state.categories,
+      sales: state.sales,
+      deliveries: state.deliveries,
+      movements: state.movements,
+      cash: state.cash,
+      sound: state.sound,
+      soundStyle,
+      theme: state.theme,
+      store: state.store,
+      users: state.users,
+      stockViewMode,
+    };
+    localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(payload));
+  } catch (err) {
+    console.warn("No se pudo guardar en localStorage:", err);
+  }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STATE_STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== "object") return;
+    if (Array.isArray(data.products) && data.products.length) {
+      state.products = data.products.map((p) => ({ ...p, image: p.image || "" }));
+    }
+    if (Array.isArray(data.categories) && data.categories.length) {
+      state.categories = data.categories;
+    }
+    if (Array.isArray(data.sales)) state.sales = data.sales;
+    if (Array.isArray(data.deliveries)) state.deliveries = data.deliveries;
+    if (Array.isArray(data.movements)) state.movements = data.movements;
+    if (typeof data.cash === "boolean") state.cash = data.cash;
+    if (typeof data.sound === "boolean") state.sound = data.sound;
+    if (data.soundStyle) soundStyle = data.soundStyle;
+    if (data.theme === "light" || data.theme === "dark") {
+      state.theme = data.theme;
+      document.documentElement.dataset.theme = state.theme;
+    }
+    if (data.store) state.store = data.store;
+    if (Array.isArray(data.users) && data.users.length) state.users = data.users;
+    if (data.stockViewMode === "cards" || data.stockViewMode === "table") {
+      stockViewMode = data.stockViewMode;
+    }
+  } catch (err) {
+    console.warn("No se pudo cargar desde localStorage:", err);
+  }
+}
+
+loadState();
 syncCategories();
 const THEME_PREF_KEY = "comerciando_emprendedores_theme_v1";
 try {
@@ -347,7 +408,65 @@ function kpi(name, val, desc, color = "sky") {
   return `<div class="v8-kpi ${color}"><small>${name}</small><strong>${val}</strong><span>${desc}</span></div>`;
 }
 function avatar(p) {
-  return `<div class="lite-productmark">${esc(p.emoji || "📦")}</div>`;
+  if (p?.image) {
+    return `<div class="lite-productmark" style="padding:0;overflow:hidden"><img src="${p.image}" alt="${esc(p.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"></div>`;
+  }
+  return `<div class="lite-productmark">${esc(p?.emoji || "📦")}</div>`;
+}
+function renderProductCard(p, mode = "pos") {
+  const isPos = mode === "pos";
+  const idText = p.barcode ? `ID: ${esc(p.barcode)}` : `ID: ${p.id}`;
+  const outOfStock = p.stock <= 0;
+  const isLowStock = p.stock <= p.min;
+
+  const mediaContent = p.image
+    ? `<img src="${p.image}" alt="${esc(p.name)}" class="pro-card-img" loading="lazy">`
+    : `<div class="pro-card-placeholder" aria-label="${esc(p.name)}">
+         <span>${esc(p.emoji || "📦")}</span>
+       </div>`;
+
+  const metaHtml = isPos
+    ? `<div class="pro-card-meta">
+         <span class="pro-card-stock ${isLowStock ? "warn" : "ok"}">${outOfStock ? "Agotado" : `${p.stock} u. disp.`}</span>
+         <span class="pro-card-cat">${esc(p.cat || "")}</span>
+       </div>`
+    : `<div class="pro-card-meta">
+         <span class="pro-card-stock ${isLowStock ? "warn" : "ok"}">${isLowStock ? "Reponer: " : "Stock: "}${p.stock} u.</span>
+         <span class="pro-card-margin">Margen: ${marginOnSale(p.cost, p.price).toFixed(0)}%</span>
+       </div>`;
+
+  const actionHtml = isPos
+    ? `<button type="button" class="pro-card-btn" data-add="${p.id}" ${outOfStock ? "disabled" : ""} aria-label="Agregar ${esc(p.name)} al carrito">
+         ${outOfStock ? "Sin stock" : "Agregar al carrito"}
+       </button>`
+    : `<button type="button" class="pro-card-btn" data-action="edit:${p.id}" aria-label="Editar ${esc(p.name)}">
+         Editar producto
+       </button>`;
+
+  const clickAttr = isPos
+    ? (outOfStock ? "" : `data-add="${p.id}"`)
+    : `data-action="edit:${p.id}"`;
+
+  return `
+    <article class="pro-card" data-product-id="${p.id}">
+      <div class="pro-card-media" ${clickAttr} role="button" tabindex="0">
+        ${mediaContent}
+      </div>
+      <div class="pro-card-body">
+        <div class="pro-card-row">
+          <div class="pro-card-left">
+            <h3 class="pro-card-title" title="${esc(p.name)}">${esc(p.name)}</h3>
+            <div class="pro-card-id">${idText}</div>
+          </div>
+          <div class="pro-card-price">${money(p.price)}</div>
+        </div>
+        ${metaHtml}
+      </div>
+      <div class="pro-card-action">
+        ${actionHtml}
+      </div>
+    </article>
+  `;
 }
 function label(txt, theme = "blue") {
   return `<span class="v8-label ${theme}">${esc(txt)}</span>`;
@@ -432,6 +551,9 @@ function renderNav() {
 function go(page) {
   if (!(page in NAME)) return;
   view = page;
+  try {
+    history.replaceState(null, "", "#" + page);
+  } catch {}
   document.body.dataset.view = page;
   $("#crumb").innerHTML = `Comerciando Emprendedores · <b>${NAME[page]}</b>`;
   closeNav();
@@ -488,7 +610,7 @@ function home() {
  </div>
  <div class="ex-status-grid premium-status-grid">
   <div class="card ex-status-card premium-status-card"><div class="ex-icon premium-status-icon"><img class="premium-status-art" src="img/trade.png" alt=""></div><div class="ex-status-text"><div class="ex-title-line"><h2>${esc(state.store)}</h2><span class="pill premium-pill">● Operativo</span></div><p>Tu comercio</p><small>Una sola ubicación · Plan Emprendedores</small></div></div>
-  <div class="card ex-status-card premium-status-card"><div class="ex-icon premium-status-icon cash"><img class="premium-status-art" src="img/CashRegister.png" alt=""></div><div class="ex-status-text"><div class="ex-title-line"><h2>Control de caja</h2><span class="pill premium-pill ${state.cash ? "" : "w"}">${state.cash ? "● Caja abierta" : "○ Caja cerrada"}</span></div><p>${state.cash ? "Listo para registrar cobros" : "Abrí caja para empezar a vender"}</p><small>Operaciones simuladas para esta maqueta.</small></div><button class="btn g sm" data-action="toggle-cash">${state.cash ? "Cerrar caja" : "Abrir caja"}</button></div>
+  <div class="card ex-status-card premium-status-card"><div class="ex-icon premium-status-icon cash"><img class="premium-status-art" src="img/CashRegister.png" alt=""></div><div class="ex-status-text"><div class="ex-title-line"><h2>Control de caja</h2><span class="pill premium-pill ${state.cash ? "" : "w"}">${state.cash ? "● Caja abierta" : "○ Caja cerrada"}</span></div><p>${state.cash ? "Listo para registrar cobros" : "Abrí caja para empezar a vender"}</p><small>Registro operativo de ventas en tiempo real.</small></div><button class="btn g sm" data-action="toggle-cash">${state.cash ? "Cerrar caja" : "Abrir caja"}</button></div>
  </div>
   <div class="v8-metrics four premium-kpis">
   <button class="v8-kpi sky premium-kpi premium-kpi-primary dashboard-kpi" data-dashboard="sales"><div class="premium-kpi-text"><small>Ventas del día</small><strong>${money(sum)}</strong><span>Cobros registrados</span></div><div class="premium-kpi-icon" aria-hidden="true">${ic("sales")}</div></button>
@@ -497,8 +619,8 @@ function home() {
   <button class="v8-kpi lilac premium-kpi dashboard-kpi" data-dashboard="ship"><div class="premium-kpi-text"><small>Pedidos en curso</small><strong>${state.deliveries.filter((d) => d.status !== "Entregado").length}</strong><span>Pendientes de entrega</span></div><div class="premium-kpi-icon" aria-hidden="true">${ic("ship")}</div></button>
  </div>
  <div class="lite-summary premium-lower">
-  <section class="v8-panel premium-panel premium-chart-panel"><div class="v8-panelhead premium-panel-heading"><div class="premium-heading-icon">${ic("mod")}</div><div><h2>Movimiento comercial</h2><p>Representación de ventas recientes de la maqueta.</p></div></div>
-   <div class="v8-panel-inner"><div class="premium-chart-wrap"><div class="premium-axis" aria-hidden="true">${[30000, 25000, 20000, 15000, 10000, 5000, 0].map((n) => `<span>${moneyValue(n)}</span>`).join("")}</div><div class="premium-chart-area"><div class="premium-gridlines" aria-hidden="true"></div><div class="lite-chart premium-chart" role="img" aria-label="Gráfico demostrativo de ventas de lunes a domingo">${chartDays.map((n, i) => `<div class="premium-bar-wrap"><div class="lite-column premium-bar" style="height:${Math.round((example[i] / 30000) * 100)}%" title="${n}: $ ${moneyValue(example[i])}"></div><span>${n}</span></div>`).join("")}</div></div></div><p class="lite-note premium-info"><span aria-hidden="true">${ic("info")}</span>Todos los importes y actividades son ficticios.</p></div>
+  <section class="v8-panel premium-panel premium-chart-panel"><div class="v8-panelhead premium-panel-heading"><div class="premium-heading-icon">${ic("mod")}</div><div><h2>Movimiento comercial</h2><p>Representación de ventas recientes del negocio.</p></div></div>
+   <div class="v8-panel-inner"><div class="premium-chart-wrap"><div class="premium-axis" aria-hidden="true">${[30000, 25000, 20000, 15000, 10000, 5000, 0].map((n) => `<span>${moneyValue(n)}</span>`).join("")}</div><div class="premium-chart-area"><div class="premium-gridlines" aria-hidden="true"></div><div class="lite-chart premium-chart" role="img" aria-label="Gráfico demostrativo de ventas de lunes a domingo">${chartDays.map((n, i) => `<div class="premium-bar-wrap"><div class="lite-column premium-bar" style="height:${Math.round((example[i] / 30000) * 100)}%" title="${n}: $ ${moneyValue(example[i])}"></div><span>${n}</span></div>`).join("")}</div></div></div><p class="lite-note premium-info"><span aria-hidden="true">${ic("info")}</span>Estadísticas consolidadas en base a operaciones registradas.</p></div>
   </section>
   <section class="v8-panel premium-panel premium-quick-panel"><div class="v8-panelhead premium-panel-heading"><div class="premium-heading-icon quick">${ic("pos")}</div><div><h2>Accesos rápidos</h2><p>Las tareas más habituales de tu emprendimiento.</p></div></div>
    <div class="v8-panel-inner premium-quick-actions"><button class="premium-quick-button primary" data-go="pos"><span class="quick-symbol">${ic("plus")}</span><span>Registrar venta</span><span class="quick-arrow">${chevronRight()}</span></button><button class="premium-quick-button" data-go="stock"><span class="quick-symbol">${ic("stock")}</span><span>Administrar productos</span><span class="quick-arrow">${chevronRight()}</span></button><button class="premium-quick-button" data-go="ship"><span class="quick-symbol">${ic("ship")}</span><span>Ver entregas pendientes</span><span class="quick-arrow">${chevronRight()}</span></button><button class="premium-quick-button" data-go="mod"><span class="quick-symbol">${ic("mod")}</span><span>Consultar reportes Lite</span><span class="quick-arrow">${chevronRight()}</span></button></div>
@@ -511,15 +633,16 @@ function pos() {
     items = state.products.filter(
       (p) =>
         (category === "Todas" || p.cat === category) &&
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()),
+        (p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (p.barcode && p.barcode.toLowerCase().includes(searchTerm.toLowerCase()))),
     ),
     qty = Object.values(cart).reduce((a, b) => a + b, 0),
     total = cartTotal();
-  return `${title("Punto de venta", "Venta rápida, cobro y actualización de stock desde una misma pantalla.", `<span class="pill ${state.cash ? "" : "w"}">${state.cash ? "CAJA ABIERTA" : "CAJA CERRADA"}</span>${action("Vaciar", "clear-cart")}`)}<div class="pos"><div><div class="bar"><input id="posSearch" class="search" placeholder="Buscar por nombre o código..." value="${esc(searchTerm)}" aria-label="Buscar producto"></div><div class="chips">${cats.map((c) => `<button class="${category === c ? "on" : ""}" data-category="${esc(c)}">${esc(c)}</button>`).join("")}</div><div id="grid" class="grid">${items.map((p) => `<button type="button" class="pr" data-add="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>${avatar(p)}<b>${esc(p.name)}</b><span class="f"><b class="num">${money(p.price)}</b><small>${p.stock} u. disp.</small></span><span class="lite-add">${posPlus()}</span></button>`).join("") || '<p class="lite-empty">No hay productos para este filtro.</p>'}</div></div><div class="card cart"><div class="ch"><div><h2>Venta actual</h2><p>${qty} unidades</p></div><span class="pill a">NUEVA</span></div><div class="lines" id="lines">${
+  return `${title("Punto de venta", "Venta rápida, cobro y actualización de stock desde una misma pantalla.", `<span class="pill ${state.cash ? "" : "w"}">${state.cash ? "CAJA ABIERTA" : "CAJA CERRADA"}</span>${action("Vaciar", "clear-cart")}`)}<div class="pos"><div><div class="bar"><input id="posSearch" class="search" placeholder="Buscar por nombre o código..." value="${esc(searchTerm)}" aria-label="Buscar producto"></div><div class="chips">${cats.map((c) => `<button class="${category === c ? "on" : ""}" data-category="${esc(c)}">${esc(c)}</button>`).join("")}</div><div id="grid" class="grid pro-cards-grid">${items.map((p) => renderProductCard(p, "pos")).join("") || '<p class="lite-empty" style="grid-column:1/-1">No hay productos para este filtro.</p>'}</div></div><div class="card cart"><div class="ch"><div><h2>Venta actual</h2><p>${qty} unidades</p></div><span class="pill a">NUEVA</span></div><div class="lines" id="lines">${
     Object.entries(cart)
       .map(([id, q]) => {
         const p = state.products.find((p) => p.id === Number(id));
-        return `<div class="ln">${avatar(p)}<div class="t"><b>${esc(p.name)}</b><small>${money(p.price)} c/u</small></div><div class="q"><button class="pos-minus-button" data-qty="${id}" data-delta="-1" aria-label="Quitar uno">${posMinus()}</button><span class="num">${q}</span><button class="pos-plus-button" data-qty="${id}" data-delta="1" aria-label="Agregar uno">${posPlus()}</button></div></div>`;
+        return `<div class="ln">${avatar(p)}<div class="t"><b>${esc(p?.name || "")}</b><small>${money(p?.price || 0)} c/u</small></div><div class="q"><button class="pos-minus-button" data-qty="${id}" data-delta="-1" aria-label="Quitar uno">${posMinus()}</button><span class="num">${q}</span><button class="pos-plus-button" data-qty="${id}" data-delta="1" aria-label="Agregar uno">${posPlus()}</button></div></div>`;
       })
       .join("") ||
     '<p class="lite-empty">Tocá un producto para empezar la venta.</p>'
@@ -560,16 +683,55 @@ function stockView() {
     state.products.reduce((a, p) => a + marginAmount(p.cost, p.price), 0) /
     (state.products.length || 1);
   const products = state.products.filter((p) => stockFilter === "all" || p.stock <= p.min);
-  return `<div class="v8-screen">${title("Stock Lite", "Control de productos, existencias y movimientos básicos.", action("+ Nuevo producto", "new-product", "") + action("Categorías", "categories") + action("Registrar movimiento", "move"))}<div class="v8-metrics four">${kpi("Productos", state.products.length, "Artículos cargados", "sky")}${kpi(
+  return `<div class="v8-screen">${title(
+    "Stock Lite",
+    "Control de productos, existencias y movimientos básicos.",
+    action("+ Nuevo producto", "new-product", "") +
+      action("Categorías", "categories") +
+      action("Registrar movimiento", "move"),
+  )}<div class="v8-metrics four">${kpi("Productos", state.products.length, "Artículos cargados", "sky")}${kpi(
     "Unidades totales",
     state.products.reduce((a, p) => a + p.stock, 0),
     "Existencias",
     "mint",
-  )}${kpi("Stock crítico", low, "Reponer", "amber")}${kpi("Ganancia promedio", money(avgGain), "Por unidad", "lilac")}</div><div class="lite-filterbar" role="group" aria-label="Filtrar stock"><span>Mostrar:</span><button class="${stockFilter === "all" ? "on" : ""}" data-stock-filter="all">Todo</button><button class="${stockFilter === "low" ? "on" : ""}" data-stock-filter="low">Por reponer (${low})</button></div><div class="v8-panel v8-overflow"><table class="v8-table"><thead><tr><th>Producto</th><th>Categoría</th><th>Compra</th><th>Venta</th><th>Ganancia</th><th>Stock disponible</th><th>Mínimo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${products.map((p) => `<tr><td><div class="v8-prodcell">${avatar(p)}<span><b>${esc(p.name)}</b><small>${esc(p.barcode || "Sin código")}</small></span></div></td><td>${esc(p.cat)}</td><td class="v8-money">${money(p.cost || 0)}</td><td class="v8-money">${money(p.price)}</td><td><b>${money(marginAmount(p.cost, p.price))}</b><small style="display:block;color:var(--muted)">${marginOnCost(p.cost, p.price).toFixed(0)}% s/costo · ${marginOnSale(p.cost, p.price).toFixed(0)}% s/venta</small></td><td><b>${p.stock} u.</b><div class="lite-stockbar"><i style="width:${Math.min(100, (100 * p.stock) / (p.min * 3 || 1))}%"></i></div></td><td>${p.min} u.</td><td>${p.stock <= p.min ? label("Reponer", "warn") : label("Disponible", "ok")}</td><td>${action("Editar", "edit:" + p.id)}</td></tr>`).join("") || '<tr><td colspan="9"><p class="lite-empty">No hay productos para reponer.</p></td></tr>'}</tbody></table></div><p class="lite-note">Stock Lite no incluye lotes ni compras avanzadas, pero sí control básico de categorías y rentabilidad por producto.</p></div>`;
+  )}${kpi("Stock crítico", low, "Reponer", "amber")}${kpi(
+    "Ganancia promedio",
+    money(avgGain),
+    "Por unidad",
+    "lilac",
+  )}</div>
+  <div class="lite-filterbar" role="group" aria-label="Filtrar stock" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span>Mostrar:</span>
+      <button class="${stockFilter === "all" ? "on" : ""}" data-stock-filter="all">Todo</button>
+      <button class="${stockFilter === "low" ? "on" : ""}" data-stock-filter="low">Por reponer (${low})</button>
+    </div>
+    <div class="stock-view-toggle" role="group" aria-label="Modo de visualización">
+      <button type="button" class="${stockViewMode === "cards" ? "on" : ""}" data-stock-view="cards" title="Vista en tarjetas (Foto 1)">⊞ Tarjetas</button>
+      <button type="button" class="${stockViewMode === "table" ? "on" : ""}" data-stock-view="table" title="Vista en tabla">☰ Tabla</button>
+    </div>
+  </div>
+  ${
+    stockViewMode === "cards"
+      ? `<div id="stockGrid" class="pro-cards-grid" style="margin-top:14px">${
+          products.map((p) => renderProductCard(p, "stock")).join("") ||
+          '<p class="lite-empty" style="grid-column:1/-1">No hay productos para este filtro.</p>'
+        }</div>`
+      : `<div class="v8-panel v8-overflow" style="margin-top:14px"><table class="v8-table"><thead><tr><th>Producto</th><th>Categoría</th><th>Compra</th><th>Venta</th><th>Ganancia</th><th>Stock disponible</th><th>Mínimo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${
+          products
+            .map(
+              (p) =>
+                `<tr><td><div class="v8-prodcell">${avatar(p)}<span><b>${esc(p.name)}</b><small>${esc(p.barcode || "Sin código")}</small></span></div></td><td>${esc(p.cat)}</td><td class="v8-money">${money(p.cost || 0)}</td><td class="v8-money">${money(p.price)}</td><td><b>${money(marginAmount(p.cost, p.price))}</b><small style="display:block;color:var(--muted)">${marginOnCost(p.cost, p.price).toFixed(0)}% s/costo · ${marginOnSale(p.cost, p.price).toFixed(0)}% s/venta</small></td><td><b>${p.stock} u.</b><div class="lite-stockbar"><i style="width:${Math.min(100, (100 * p.stock) / (p.min * 3 || 1))}%"></i></div></td><td>${p.min} u.</td><td>${p.stock <= p.min ? label("Reponer", "warn") : label("Disponible", "ok")}</td><td>${action("Editar", "edit:" + p.id)}</td></tr>`,
+            )
+            .join("") ||
+          '<tr><td colspan="9"><p class="lite-empty">No hay productos para reponer.</p></td></tr>'
+        }</tbody></table></div>`
+  }
+  <p class="lite-note">Stock Lite permite cargar fotos del producto, gestionar existencias, categorías y rentabilidad unitaria.</p></div>`;
 }
 function catalogView() {
   const published = state.products.filter((p) => p.published).length;
-  return `<div class="v8-screen">${title("Catálogo virtual Lite", "Elegí qué artículos mostrar en un catálogo público de ejemplo.", action("Vista previa", "preview", ""))}<div class="v8-metrics three">${kpi("Productos publicados", published, "Visibles", "mint")}${kpi("Sin publicar", state.products.length - published, "Ocultos", "amber")}${kpi("Precio promedio", money(state.products.reduce((a, p) => a + p.price, 0) / state.products.length), "Artículos", "sky")}</div><div class="v8-panel"><div class="v8-panelhead"><h2>Publicación de productos</h2><p>Vista de prueba: no genera ni publica una tienda real.</p></div>${state.products.map((p) => `<div class="lite-catalog-item"><div class="v8-prodcell">${avatar(p)}<div><b>${esc(p.name)}</b><small>${money(p.price)} · ${p.stock} disponibles</small></div></div><div class="lite-actions">${p.published ? label("Publicado", "ok") : label("Oculto", "warn")}<button class="btn g sm" data-action="publish:${p.id}">${p.published ? "Ocultar" : "Publicar"}</button></div></div>`).join("")}</div></div>`;
+  return `<div class="v8-screen">${title("Catálogo virtual Lite", "Elegí qué artículos mostrar en un catálogo público de ejemplo.", action("Vista previa", "preview", ""))}<div class="v8-metrics three">${kpi("Productos publicados", published, "Visibles", "mint")}${kpi("Sin publicar", state.products.length - published, "Ocultos", "amber")}${kpi("Precio promedio", money(state.products.reduce((a, p) => a + p.price, 0) / state.products.length), "Artículos", "sky")}</div><div class="v8-panel"><div class="v8-panelhead"><h2>Publicación de productos</h2><p>Catálogo digital optimizado para exhibición y pedidos.</p></div>${state.products.map((p) => `<div class="lite-catalog-item"><div class="v8-prodcell">${avatar(p)}<div><b>${esc(p.name)}</b><small>${money(p.price)} · ${p.stock} disponibles</small></div></div><div class="lite-actions">${p.published ? label("Publicado", "ok") : label("Oculto", "warn")}<button class="btn g sm" data-action="publish:${p.id}">${p.published ? "Ocultar" : "Publicar"}</button></div></div>`).join("")}</div></div>`;
 }
 function reports() {
   return liteReportRender();
@@ -882,7 +1044,7 @@ function liteReportExport() {
 }
 
 function settings() {
-  return `<div class="v8-screen">${title("Configuración", "Preferencias del emprendimiento y usuarios Lite.")}<div class="lite-summary"><div class="v8-panel"><div class="v8-panelhead"><h2>Datos del comercio</h2><p>Estos cambios afectan únicamente a la maqueta abierta.</p></div><div class="v8-panel-inner"><div class="lite-form"><label class="full">Nombre del negocio<input id="storeEdit" class="lite-input" value="${esc(state.store)}" maxlength="60"></label><label>Tema<select id="themeEdit" class="lite-input"><option value="dark" ${state.theme === "dark" ? "selected" : ""}>Oscuro</option><option value="light" ${state.theme === "light" ? "selected" : ""}>Claro</option></select></label><label>Sonidos<select id="soundEdit" class="lite-input"><option value="true" ${state.sound ? "selected" : ""}>Activados</option><option value="false" ${!state.sound ? "selected" : ""}>Desactivados</option></select></label><label>Estilo de sonido<select id="soundStyleEdit" class="lite-input"><option value="suave" ${soundStyle === "suave" ? "selected" : ""}>Suave · Campanillas discretas</option><option value="digital" ${soundStyle === "digital" ? "selected" : ""}>Digital · Tonos breves</option></select></label></div><div class="lite-sound-tools"><h3>Probar sonidos de Emprendedores</h3><p>Ya no hay bip al navegar ni al tocar cada botón. Los avisos acompañan sólo acciones importantes.</p><div class="lite-sound-examples"><button class="btn g sm" data-action="sound-preview:add">Agregar producto</button><button class="btn g sm" data-action="sound-preview:success">Venta confirmada</button><button class="btn g sm" data-action="sound-preview:warning">Advertencia</button></div><small class="lite-sound-hint">Elegí el estilo y presioná un botón para escucharlo. Si están silenciados no sonará.</small></div><div style="margin-top:17px">${action("Guardar preferencias", "save-settings", "")}</div></div></div><div class="v8-panel"><div class="v8-panelhead"><h2>Usuarios · máximo 3</h2><p>Tope de usuarios permitido por Emprendedores (simulación).</p></div><div class="v8-panel-inner"><div class="lite-rows">${state.users.map((u, i) => `<div class="lite-row"><div class="lite-pick"><span class="v8-usercircle">${u.slice(0, 2).toUpperCase()}</span><div><b>${esc(u)}</b><small>${i === 0 ? "Administrador" : "Colaborador"}</small></div></div>${label("Activo", "ok")}</div>`).join("")}</div><div style="margin-top:17px">${action(state.users.length >= 3 ? "Límite alcanzado" : "+ Invitar usuario", "new-user", state.users.length >= 3 ? "g sm" : "")}<p class="lite-note" style="margin-top:11px">${state.users.length} de 3 usuarios. Las invitaciones no se envían realmente.</p></div></div></div></div></div>`;
+  return `<div class="v8-screen">${title("Configuración", "Preferencias del emprendimiento y usuarios Lite.")}<div class="lite-summary"><div class="v8-panel"><div class="v8-panelhead"><h2>Datos del comercio</h2><p>Configuración general y preferencias de tu comercio.</p></div><div class="v8-panel-inner"><div class="lite-form"><label class="full">Nombre del negocio<input id="storeEdit" class="lite-input" value="${esc(state.store)}" maxlength="60"></label><label>Tema<select id="themeEdit" class="lite-input"><option value="dark" ${state.theme === "dark" ? "selected" : ""}>Oscuro</option><option value="light" ${state.theme === "light" ? "selected" : ""}>Claro</option></select></label><label>Sonidos<select id="soundEdit" class="lite-input"><option value="true" ${state.sound ? "selected" : ""}>Activados</option><option value="false" ${!state.sound ? "selected" : ""}>Desactivados</option></select></label><label>Estilo de sonido<select id="soundStyleEdit" class="lite-input"><option value="suave" ${soundStyle === "suave" ? "selected" : ""}>Suave · Campanillas discretas</option><option value="digital" ${soundStyle === "digital" ? "selected" : ""}>Digital · Tonos breves</option></select></label></div><div class="lite-sound-tools"><h3>Probar sonidos de Emprendedores</h3><p>Ya no hay bip al navegar ni al tocar cada botón. Los avisos acompañan sólo acciones importantes.</p><div class="lite-sound-examples"><button class="btn g sm" data-action="sound-preview:add">Agregar producto</button><button class="btn g sm" data-action="sound-preview:success">Venta confirmada</button><button class="btn g sm" data-action="sound-preview:warning">Advertencia</button></div><small class="lite-sound-hint">Elegí el estilo y presioná un botón para escucharlo. Si están silenciados no sonará.</small></div><div style="margin-top:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">${action("Guardar preferencias", "save-settings", "")}${action("Restablecer demo", "reset-demo", "g sm")}</div></div></div><div class="v8-panel"><div class="v8-panelhead"><h2>Usuarios · máximo 3</h2><p>Tope de usuarios permitido por el plan Emprendedores.</p></div><div class="v8-panel-inner"><div class="lite-rows">${state.users.map((u, i) => `<div class="lite-row"><div class="lite-pick"><span class="v8-usercircle">${u.slice(0, 2).toUpperCase()}</span><div><b>${esc(u)}</b><small>${i === 0 ? "Administrador" : "Colaborador"}</small></div></div>${label("Activo", "ok")}</div>`).join("")}</div><div style="margin-top:17px">${action(state.users.length >= 3 ? "Límite alcanzado" : "+ Invitar usuario", "new-user", state.users.length >= 3 ? "g sm" : "")}<p class="lite-note" style="margin-top:11px">${state.users.length} de 3 usuarios. Las invitaciones se gestionan por correo electrónico.</p></div></div></div></div></div>`;
 }
 function openModal(h, sub, content, actions = "") {
   $("#modalTitle").textContent = h;
@@ -919,11 +1081,11 @@ function renderCheckout() {
     )
       .map(([id, q]) => {
         const p = state.products.find((p) => p.id === Number(id));
-        return `<div class="lite-row"><div><b>${esc(p.name)}</b><div class="lite-note">${q} × ${money(p.price)}</div></div><strong>${money(q * p.price)}</strong></div>`;
+        return `<div class="lite-row"><div><b>${esc(p?.name || "")}</b><div class="lite-note">${q} × ${money(p?.price || 0)}</div></div><strong>${money(q * (p?.price || 0))}</strong></div>`;
       })
       .join(
         "",
-      )}</div><div class="lite-form" style="margin-top:16px"><label class="full">Descuento fijo (ARS)<input id="discountInput" type="number" min="0" max="${sum}" class="lite-input" value="${discount}"><small class="lite-note">Aplicable sólo a esta venta.</small></label><label class="full">Medio de pago<div class="lite-choice">${["Efectivo", "Transferencia"].map((x) => `<button type="button" data-payment="${x}" class="${payment === x ? "active" : ""}">${x}</button>`).join("")}</div></label><label class="full">Tipo de entrega<div class="lite-choice">${["Retiro", "Envío"].map((x) => `<button type="button" data-delivery="${x}" class="${delivery === x ? "active" : ""}">${x}</button>`).join("")}</div></label><label class="full">Nombre del cliente<input id="customer" class="lite-input" value="${esc(customer)}" placeholder="Nombre de quien recibe o retira"></label>${delivery === "Envío" ? `<label class="full">Dirección de entrega<input id="address" class="lite-input" value="${esc(address)}" placeholder="Dirección de entrega"></label>` : ""}</div><p class="lite-note" style="margin-top:15px">Operación simulada: no se realiza un cobro real ni se emiten comprobantes fiscales.</p>`,
+      )}</div><div class="lite-form" style="margin-top:16px"><label class="full">Descuento fijo (ARS)<input id="discountInput" type="number" min="0" max="${sum}" class="lite-input" value="${discount}"><small class="lite-note">Aplicable sólo a esta venta.</small></label><label class="full">Medio de pago<div class="lite-choice">${["Efectivo", "Transferencia"].map((x) => `<button type="button" data-payment="${x}" class="${payment === x ? "active" : ""}">${x}</button>`).join("")}</div></label><label class="full">Tipo de entrega<div class="lite-choice">${["Retiro", "Envío"].map((x) => `<button type="button" data-delivery="${x}" class="${delivery === x ? "active" : ""}">${x}</button>`).join("")}</div></label><label class="full">Nombre del cliente<input id="customer" class="lite-input" value="${esc(customer)}" placeholder="Nombre de quien recibe o retira"></label>${delivery === "Envío" ? `<label class="full">Dirección de entrega<input id="address" class="lite-input" value="${esc(address)}" placeholder="Dirección de entrega"></label>` : ""}</div><p class="lite-note" style="margin-top:15px">Registro de cobro y actualización automática de existencias.</p>`,
     `<button class="btn g" data-action="close-modal">Volver</button><button class="btn" data-action="confirm-sale">✓ Confirmar venta</button>`,
   );
   $("#discountInput").addEventListener("input", (e) => {
@@ -973,10 +1135,11 @@ function confirmSale() {
     status: "Pendiente",
   });
   cart = {};
+  saveState();
   closeModal();
   render();
   tone("success");
-  toast("Venta registrada en la maqueta");
+  toast("Venta registrada con éxito");
 }
 function refreshProductProfit() {
   const cost = Number($('#productForm [name="cost"]')?.value || 0),
@@ -990,16 +1153,204 @@ function refreshProductProfit() {
   $("#profitSalePct") &&
     ($("#profitSalePct").textContent = price ? salePct.toFixed(1) + "%" : "0%");
 }
+
+function updateModalPhotoPreview() {
+  const previewWrap = $("#photoPreviewWrap");
+  const removeBtn = $("#btnRemovePhoto");
+  if (!previewWrap) return;
+  if (editingPhoto) {
+    previewWrap.innerHTML = `<img src="${editingPhoto}" alt="Foto producto" class="photo-preview-img" id="photoPreviewImg">`;
+    if (removeBtn) removeBtn.style.display = "";
+  } else {
+    previewWrap.innerHTML = `<div class="photo-preview-empty" id="photoPreviewEmpty"><span style="font-size:32px">📷</span><span>Sin foto</span></div>`;
+    if (removeBtn) removeBtn.style.display = "none";
+  }
+}
+
+function processImageFile(file) {
+  if (!file || !file.type.startsWith("image/")) {
+    return toast("Seleccioná un archivo de imagen válido (JPG, PNG, WebP).", true);
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 800;
+      let w = img.width,
+        h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        } else {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      editingPhoto = canvas.toDataURL("image/jpeg", 0.85);
+      updateModalPhotoPreview();
+      toast("Foto cargada con éxito");
+    };
+    img.onerror = () => {
+      toast("No se pudo procesar la imagen seleccionada.", true);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function setupPhotoUploaderEvents() {
+  const fileInput = $("#productPhotoFile");
+  const uploadBtn = $("#btnUploadPhoto");
+  const removeBtn = $("#btnRemovePhoto");
+  const dropzone = $("#photoDropzone");
+  const urlBtn = $("#btnAddUrlPhoto");
+  const urlInput = $("#photoUrlInput");
+
+  uploadBtn?.addEventListener("click", () => fileInput?.click());
+
+  fileInput?.addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (file) processImageFile(file);
+    fileInput.value = "";
+  });
+
+  removeBtn?.addEventListener("click", () => {
+    editingPhoto = "";
+    if (urlInput) urlInput.value = "";
+    updateModalPhotoPreview();
+    toast("Foto quitada");
+  });
+
+  urlBtn?.addEventListener("click", () => {
+    const url = (urlInput?.value || "").trim();
+    if (!url) return toast("Ingresá una URL de imagen.", true);
+    const testImg = new Image();
+    testImg.crossOrigin = "anonymous";
+    testImg.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        const maxDim = 800;
+        let w = testImg.naturalWidth || testImg.width,
+          h = testImg.naturalHeight || testImg.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(testImg, 0, 0, w, h);
+        editingPhoto = canvas.toDataURL("image/jpeg", 0.85);
+      } catch {
+        editingPhoto = url;
+      }
+      updateModalPhotoPreview();
+      toast("Foto cargada desde enlace");
+    };
+    testImg.onerror = () => {
+      toast("No se pudo cargar la imagen desde esa URL.", true);
+    };
+    testImg.src = url;
+  });
+
+  if (dropzone) {
+    ["dragenter", "dragover"].forEach((eventName) => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add("dragover");
+      });
+    });
+    ["dragleave", "drop"].forEach((eventName) => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove("dragover");
+      });
+    });
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove("dragover");
+      const file = e.dataTransfer?.files?.[0];
+      if (file) processImageFile(file);
+    });
+  }
+}
+
 function productModal(id) {
   syncCategories();
   const p = state.products.find((x) => x.id === id);
   editingId = id || null;
+  editingPhoto = p?.image || "";
+
+  const renderPhotoSection = () => `
+    <div class="product-photo-uploader" id="photoDropzone">
+      <div class="photo-uploader-content">
+        <div class="photo-preview-wrap" id="photoPreviewWrap">
+          ${
+            editingPhoto
+              ? `<img src="${editingPhoto}" alt="Foto producto" class="photo-preview-img" id="photoPreviewImg">`
+              : `<div class="photo-preview-empty" id="photoPreviewEmpty">
+                   <span style="font-size:32px">📷</span>
+                   <span>Sin foto</span>
+                 </div>`
+          }
+        </div>
+        <div class="photo-controls">
+          <div>
+            <b>Foto del producto</b>
+            <p class="photo-help-text">Subí una imagen desde tu dispositivo o arrastrala acá. Se optimiza y almacena de forma local.</p>
+          </div>
+          <div class="photo-buttons-row">
+            <input type="file" id="productPhotoFile" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">
+            <button type="button" class="btn g sm" id="btnUploadPhoto">📁 Subir foto</button>
+            <button type="button" class="btn g sm" id="btnRemovePhoto" ${!editingPhoto ? 'style="display:none"' : ""}>✕ Quitar</button>
+          </div>
+          <div class="photo-url-row">
+            <input type="url" id="photoUrlInput" class="lite-input" placeholder="O pegar enlace web (https://...)" style="font-size:12px;padding:6px 10px">
+            <button type="button" class="btn g sm" id="btnAddUrlPhoto">Cargar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
   openModal(
     p ? "Editar producto" : "Nuevo producto",
-    "Registro básico de artículos para Stock Lite.",
-    `<form id="productForm" class="lite-form"><label class="full">Nombre del producto *<input name="name" required class="lite-input" maxlength="120" value="${esc(p?.name || "")}" placeholder="Ej. Yerba mate 1 kg"></label><label>Categoría *<select name="cat" required class="lite-input">${state.categories.map((cat) => `<option value="${esc(cat)}" ${(p?.cat || "Almacén") === cat ? "selected" : ""}>${esc(cat)}</option>`).join("")}</select></label><label>Precio de compra ($) *<input name="cost" type="number" min="0" step="0.01" required class="lite-input" value="${p?.cost || 0}"></label><label>Precio de venta ($) *<input name="price" type="number" min="0" step="0.01" required class="lite-input" value="${p?.price || 0}"></label><div class="lite-profit-box"><div><small>Ganancia por unidad</small><strong id="profitAmount">${money(marginAmount(p?.cost || 0, p?.price || 0))}</strong></div><div><small>Rentabilidad sobre costo</small><strong id="profitCostPct">${marginOnCost(p?.cost || 0, p?.price || 0).toFixed(1)}%</strong></div><div><small>Margen sobre venta</small><strong id="profitSalePct">${marginOnSale(p?.cost || 0, p?.price || 0).toFixed(1)}%</strong></div></div><label>Código de barras<input name="barcode" maxlength="80" class="lite-input" value="${esc(p?.barcode || "")}" placeholder="Código opcional"></label><label>Stock disponible<input name="stock" type="number" min="0" step="1" required class="lite-input" value="${p?.stock || 0}"></label><label>Stock mínimo<input name="min" type="number" min="0" step="1" required class="lite-input" value="${p?.min || 0}"></label><div class="lite-help-box">Usá el botón <b>Categorías</b> para agregar, editar o suprimir categorías del inventario.</div></form><p class="lite-note" style="margin-top:15px">Alta manual Lite; el escáner remoto de celular pertenece al plan Negocios.</p>`,
+    "Gestión de datos y fotos del artículo para Stock Lite y Punto de Venta.",
+    `<form id="productForm" class="lite-form">
+      ${renderPhotoSection()}
+      <label class="full">Nombre del producto *<input name="name" required class="lite-input" maxlength="120" value="${esc(p?.name || "")}" placeholder="Ej. Yerba mate 1 kg"></label>
+      <label>Categoría *<select name="cat" required class="lite-input">${state.categories.map((cat) => `<option value="${esc(cat)}" ${(p?.cat || "Almacén") === cat ? "selected" : ""}>${esc(cat)}</option>`).join("")}</select></label>
+      <label>Precio de compra ($) *<input name="cost" type="number" min="0" step="0.01" required class="lite-input" value="${p?.cost ?? 0}"></label>
+      <label>Precio de venta ($) *<input name="price" type="number" min="0" step="0.01" required class="lite-input" value="${p?.price ?? 0}"></label>
+      <div class="lite-profit-box">
+        <div><small>Ganancia por unidad</small><strong id="profitAmount">${money(marginAmount(p?.cost || 0, p?.price || 0))}</strong></div>
+        <div><small>Rentabilidad sobre costo</small><strong id="profitCostPct">${marginOnCost(p?.cost || 0, p?.price || 0).toFixed(1)}%</strong></div>
+        <div><small>Margen sobre venta</small><strong id="profitSalePct">${marginOnSale(p?.cost || 0, p?.price || 0).toFixed(1)}%</strong></div>
+      </div>
+      <label>Código de barras / ID<input name="barcode" maxlength="80" class="lite-input" value="${esc(p?.barcode || "")}" placeholder="Código o ID numérico"></label>
+      <label>Stock disponible<input name="stock" type="number" min="0" step="1" required class="lite-input" value="${p?.stock ?? 0}"></label>
+      <label>Stock mínimo<input name="min" type="number" min="0" step="1" required class="lite-input" value="${p?.min ?? 0}"></label>
+      <div class="lite-help-box">Usá el botón <b>Categorías</b> para agregar, editar o suprimir categorías del inventario.</div>
+    </form>`,
     `<button class="btn g" data-action="close-modal">Cancelar</button><button class="btn g" data-action="categories">Categorías</button><button class="btn" data-action="save-product">Guardar producto</button>`,
   );
+
+  setupPhotoUploaderEvents();
+
   ["cost", "price"].forEach((name) =>
     $('#productForm [name="' + name + '"]')?.addEventListener(
       "input",
@@ -1027,30 +1378,32 @@ function saveProduct() {
     barcode: data.barcode.trim(),
     stock: Number(data.stock),
     min: Number(data.min),
+    image: editingPhoto || "",
   };
   if (values.price < values.cost)
     return toast(
-      "El precio de venta no puede ser menor que el precio de compra en esta maqueta.",
+      "El precio de venta no puede ser menor que el precio de compra.",
       true,
     );
   if (editingId) {
-    Object.assign(
-      state.products.find((p) => p.id === editingId),
-      values,
-    );
+    const existing = state.products.find((p) => p.id === editingId);
+    if (existing) {
+      Object.assign(existing, values);
+    }
   } else {
     state.products.push({
       id: Math.max(0, ...state.products.map((p) => p.id)) + 1,
       ...values,
       emoji: "📦",
-      published: false,
+      published: true,
     });
   }
   syncCategories();
+  saveState();
   closeModal();
   render();
   tone("success");
-  toast("Producto guardado en la maqueta");
+  toast("Producto guardado con éxito");
 }
 function categoryModal() {
   syncCategories();
@@ -1069,6 +1422,7 @@ function addCategory() {
     return toast("Esa categoría ya existe.", true);
   state.categories.push(name);
   syncCategories();
+  saveState();
   categoryModal();
   toast("Categoría agregada");
 }
@@ -1089,6 +1443,7 @@ function editCategory(oldName) {
     .filter((p) => p.cat === current)
     .forEach((p) => (p.cat = name));
   syncCategories();
+  saveState();
   categoryModal();
   render();
   toast("Categoría actualizada");
@@ -1102,6 +1457,7 @@ function deleteCategory(oldName) {
     );
   state.categories = state.categories.filter((c) => c !== current);
   syncCategories();
+  saveState();
   categoryModal();
   render();
   toast("Categoría eliminada");
@@ -1129,6 +1485,7 @@ function saveMove() {
     delta: qty,
     reason: "Ajuste Lite",
   });
+  saveState();
   closeModal();
   render();
   tone("success");
@@ -1136,8 +1493,8 @@ function saveMove() {
 }
 function deliveryModal() {
   openModal(
-    "Nuevo pedido Lite",
-    "Creá un pedido ficticio para recorrer el flujo.",
+    "Nuevo pedido",
+    "Creá un nuevo pedido de entrega para despachar.",
     `<form class="lite-form" id="deliveryForm"><label class="full">Nombre del cliente<input name="customer" class="lite-input" required placeholder="Nombre del cliente"></label><label>Modalidad<select name="type" class="lite-input"><option>Retiro</option><option>Envío</option></select></label><label>Dirección (para envíos)<input name="address" class="lite-input" placeholder="Dirección"></label></form>`,
     `<button class="btn g" data-action="close-modal">Cancelar</button><button class="btn" data-action="save-delivery">Crear pedido</button>`,
   );
@@ -1150,23 +1507,24 @@ function saveDelivery() {
     return toast("Ingresá la dirección de envío.", true);
   state.deliveries.unshift({
     id: "P-" + String(101 + state.deliveries.length),
-    sale: "Manual",
+    sale: "Directa",
     customer: d.customer,
     type: d.type,
     address: d.address,
     status: "Pendiente",
   });
+  saveState();
   closeModal();
   render();
   tone("success");
-  toast("Pedido creado en la maqueta");
+  toast("Pedido creado con éxito");
 }
 function saleDetail(id) {
   const s = state.sales.find((s) => s.id === id);
   if (!s) return;
   openModal(
     "Detalle de " + s.id,
-    "Operación simulada.",
+    "Comprobante y detalle de la operación.",
     `<div class="lite-row"><span>Medio de pago</span><b>${esc(s.payment)}</b></div><div class="lite-row"><span>Tipo de entrega</span><b>${esc(s.delivery || "Retiro")}</b></div><div class="lite-row"><span>Cliente</span><b>${esc(s.customer || "—")}</b></div><div class="lite-rows" style="margin-top:12px">${(s.items || []).map((i) => `<div class="lite-row"><span>${esc(i.name)} · ${i.qty} u.</span><b>${money(i.price * i.qty)}</b></div>`).join("")}</div><div class="lite-total"><span>Total</span><strong>${money(s.total)}</strong></div>`,
     `<button class="btn" data-action="close-modal">Cerrar</button>`,
   );
@@ -1252,7 +1610,7 @@ function preview() {
   const items = state.products.filter((p) => p.published);
   openModal(
     "Catálogo virtual Lite",
-    "Vista previa local. No existe una tienda online publicada.",
+    "Vista previa del catálogo público de productos.",
     `<div class="lite-catalog-preview">${items.map((p) => `<div class="lite-preview-item">${avatar(p)}<b>${esc(p.name)}</b><small>${money(p.price)}</small></div>`).join("") || '<p class="lite-empty">No hay productos publicados.</p>'}</div>`,
     `<button class="btn" data-action="close-modal">Cerrar</button>`,
   );
@@ -1264,6 +1622,7 @@ function saveSettings() {
   soundStyle = $("#soundStyleEdit").value;
   saveThemePreference();
   saveSoundPreference();
+  saveState();
   document.documentElement.dataset.theme = state.theme;
   render();
   toast("Preferencias actualizadas");
@@ -1277,7 +1636,7 @@ function modalAction(code) {
   if (code === "add-category") return addCategory();
 }
 document.addEventListener("click", (e) => {
-  const target = e.target.closest("button");
+  const target = e.target.closest("button, [data-add], [data-action], [data-stock-view]");
   if (!target || target.disabled) return;
   if (target === $("#bg")) {
     toggleNav();
@@ -1289,6 +1648,7 @@ document.addEventListener("click", (e) => {
   }
   if (target === $("#cashHeader")) {
     state.cash = !state.cash;
+    saveState();
     render();
     tone("notice");
     toast(state.cash ? "Caja abierta" : "Caja cerrada");
@@ -1378,6 +1738,12 @@ document.addEventListener("click", (e) => {
     renderNav();
     return;
   }
+  if (target.dataset.stockView) {
+    stockViewMode = target.dataset.stockView;
+    saveState();
+    render();
+    return;
+  }
   if (target.dataset.add) {
     const p = state.products.find((p) => p.id === Number(target.dataset.add));
     if ((cart[p.id] || 0) >= p.stock)
@@ -1458,6 +1824,7 @@ document.addEventListener("click", (e) => {
   }
   if (code === "toggle-cash") {
     state.cash = !state.cash;
+    saveState();
     render();
     return toast(state.cash ? "Caja abierta" : "Caja cerrada");
   }
@@ -1465,6 +1832,7 @@ document.addEventListener("click", (e) => {
   if (code.startsWith("advance:")) {
     const d = state.deliveries.find((d) => d.id === code.slice(8));
     d.status = d.status === "Pendiente" ? "En preparación" : "Entregado";
+    saveState();
     render();
     tone("notice");
     return toast("Estado de pedido actualizado");
@@ -1472,22 +1840,36 @@ document.addEventListener("click", (e) => {
   if (code.startsWith("publish:")) {
     const p = state.products.find((p) => p.id === Number(code.slice(8)));
     p.published = !p.published;
+    saveState();
     render();
     tone("notice");
     return toast(
-      p.published ? "Producto publicado en vista previa" : "Producto oculto",
+      p.published ? "Producto publicado en catálogo" : "Producto oculto",
     );
   }
   if (code === "preview") return preview();
   if (code === "save-settings") return saveSettings();
+  if (code === "reset-demo") {
+    if (
+      confirm(
+        "¿Deseás restablecer los productos y datos originales del demo? Se reiniciarán las imágenes y datos guardados localmente.",
+      )
+    ) {
+      try {
+        localStorage.removeItem(STATE_STORAGE_KEY);
+      } catch {}
+      location.reload();
+    }
+    return;
+  }
   if (code === "new-user") {
     if (state.users.length >= 3)
       return toast("Este plan permite hasta 3 usuarios.", true);
     openModal(
       "Invitar usuario",
-      "Simulación del límite de usuarios del plan.",
+      "Límite de usuarios activos del plan.",
       `<label class="lite-form">Nombre completo<input class="lite-input" id="newUser" maxlength="60" placeholder="Nombre del usuario"></label>`,
-      `<button class="btn g" data-action="close-modal">Cancelar</button><button class="btn" data-action="add-user">Agregar a la maqueta</button>`,
+      `<button class="btn g" data-action="close-modal">Cancelar</button><button class="btn" data-action="add-user">Agregar usuario</button>`,
     );
     return;
   }
@@ -1496,9 +1878,10 @@ document.addEventListener("click", (e) => {
     if (!val) return toast("Ingresá un nombre.", true);
     if (state.users.length >= 3) return toast("Límite de 3 usuarios.", true);
     state.users.push(val);
+    saveState();
     closeModal();
     render();
-    return toast("Usuario ficticio agregado");
+    return toast("Usuario agregado con éxito");
   }
   modalAction(code);
 });
@@ -1535,6 +1918,10 @@ document.addEventListener("submit", (e) => {
     e.preventDefault();
     const val = $("#navSearchInput")?.value || "";
     openGlobalSearch(val);
+  }
+  if (e.target.id === "productForm") {
+    e.preventDefault();
+    saveProduct();
   }
 });
 $("#modal").addEventListener("click", (e) => {
@@ -1601,4 +1988,9 @@ window.addEventListener("resize", () => {
   document.body.classList.toggle("remake-touch", window.innerWidth <= 850);
 });
 document.documentElement.dataset.theme = state.theme;
-render();
+const initialHash = location.hash.replace("#", "");
+if (initialHash in NAME) {
+  go(initialHash);
+} else {
+  render();
+}

@@ -1,6 +1,6 @@
 /* Estilos de comercIAndo Emprendedores */
 
-/* Maqueta offline: se usan fuentes locales y alternativas del sistema. */
+/* Modo offline: se usan fuentes locales y alternativas del sistema. */
 .lite-profit-box {
   grid-column: 1/-1;
   border: 1px solid rgba(125, 154, 214, 0.22);
@@ -6938,111 +6938,9 @@ body.lite-sidebar-auto:not(.remake-touch)
     flex-wrap: wrap;
   }
 }
-/* Punto de Venta: filas compactas en lugar de tarjetas grandes. */
+/* Punto de Venta: el layout de productos se gestiona con la tarjeta .pro-card */
 body[data-view="pos"] #grid {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 7px !important;
-  padding: 2px !important;
-  overflow-y: auto !important;
-  min-height: 0 !important;
-}
-body[data-view="pos"] #grid .pr {
-  display: flex !important;
-  align-items: center !important;
-  flex-direction: row !important;
-  min-height: 77px !important;
-  height: auto !important;
-  padding: 10px 14px !important;
-  gap: 16px !important;
-  text-align: left !important;
-  border-radius: 12px !important;
-  flex: none !important;
-  box-shadow: none !important;
-  background: var(--s) !important;
-  transition:
-    border-color 0.12s,
-    background 0.12s;
-}
-body[data-view="pos"] #grid .pr:hover {
-  border-color: var(--ac) !important;
-  background: var(--acs) !important;
-}
-body[data-view="pos"] #grid .pr > .tile {
-  height: 52px !important;
-  width: 52px !important;
-  min-width: 52px !important;
-  min-height: 52px !important;
-  border-radius: 10px !important;
-  flex: none !important;
-  overflow: hidden !important;
-}
-body[data-view="pos"] #grid .pr > .tile img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-body[data-view="pos"] #grid .pr > b {
-  font-size: 13px !important;
-  line-height: 1.35 !important;
-  flex: 1 !important;
-  min-width: 0 !important;
-  align-self: center !important;
-}
-body[data-view="pos"] #grid .pr > .f {
-  display: flex !important;
-  align-items: flex-end !important;
-  flex-direction: column !important;
-  gap: 5px !important;
-  margin-left: auto !important;
-  margin-top: 0 !important;
-  white-space: nowrap !important;
-}
-body[data-view="pos"] #grid .pr > .f b {
-  font-size: 15px !important;
-}
-body[data-view="pos"] #grid .pr > .f small {
-  font-size: 11px !important;
-}
-body[data-view="pos"] #grid .pr:after {
-  content: none;
-  display: none;
-  border-radius: 9px;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--ac-border);
-  display: grid;
-  place-items: center;
-  color: var(--ac);
-  font-size: 21px;
-  font-weight: 600;
-  margin-left: 10px;
-  flex: none;
-  background: var(--acs);
-}
-@media (max-width: 650px) {
-  body[data-view="pos"] #grid .pr {
-    min-height: 70px !important;
-    padding: 7px 9px !important;
-    gap: 8px !important;
-  }
-  body[data-view="pos"] #grid .pr:after {
-    margin-left: 0;
-    width: 28px;
-    height: 28px;
-  }
-  body[data-view="pos"] #grid .pr > .tile {
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px !important;
-    min-height: 40px !important;
-  }
-  body[data-view="pos"] #grid .pr > b {
-    font-size: 11px !important;
-  }
-  body[data-view="pos"] #grid .pr > .f b {
-    font-size: 12px !important;
-  }
+  min-height: 0;
 }
 .v8-gondola-layout {
   display: grid;
@@ -13351,4 +13249,449 @@ html[data-theme="dark"] .nav-search-btn svg circle {
   .nav-search-input {
     width: clamp(110px, 28vw, 160px);
   }
+}
+
+/* ==========================================================================
+   PRODUCT CARD SYSTEM (DISEÑO FOTO 1)
+   Mobile, Tablet y Desktop para Punto de Venta y Stock Lite
+   ========================================================================== */
+
+/* Contenedor Grid Responsivo */
+.pro-cards-grid,
+body[data-view="pos"] #grid,
+body[data-view="pos"] #v #grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)) !important;
+  gap: 16px !important;
+  align-content: start !important;
+  width: 100% !important;
+  padding: 6px 2px 24px !important;
+  box-sizing: border-box !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow-y: auto !important;
+}
+
+@media (min-width: 1300px) {
+  .pro-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: 18px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .pro-cards-grid,
+  body[data-view="pos"] #grid,
+  body[data-view="pos"] #v #grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+    gap: 14px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .pro-cards-grid,
+  body[data-view="pos"] #grid,
+  body[data-view="pos"] #v #grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    padding: 4px 0 20px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .pro-cards-grid,
+  body[data-view="pos"] #grid,
+  body[data-view="pos"] #v #grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* Tarjeta de Producto (Estilo Foto 1) */
+.pro-card {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  background: var(--s, #ffffff) !important;
+  border: 1.5px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 20px !important;
+  padding: 14px !important;
+  gap: 12px !important;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  text-align: left !important;
+  cursor: default !important;
+}
+
+[data-theme="dark"] .pro-card {
+  background: #1c2436 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 6px 18px -2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.pro-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(8, 90, 133, 0.4) !important;
+  box-shadow: 0 10px 24px -4px rgba(8, 90, 133, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="dark"] .pro-card:hover {
+  border-color: rgba(94, 161, 255, 0.4) !important;
+  box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Área de imagen / media (Foto 1) */
+.pro-card-media {
+  width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  background-color: #343f50 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  flex: none !important;
+  cursor: pointer;
+}
+
+.pro-card-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: inherit !important;
+  transition: transform 0.25s ease !important;
+}
+
+.pro-card:hover .pro-card-img {
+  transform: scale(1.04) !important;
+}
+
+.pro-card-placeholder {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #343f50 !important;
+  color: #94a3b8 !important;
+  font-size: 42px !important;
+  user-select: none !important;
+}
+
+/* Cuerpo de la tarjeta */
+.pro-card-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.pro-card-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.pro-card-left {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.pro-card-title {
+  margin: 0 !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: var(--ink, #0f172a) !important;
+  line-height: 1.25 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  overflow-wrap: break-word !important;
+}
+
+[data-theme="dark"] .pro-card-title {
+  color: #f1f5f9 !important;
+}
+
+.pro-card-id {
+  font-size: 0.825rem !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+[data-theme="dark"] .pro-card-id {
+  color: #94a3b8 !important;
+}
+
+.pro-card-price {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: #b91c1c !important;
+  white-space: nowrap !important;
+  text-align: right !important;
+  letter-spacing: -0.02em !important;
+  flex: 0 0 auto !important;
+  line-height: 1.2 !important;
+}
+
+[data-theme="dark"] .pro-card-price {
+  color: #f87171 !important;
+}
+
+.pro-card-meta {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  font-size: 0.775rem !important;
+  color: #64748b !important;
+  margin-top: 2px !important;
+  flex-wrap: wrap !important;
+}
+
+[data-theme="dark"] .pro-card-meta {
+  color: #94a3b8 !important;
+}
+
+.pro-card-stock {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+}
+
+.pro-card-stock.ok {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #059669 !important;
+}
+
+[data-theme="dark"] .pro-card-stock.ok {
+  background: rgba(16, 185, 129, 0.22) !important;
+  color: #34d399 !important;
+}
+
+.pro-card-stock.warn {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #dc2626 !important;
+}
+
+[data-theme="dark"] .pro-card-stock.warn {
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #f87171 !important;
+}
+
+.pro-card-cat,
+.pro-card-margin {
+  font-size: 0.75rem !important;
+  color: var(--muted, #64748b) !important;
+}
+
+/* Botón de acción al pie de la tarjeta (Foto 1) */
+.pro-card-action {
+  width: 100% !important;
+  margin-top: auto !important;
+}
+
+.pro-card-btn {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  background-color: #085a85 !important;
+  color: #ffffff !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  padding: 12px 14px !important;
+  border-radius: 10px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease !important;
+  box-shadow: 0 2px 6px rgba(8, 90, 133, 0.25) !important;
+  text-decoration: none !important;
+  user-select: none !important;
+  box-sizing: border-box !important;
+}
+
+.pro-card-btn:hover:not(:disabled) {
+  background-color: #06476b !important;
+  box-shadow: 0 4px 12px rgba(8, 90, 133, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+.pro-card-btn:active:not(:disabled) {
+  transform: scale(0.98) !important;
+}
+
+.pro-card-btn:disabled {
+  background-color: #94a3b8 !important;
+  color: #f1f5f9 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  opacity: 0.8 !important;
+}
+
+[data-theme="dark"] .pro-card-btn:disabled {
+  background-color: #475569 !important;
+  color: #94a3b8 !important;
+}
+
+/* Selector de vista en Stock Lite (Tarjetas / Tabla) */
+.stock-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: var(--s2, #f1f5f9);
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: 10px;
+  padding: 2px;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.stock-view-toggle button {
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted, #64748b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.stock-view-toggle button.on {
+  background: var(--s, #ffffff);
+  color: var(--ink, #0f172a);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .stock-view-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .stock-view-toggle button.on {
+  background: #252e42;
+  color: #ffffff;
+}
+
+/* Apartado para cargar fotos del producto en modal Stock Lite */
+.product-photo-uploader {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--s2, #f8fafc);
+  border: 1.5px dashed var(--line, #cbd5e1);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+[data-theme="dark"] .product-photo-uploader {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.product-photo-uploader.dragover {
+  border-color: #085a85;
+  background-color: rgba(8, 90, 133, 0.06);
+}
+
+.photo-uploader-content {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+@media (max-width: 540px) {
+  .photo-uploader-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.photo-preview-wrap {
+  width: 120px;
+  height: 120px;
+  min-width: 120px;
+  min-height: 120px;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: #343f50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.photo-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-preview-empty {
+  font-size: 32px;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.photo-preview-empty span {
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.photo-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.photo-buttons-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.photo-url-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.photo-help-text {
+  font-size: 0.8rem;
+  color: var(--muted, #64748b);
+  line-height: 1.35;
 }
