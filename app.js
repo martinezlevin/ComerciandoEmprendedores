@@ -101,8 +101,19 @@ const SEED = [
     6,
     "🧉",
     "7790000000011",
+    "img/Products/yerba.webp",
   ],
-  ["Arroz Gallo Oro 1 kg", "Almacén", 1980, 2900, 37, 8, "🍚", "7790000000012"],
+  [
+    "Arroz Gallo Oro 1 kg",
+    "Almacén",
+    1980,
+    2900,
+    37,
+    8,
+    "🍚",
+    "7790000000012",
+    "img/Products/arroz.webp",
+  ],
   [
     "Fideos Matarazzo 500 g",
     "Almacén",
@@ -112,6 +123,7 @@ const SEED = [
     10,
     "🍝",
     "7790000000013",
+    "img/Products/fideos.webp",
   ],
   [
     "Aceite Cocinero girasol 900 ml",
@@ -122,6 +134,7 @@ const SEED = [
     5,
     "🫒",
     "7790000000014",
+    "img/Products/aceite.webp",
   ],
   [
     "Harina 000 Pureza 1 kg",
@@ -132,8 +145,19 @@ const SEED = [
     7,
     "🌾",
     "7790000000015",
+    "img/Products/harina.webp",
   ],
-  ["Azúcar Ledesma 1 kg", "Almacén", 1120, 1750, 31, 7, "🍬", "7790000000016"],
+  [
+    "Azúcar Ledesma 1 kg",
+    "Almacén",
+    1120,
+    1750,
+    31,
+    7,
+    "🍬",
+    "7790000000016",
+    "img/Products/azucar.webp",
+  ],
   [
     "Galletitas dulces 350 g",
     "Desayuno",
@@ -143,9 +167,30 @@ const SEED = [
     5,
     "🍪",
     "7790000000017",
+    "img/Products/galletas.webp",
   ],
-  ["Agua mineral 1,5 L", "Bebidas", 980, 1900, 41, 10, "💧", "7790000000018"],
-  ["Chocolate 100 g", "Golosinas", 2150, 3300, 15, 5, "🍫", "7790000000019"],
+  [
+    "Agua mineral 1,5 L",
+    "Bebidas",
+    980,
+    1900,
+    41,
+    10,
+    "💧",
+    "7790000000018",
+    "img/Products/agua.webp",
+  ],
+  [
+    "Chocolate 100 g",
+    "Golosinas",
+    2150,
+    3300,
+    15,
+    5,
+    "🍫",
+    "7790000000019",
+    "img/Products/chocolate.webp",
+  ],
 ];
 const state = {
   products: SEED.map((p, i) => ({
@@ -159,7 +204,7 @@ const state = {
     emoji: p[6],
     barcode: p[7],
     published: i < 6,
-    image: "",
+    image: p[8] || "",
   })),
   categories: [...new Set(SEED.map((p) => p[1]))],
   sales: [
@@ -276,7 +321,22 @@ function loadState() {
     const data = JSON.parse(raw);
     if (!data || typeof data !== "object") return;
     if (Array.isArray(data.products) && data.products.length) {
-      state.products = data.products.map((p) => ({ ...p, image: p.image || "" }));
+      state.products = data.products.map((p) => {
+        const seedItem = SEED.find(
+          (s) =>
+            s[0] === p.name ||
+            s[7] === p.barcode ||
+            s[0].toLowerCase() === (p.name || "").toLowerCase(),
+        );
+        let img = p.image || (seedItem ? seedItem[8] : "");
+        if (img && img.startsWith("img/products/")) {
+          img = img.replace("img/products/", "img/Products/");
+        }
+        return {
+          ...p,
+          image: img,
+        };
+      });
     }
     if (Array.isArray(data.categories) && data.categories.length) {
       state.categories = data.categories;
@@ -303,6 +363,7 @@ function loadState() {
 
 loadState();
 syncCategories();
+saveState();
 const THEME_PREF_KEY = "comerciando_emprendedores_theme_v1";
 try {
   const savedTheme = localStorage.getItem(THEME_PREF_KEY);
