@@ -67,6 +67,10 @@ const posPlus = () =>
   `<svg width="256" height="256" viewBox="0 0 24 24" fill="none" stroke="#89AEFF" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`;
 const posMinus = () =>
   `<svg width="256" height="256" viewBox="0 0 24 24" fill="none" stroke="#89AEFF" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg>`;
+const iconGrid = () =>
+  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-grid" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>`;
+const iconList = () =>
+  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-list" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><path d="M14 4h7"/><path d="M14 9h7"/><path d="M14 15h7"/><path d="M14 20h7"/></svg>`;
 const ic = (k) =>
   k === "chevronRight"
     ? chevronRight()
@@ -262,6 +266,8 @@ let view = "home",
   salesFilter = "all",
   stockFilter = "all",
   stockViewMode = "cards",
+  posViewMode = "cards",
+  soundStyle = "suave",
   globalSearchTerm = "",
   discount = 0,
   modalEscape = null,
@@ -307,6 +313,7 @@ function saveState() {
       store: state.store,
       users: state.users,
       stockViewMode,
+      posViewMode,
     };
     localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(payload));
   } catch (err) {
@@ -356,6 +363,9 @@ function loadState() {
     if (data.stockViewMode === "cards" || data.stockViewMode === "table") {
       stockViewMode = data.stockViewMode;
     }
+    if (data.posViewMode === "cards" || data.posViewMode === "list") {
+      posViewMode = data.posViewMode;
+    }
   } catch (err) {
     console.warn("No se pudo cargar desde localStorage:", err);
   }
@@ -379,7 +389,6 @@ function saveThemePreference() {
   } catch {}
 }
 const SOUND_PREF_KEY = "comerciando_emprendedores_audio_v052";
-let soundStyle = "suave";
 try {
   const saved = JSON.parse(localStorage.getItem(SOUND_PREF_KEY) || "null");
   if (saved) {
@@ -524,6 +533,62 @@ function renderProductCard(p, mode = "pos") {
         ${metaHtml}
       </div>
       <div class="pro-card-action">
+        ${actionHtml}
+      </div>
+    </article>
+  `;
+}
+function renderProductListRow(p, mode = "pos") {
+  const isPos = mode === "pos";
+  const idText = p.barcode ? `ID: ${esc(p.barcode)}` : `ID: ${p.id}`;
+  const outOfStock = p.stock <= 0;
+  const isLowStock = p.stock <= p.min;
+
+  const mediaContent = p.image
+    ? `<img src="${p.image}" alt="${esc(p.name)}" class="pro-list-img" loading="lazy">`
+    : `<div class="pro-list-placeholder" aria-label="${esc(p.name)}">
+         <span>${esc(p.emoji || "📦")}</span>
+       </div>`;
+
+  const metaHtml = isPos
+    ? `<div class="pro-list-meta">
+         <span class="pro-list-id">${idText}</span>
+         <span class="pro-list-dot">·</span>
+         <span class="pro-list-cat">${esc(p.cat || "")}</span>
+         <span class="pro-list-dot">·</span>
+         <span class="pro-card-stock ${isLowStock ? "warn" : "ok"}">${outOfStock ? "Agotado" : `${p.stock} u. disp.`}</span>
+       </div>`
+    : `<div class="pro-list-meta">
+         <span class="pro-list-id">${idText}</span>
+         <span class="pro-list-dot">·</span>
+         <span class="pro-list-cat">${esc(p.cat || "")}</span>
+         <span class="pro-list-dot">·</span>
+         <span class="pro-card-stock ${isLowStock ? "warn" : "ok"}">${isLowStock ? "Reponer: " : "Stock: "}${p.stock} u.</span>
+       </div>`;
+
+  const actionHtml = isPos
+    ? `<button type="button" class="pro-list-btn" data-add="${p.id}" ${outOfStock ? "disabled" : ""} aria-label="Agregar ${esc(p.name)} al carrito">
+         ${outOfStock ? "Sin stock" : "+ Agregar"}
+       </button>`
+    : `<button type="button" class="pro-list-btn" data-action="edit:${p.id}" aria-label="Editar ${esc(p.name)}">
+         Editar
+       </button>`;
+
+  const clickAttr = isPos
+    ? (outOfStock ? "" : `data-add="${p.id}"`)
+    : `data-action="edit:${p.id}"`;
+
+  return `
+    <article class="pro-list-row ${outOfStock ? "out-of-stock" : ""}" data-product-id="${p.id}">
+      <div class="pro-list-media" ${clickAttr} role="button" tabindex="0">
+        ${mediaContent}
+      </div>
+      <div class="pro-list-info" ${clickAttr} role="button" tabindex="0">
+        <h3 class="pro-list-title" title="${esc(p.name)}">${esc(p.name)}</h3>
+        ${metaHtml}
+      </div>
+      <div class="pro-list-right">
+        <div class="pro-list-price">${money(p.price)}</div>
         ${actionHtml}
       </div>
     </article>
@@ -699,7 +764,7 @@ function pos() {
     ),
     qty = Object.values(cart).reduce((a, b) => a + b, 0),
     total = cartTotal();
-  return `${title("Punto de venta", "Venta rápida, cobro y actualización de stock desde una misma pantalla.", `<span class="pill ${state.cash ? "" : "w"}">${state.cash ? "CAJA ABIERTA" : "CAJA CERRADA"}</span>${action("Vaciar", "clear-cart")}`)}<div class="pos"><div><div class="bar"><input id="posSearch" class="search" placeholder="Buscar por nombre o código..." value="${esc(searchTerm)}" aria-label="Buscar producto"></div><div class="chips">${cats.map((c) => `<button class="${category === c ? "on" : ""}" data-category="${esc(c)}">${esc(c)}</button>`).join("")}</div><div id="grid" class="grid pro-cards-grid">${items.map((p) => renderProductCard(p, "pos")).join("") || '<p class="lite-empty" style="grid-column:1/-1">No hay productos para este filtro.</p>'}</div></div><div class="card cart"><div class="ch"><div><h2>Venta actual</h2><p>${qty} unidades</p></div><span class="pill a">NUEVA</span></div><div class="lines" id="lines">${
+  return `${title("Punto de venta", "Venta rápida, cobro y actualización de stock desde una misma pantalla.", `<span class="pill ${state.cash ? "" : "w"}">${state.cash ? "CAJA ABIERTA" : "CAJA CERRADA"}</span>${action("Vaciar", "clear-cart")}`)}<div class="pos"><div><div class="bar pos-bar"><input id="posSearch" class="search" placeholder="Buscar por nombre o código..." value="${esc(searchTerm)}" aria-label="Buscar producto"><div class="stock-view-toggle pos-view-toggle" role="group" aria-label="Modo de visualización en punto de venta"><button type="button" class="${posViewMode === "cards" ? "on" : ""}" data-pos-view="cards" title="Vista en tarjetas (Foto 1)">${iconGrid()} Tarjetas</button><button type="button" class="${posViewMode === "list" ? "on" : ""}" data-pos-view="list" title="Vista en lista">${iconList()} Lista</button></div></div><div class="chips">${cats.map((c) => `<button class="${category === c ? "on" : ""}" data-category="${esc(c)}">${esc(c)}</button>`).join("")}</div>${posViewMode === "cards" ? `<div id="grid" class="grid pro-cards-grid">${items.map((p) => renderProductCard(p, "pos")).join("") || '<p class="lite-empty" style="grid-column:1/-1">No hay productos para este filtro.</p>'}</div>` : `<div id="grid" class="pro-list-container">${items.map((p) => renderProductListRow(p, "pos")).join("") || '<p class="lite-empty">No hay productos para este filtro.</p>'}</div>`}</div><div class="card cart"><div class="ch"><div><h2>Venta actual</h2><p>${qty} unidades</p></div><span class="pill a">NUEVA</span></div><div class="lines" id="lines">${
     Object.entries(cart)
       .map(([id, q]) => {
         const p = state.products.find((p) => p.id === Number(id));
@@ -768,8 +833,8 @@ function stockView() {
       <button class="${stockFilter === "low" ? "on" : ""}" data-stock-filter="low">Por reponer (${low})</button>
     </div>
     <div class="stock-view-toggle" role="group" aria-label="Modo de visualización">
-      <button type="button" class="${stockViewMode === "cards" ? "on" : ""}" data-stock-view="cards" title="Vista en tarjetas (Foto 1)">⊞ Tarjetas</button>
-      <button type="button" class="${stockViewMode === "table" ? "on" : ""}" data-stock-view="table" title="Vista en tabla">☰ Tabla</button>
+      <button type="button" class="${stockViewMode === "cards" ? "on" : ""}" data-stock-view="cards" title="Vista en tarjetas (Foto 1)">${iconGrid()} Tarjetas</button>
+      <button type="button" class="${stockViewMode === "table" ? "on" : ""}" data-stock-view="table" title="Vista en lista">${iconList()} Lista</button>
     </div>
   </div>
   ${
@@ -1697,7 +1762,7 @@ function modalAction(code) {
   if (code === "add-category") return addCategory();
 }
 document.addEventListener("click", (e) => {
-  const target = e.target.closest("button, [data-add], [data-action], [data-stock-view]");
+  const target = e.target.closest("button, [data-add], [data-action], [data-stock-view], [data-pos-view]");
   if (!target || target.disabled) return;
   if (target === $("#bg")) {
     toggleNav();
@@ -1801,6 +1866,12 @@ document.addEventListener("click", (e) => {
   }
   if (target.dataset.stockView) {
     stockViewMode = target.dataset.stockView;
+    saveState();
+    render();
+    return;
+  }
+  if (target.dataset.posView) {
+    posViewMode = target.dataset.posView;
     saveState();
     render();
     return;
@@ -1985,10 +2056,10 @@ document.addEventListener("submit", (e) => {
     saveProduct();
   }
 });
-$("#modal").addEventListener("click", (e) => {
+$("#modal")?.addEventListener("click", (e) => {
   if (e.target.id === "modal") closeModal();
 });
-$("#overlay").addEventListener("click", closeNav);
+$("#overlay")?.addEventListener("click", closeNav);
 document.addEventListener("keydown", (e) => {
   if (e.target.id === "globalSearch" && e.key === "Enter") {
     e.preventDefault();
