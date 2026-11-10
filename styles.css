@@ -12870,32 +12870,11 @@ button:is(:hover, :focus-visible)::after {
   }
 }
 
-/* Animaciones compartidas del lateral: hover con barrida y selección sin escala. */
-body #side .side-control::after {
-  content: "";
-  display: block;
-  position: absolute;
-  z-index: 1;
-  top: -55%;
-  bottom: -55%;
-  left: -55%;
-  width: 38%;
-  pointer-events: none;
-  opacity: 0;
-  transform: translateX(-180%) rotate(18deg);
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(218, 237, 255, 0.08) 20%,
-    rgba(238, 247, 255, 0.78) 50%,
-    rgba(169, 211, 255, 0.16) 80%,
-    transparent 100%
-  );
-}
-
-body #side .side-control:is(:hover, :focus-visible)::after {
-  animation: side-control-sweep 0.68s cubic-bezier(0.22, 0.61, 0.36, 1)
-    both;
+/* Animaciones compartidas del lateral: selección sin escala. Barrido de luz desactivado. */
+body #side .side-control::after,
+body #side button::after {
+  display: none !important;
+  content: none !important;
 }
 
 body #side .side-control:is(.on, [aria-pressed="true"]) {
