@@ -402,6 +402,26 @@ function loadState() {
         });
       }
     }
+    const authSessionRaw = localStorage.getItem("comerciando_auth_session");
+    if (authSessionRaw) {
+      try {
+        const authSession = JSON.parse(authSessionRaw);
+        if (authSession && authSession.user) {
+          const authUser = authSession.user;
+          const matchIdx = state.users.findIndex(
+            (u) =>
+              u.id === authUser.id ||
+              (u.email &&
+                u.email.toLowerCase() === (authUser.email || "").toLowerCase()),
+          );
+          if (matchIdx !== -1) {
+            state.users[matchIdx] = { ...state.users[matchIdx], ...authUser };
+          } else {
+            state.users.unshift(authUser);
+          }
+        }
+      } catch (e) {}
+    }
     if (data.stockViewMode === "cards" || data.stockViewMode === "table") {
       stockViewMode = data.stockViewMode;
     }
@@ -1268,7 +1288,7 @@ function liteReportExport() {
 function settings() {
   const userCount = state.users.length;
   const isLimit = userCount >= 3;
-  return `<div class="v8-screen">${title("Configuración", "Preferencias del emprendimiento y gestión de usuarios.")}<div class="lite-summary"><div class="v8-panel"><div class="v8-panelhead"><h2>Datos del comercio</h2><p>Configuración general y preferencias de tu comercio.</p></div><div class="v8-panel-inner"><div class="lite-form"><label class="full">Nombre del negocio<input id="storeEdit" class="lite-input" value="${esc(state.store)}" maxlength="60"></label><label>Tema<select id="themeEdit" class="lite-input"><option value="dark" ${state.theme === "dark" ? "selected" : ""}>Oscuro</option><option value="light" ${state.theme === "light" ? "selected" : ""}>Claro</option></select></label><label>Sonidos<select id="soundEdit" class="lite-input"><option value="true" ${state.sound ? "selected" : ""}>Activados</option><option value="false" ${!state.sound ? "selected" : ""}>Desactivados</option></select></label><label>Estilo de sonido<select id="soundStyleEdit" class="lite-input"><option value="suave" ${soundStyle === "suave" ? "selected" : ""}>Suave · Campanillas discretas</option><option value="digital" ${soundStyle === "digital" ? "selected" : ""}>Digital · Tonos breves</option></select></label></div><div class="lite-sound-tools"><h3>Probar sonidos de Emprendedores</h3><p>Ya no hay bip al navegar ni al tocar cada botón. Los avisos acompañan sólo acciones importantes.</p><div class="lite-sound-examples"><button class="btn g sm" data-action="sound-preview:add">Agregar producto</button><button class="btn g sm" data-action="sound-preview:success">Venta confirmada</button><button class="btn g sm" data-action="sound-preview:warning">Advertencia</button></div><small class="lite-sound-hint">Elegí el estilo y presioná un botón para escucharlo. Si están silenciados no sonará.</small></div><div style="margin-top:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">${action("Guardar preferencias", "save-settings", "")}${action("Restablecer demo", "reset-demo", "g sm")}</div></div></div><div class="v8-panel"><div class="v8-panelhead"><div><h2>Usuarios · máximo 3</h2><p>Tope de usuarios permitido por el plan Emprendedores.</p></div><span class="pill premium-pill">${userCount}/3 activos</span></div><div class="v8-panel-inner"><div class="lite-rows">${state.users.map((u, i) => {
+  return `<div class="v8-screen">${title("Configuración", "Preferencias del emprendimiento y gestión de usuarios.")}<div class="lite-summary"><div class="v8-panel"><div class="v8-panelhead"><h2>Datos del comercio</h2><p>Configuración general y preferencias de tu comercio.</p></div><div class="v8-panel-inner"><div class="lite-form"><label class="full">Nombre del negocio<input id="storeEdit" class="lite-input" value="${esc(state.store)}" maxlength="60"></label><label>Tema<select id="themeEdit" class="lite-input"><option value="dark" ${state.theme === "dark" ? "selected" : ""}>Oscuro</option><option value="light" ${state.theme === "light" ? "selected" : ""}>Claro</option></select></label><label>Sonidos<select id="soundEdit" class="lite-input"><option value="true" ${state.sound ? "selected" : ""}>Activados</option><option value="false" ${!state.sound ? "selected" : ""}>Desactivados</option></select></label><label>Estilo de sonido<select id="soundStyleEdit" class="lite-input"><option value="suave" ${soundStyle === "suave" ? "selected" : ""}>Suave · Campanillas discretas</option><option value="digital" ${soundStyle === "digital" ? "selected" : ""}>Digital · Tonos breves</option></select></label></div><div class="lite-sound-tools"><h3>Probar sonidos de Emprendedores</h3><p>Ya no hay bip al navegar ni al tocar cada botón. Los avisos acompañan sólo acciones importantes.</p><div class="lite-sound-examples"><button class="btn g sm" data-action="sound-preview:add">Agregar producto</button><button class="btn g sm" data-action="sound-preview:success">Venta confirmada</button><button class="btn g sm" data-action="sound-preview:warning">Advertencia</button></div><small class="lite-sound-hint">Elegí el estilo y presioná un botón para escucharlo. Si están silenciados no sonará.</small></div><div style="margin-top:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">${action("Guardar preferencias", "save-settings", "")}${action("Restablecer demo", "reset-demo", "g sm")}<button type="button" class="btn g sm" data-action="logout" style="color:#dc2626;margin-left:auto">Cerrar sesión</button></div></div></div><div class="v8-panel"><div class="v8-panelhead"><div><h2>Usuarios · máximo 3</h2><p>Tope de usuarios permitido por el plan Emprendedores.</p></div><span class="pill premium-pill">${userCount}/3 activos</span></div><div class="v8-panel-inner"><div class="lite-rows">${state.users.map((u, i) => {
     const nameStr = u.name || `${u.firstName || ""} ${u.lastName || ""}`.trim() || "Usuario";
     const initials = ((u.firstName?.[0] || nameStr[0] || "U") + (u.lastName?.[0] || "")).toUpperCase();
     const avatarContent = u.photo
@@ -2396,6 +2416,17 @@ document.addEventListener("click", (e) => {
     return;
   }
   if (code === "confirm-invite-user-extra") return confirmInviteUser(true);
+  if (code === "logout") {
+    try {
+      localStorage.removeItem("comerciando_auth_session");
+    } catch {}
+    closeModal();
+    toast("Cerrando sesión…");
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 450);
+    return;
+  }
   modalAction(code);
 });
 document.addEventListener("input", (e) => {
@@ -2501,6 +2532,30 @@ window.addEventListener("resize", () => {
   document.body.classList.toggle("remake-touch", window.innerWidth <= 850);
 });
 document.documentElement.dataset.theme = state.theme;
+$("#topUserBadge")?.addEventListener("click", () => {
+  const activeUser = state.users[0] || { name: "Usuario", role: "Administrador", email: "" };
+  const nameStr = activeUser.name || `${activeUser.firstName || ""} ${activeUser.lastName || ""}`.trim() || "Usuario";
+  const initials = ((activeUser.firstName?.[0] || nameStr[0] || "U") + (activeUser.lastName?.[0] || "")).toUpperCase();
+  openModal(
+    "Mi Cuenta",
+    "Sesión activa del comercio",
+    `<div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:10px 0">
+      <div class="user-photo-preview" style="width:72px;height:72px;font-size:24px;margin:0 auto">
+        ${activeUser.photo ? `<img src="${activeUser.photo}" style="width:100%;height:100%;object-fit:cover">` : `<span style="color:#fff;font-weight:700">${initials}</span>`}
+      </div>
+      <div>
+        <h3 style="margin:0;font-size:18px;color:var(--ink)">${esc(nameStr)}</h3>
+        <p style="margin:4px 0 0 0;font-size:13px;color:var(--muted)">${esc(activeUser.email || "Sin correo")}</p>
+        <span class="pill premium-pill" style="margin-top:8px;display:inline-block">${esc(activeUser.role || "Administrador")}</span>
+      </div>
+      <div style="background:var(--s2,#f1f5f9);border:1px solid var(--line,#e2e8f0);border-radius:12px;padding:12px;width:100%;font-size:13px;text-align:left;color:var(--ink)">
+        <b>Plan actual:</b> Plan Emprendedor (7 días de prueba)<br>
+        <b>Colaboradores:</b> ${state.users.length} de 3 activos
+      </div>
+    </div>`,
+    `<button class="btn" data-action="logout" style="background:#dc2626;border-color:#dc2626">Cerrar sesión</button><button class="btn g sm" data-action="close-modal">Cerrar</button>`
+  );
+});
 const initialHash = location.hash.replace("#", "");
 if (initialHash in NAME) {
   go(initialHash);

@@ -1,0 +1,1125 @@
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Iniciar Sesión — Comerciando Emprendedores</title>
+    <link rel="icon" href="img/favicon.ico" sizes="any" />
+
+    <style>
+      /* Reset & Contenedor General */
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at 50% 15%, #15274d 0%, #0b1426 70%, #070d1a 100%);
+        padding: 24px 16px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        color: #151717;
+      }
+
+      .login-wrapper {
+        width: 100%;
+        max-width: 450px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* Cabecera de Marca */
+      .brand-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 22px;
+        text-align: left;
+      }
+
+      .brand-header img {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        object-fit: contain;
+      }
+
+      .brand-text h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: -0.02em;
+      }
+
+      .brand-text p {
+        margin: 2px 0 0 0;
+        font-size: 13px;
+        color: #94a3b8;
+      }
+
+      .plan-tag {
+        display: inline-block;
+        background: rgba(45, 121, 243, 0.18);
+        border: 1px solid rgba(45, 121, 243, 0.4);
+        color: #79adff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 6px;
+        margin-left: 6px;
+        letter-spacing: 0.04em;
+      }
+
+      /* Switch de Pestañas Superior */
+      .auth-switch-bar {
+        display: flex;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 4px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        gap: 4px;
+      }
+
+      .auth-switch-btn {
+        flex: 1;
+        padding: 8px 14px;
+        border: none;
+        background: transparent;
+        color: #94a3b8;
+        font-size: 13.5px;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .auth-switch-btn.active {
+        background: #ffffff;
+        color: #151717;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Alertas / Mensajes de Feedback */
+      .alert-box {
+        display: none;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        margin-bottom: 12px;
+        line-height: 1.4;
+      }
+
+      .alert-box.show {
+        display: block;
+      }
+
+      .alert-box.error {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+      }
+
+      .alert-box.success {
+        background-color: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #15803d;
+      }
+
+      .alert-box.info {
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+      }
+
+      /* From Uiverse.io by micaelgomestavares */ 
+      .form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background-color: #ffffff;
+        padding: 30px;
+        width: 450px;
+        max-width: 100%;
+        border-radius: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      }
+
+      ::placeholder {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      }
+
+      .form button {
+        align-self: flex-end;
+      }
+
+      .flex-column > label {
+        color: #151717;
+        font-weight: 600;
+      }
+
+      .inputForm {
+        border: 1.5px solid #ecedec;
+        border-radius: 10px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        transition: 0.2s ease-in-out;
+      }
+
+      .input {
+        margin-left: 10px;
+        border-radius: 10px;
+        border: none;
+        width: 85%;
+        height: 100%;
+        font-size: 14px;
+        color: #151717;
+      }
+
+      .input:focus {
+        outline: none;
+      }
+
+      .inputForm:focus-within {
+        border: 1.5px solid #2d79f3;
+      }
+
+      .flex-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        justify-content: space-between;
+      }
+
+      .flex-row > div > label {
+        font-size: 14px;
+        color: black;
+        font-weight: 400;
+        cursor: pointer;
+      }
+
+      .span {
+        font-size: 14px;
+        margin-left: 5px;
+        color: #2d79f3;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      .span:hover {
+        text-decoration: underline;
+      }
+
+      .button-submit {
+        margin: 20px 0 10px 0;
+        background-color: #151717;
+        border: none;
+        color: white;
+        font-size: 15px;
+        font-weight: 500;
+        border-radius: 10px;
+        height: 50px;
+        width: 100%;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.2s ease;
+      }
+
+      .button-submit:hover {
+        background-color: #252727;
+      }
+
+      .button-submit:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+      }
+
+      .p {
+        text-align: center;
+        color: black;
+        font-size: 14px;
+        margin: 5px 0;
+      }
+
+      .p.line {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #71717a;
+        margin: 14px 0 6px 0;
+      }
+
+      .p.line::before,
+      .p.line::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e4e4e7;
+      }
+
+      .btn {
+        margin-top: 10px;
+        width: 100%;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 500;
+        gap: 10px;
+        border: 1px solid #ededef;
+        background-color: white;
+        cursor: pointer;
+        transition: 0.2s ease-in-out;
+        color: #151717;
+        font-size: 14px;
+      }
+
+      .btn:hover {
+        border: 1px solid #2d79f3;
+        background-color: #fafbfc;
+      }
+
+      .flex-row > .btn {
+        flex: 1;
+      }
+
+      /* Íconos interactivos y detalles */
+      .inputForm svg.input-icon {
+        width: 20px;
+        height: 20px;
+        color: #71717a;
+        stroke: currentColor;
+        flex-shrink: 0;
+        transition: color 0.2s ease, stroke 0.2s ease;
+      }
+
+      .inputForm:focus-within svg.input-icon {
+        color: #2d79f3;
+        stroke: #2d79f3;
+      }
+
+      .pwd-toggle-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px 0 0;
+        color: #71717a;
+        transition: color 0.2s;
+      }
+
+      .pwd-toggle-btn:hover {
+        color: #2d79f3;
+      }
+
+      .pwd-toggle-btn svg {
+        width: 20px;
+        height: 20px;
+        color: currentColor;
+        stroke: currentColor;
+      }
+
+      /* Spinner animado para estados de carga */
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #ffffff;
+        animation: spin 0.7s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Pantalla de Verificación y Recupero */
+      .verify-card {
+        display: none;
+        text-align: center;
+      }
+
+      .verify-card.show {
+        display: flex;
+      }
+
+      .verify-icon-bubble {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: rgba(45, 121, 243, 0.12);
+        color: #2d79f3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px auto;
+      }
+
+      .verify-icon-bubble svg {
+        width: 32px;
+        height: 32px;
+      }
+
+      .verify-title {
+        font-size: 19px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        color: #151717;
+      }
+
+      .verify-desc {
+        font-size: 13.5px;
+        color: #52525b;
+        line-height: 1.5;
+        margin: 0 0 20px 0;
+      }
+
+      .verify-email-badge {
+        font-weight: 600;
+        color: #2d79f3;
+        background: #f0f7ff;
+        padding: 3px 8px;
+        border-radius: 6px;
+        display: inline-block;
+        word-break: break-all;
+      }
+
+      .verify-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 99px;
+        background: #fef3c7;
+        color: #b45309;
+        font-weight: 600;
+        margin-bottom: 20px;
+      }
+
+      /* Modal de Recuperación */
+      .lite-modal-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(11, 20, 38, 0.75);
+        backdrop-filter: blur(4px);
+        justify-content: center;
+        align-items: center;
+        padding: 16px;
+        z-index: 999;
+      }
+
+      .lite-modal-backdrop.show {
+        display: flex;
+      }
+
+      .lite-modal-box {
+        background: #ffffff;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 420px;
+        padding: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-wrapper">
+      <!-- Encabezado de Marca -->
+      <div class="brand-header">
+        <img src="img/logo.png" alt="Comerciando Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'44\' height=\'44\' viewBox=\'0 0 24 24\' fill=\'%23175bdf\'><rect width=\'24\' height=\'24\' rx=\'6\' fill=\'%23175bdf\'/><text x=\'12\' y=\'16\' font-size=\'12\' fill=\'white\' font-family=\'sans-serif\' text-anchor=\'middle\' font-weight=\'bold\'>C</text></svg>'" />
+        <div class="brand-text">
+          <h1>Comerciando <span class="plan-tag">PLAN EMPRENDEDOR</span></h1>
+          <p>by Andes Solutions · Acceso Seguro</p>
+        </div>
+      </div>
+
+      <!-- Barra de navegación Iniciar Sesión / Registrarse -->
+      <div class="auth-switch-bar" id="authSwitchBar">
+        <button type="button" class="auth-switch-btn active" id="tabSignIn">Iniciar Sesión</button>
+        <button type="button" class="auth-switch-btn" id="tabSignUp">Crear Cuenta</button>
+      </div>
+
+      <!-- Alertas de estado -->
+      <div class="alert-box" id="authAlert" role="alert"></div>
+
+      <!-- VISTA 1: FORMULARIO DE INICIO DE SESIÓN (Uiverse.io by micaelgomestavares) -->
+      <form class="form" id="signInForm" onsubmit="handleSignInSubmit(event)">
+        <div class="flex-column">
+          <label for="loginEmail">Email</label>
+        </div>
+        <div class="inputForm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-at-sign input-icon"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>
+          <input type="email" class="input" id="loginEmail" placeholder="Enter your Email" required autocomplete="email" />
+        </div>
+
+        <div class="flex-column">
+          <label for="loginPassword">Password</label>
+        </div>
+        <div class="inputForm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock input-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" class="input" id="loginPassword" placeholder="Enter your Password" required autocomplete="current-password" />
+          <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('loginPassword', this)" title="Mostrar / ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye eye-show"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off eye-hide" style="display:none;"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+          </button>
+        </div>
+
+        <div class="flex-row">
+          <div>
+            <input type="checkbox" id="rememberMe" checked />
+            <label for="rememberMe">Remember me</label>
+          </div>
+          <span class="span" onclick="openForgotModal()">Forgot password?</span>
+        </div>
+
+        <button type="submit" class="button-submit" id="signInSubmitBtn">
+          <span>Sign In</span>
+        </button>
+
+        <p class="p">
+          Don't have an account? <span class="span" onclick="switchView('signup')">Sign Up</span>
+        </p>
+
+        <p class="p line">Or With</p>
+
+        <div class="flex-row">
+          <button type="button" class="btn google" onclick="handleSocialAuth('Google')">
+            <svg version="1.1" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <path style="fill:#FBBB00;" d="M113.47,309.408L95.648,375.94l-65.139,1.378C11.042,341.211,0,299.9,0,256 c0-42.451,10.324-82.483,28.624-117.732h0.014l57.992,10.632l25.404,57.644c-5.317,15.501-8.215,32.141-8.215,49.456 C103.821,274.792,107.225,292.797,113.47,309.408z"></path>
+              <path style="fill:#518EF8;" d="M507.527,208.176C510.467,223.662,512,239.655,512,256c0,18.328-1.927,36.206-5.598,53.451 c-12.462,58.683-45.025,109.925-90.134,146.187l-0.014-0.014l-73.044-3.727l-10.338-64.535 c29.932-17.554,53.324-45.025,65.646-77.911h-136.89V208.176h138.887L507.527,208.176L507.527,208.176z"></path>
+              <path style="fill:#28B446;" d="M416.253,455.624l0.014,0.014C372.396,490.901,316.666,512,256,512 c-97.491,0-182.252-54.491-225.491-134.681l82.961-67.91c21.619,57.698,77.278,98.771,142.53,98.771 c28.047,0,54.323-7.582,76.87-20.818L416.253,455.624z"></path>
+              <path style="fill:#F14336;" d="M419.404,58.936l-82.933,67.896c-23.335-14.586-50.919-23.012-80.471-23.012 c-66.729,0-123.429,42.957-143.965,102.724l-83.397-68.276h-0.014C71.23,56.123,157.06,0,256,0 C318.115,0,375.068,22.126,419.404,58.936z"></path>
+            </svg>
+            Google
+          </button>
+          <button type="button" class="btn apple" onclick="handleSocialAuth('Apple')">
+            <svg version="1.1" height="20" width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.773 22.773">
+              <path d="M15.769,0c0.053,0,0.106,0,0.162,0c0.13,1.606-0.483,2.806-1.228,3.675c-0.731,0.863-1.732,1.7-3.351,1.573 c-0.108-1.583,0.506-2.694,1.25-3.561C13.292,0.879,14.557,0.16,15.769,0z"></path>
+              <path d="M20.67,16.716c0,0.016,0,0.03,0,0.045c-0.455,1.378-1.104,2.559-1.896,3.655c-0.723,0.995-1.609,2.334-3.191,2.334 c-1.367,0-2.275-0.879-3.676-0.903c-1.482-0.024-2.297,0.735-3.652,0.926c-0.155,0-0.31,0-0.462,0 c-0.995-0.144-1.798-0.932-2.383-1.642c-1.725-2.098-3.058-4.808-3.306-8.276c0-0.34,0-0.679,0-1.019 c0.105-2.482,1.311-4.5,2.914-5.478c0.846-0.52,2.009-0.963,3.304-0.765c0.555,0.086,1.122,0.276,1.619,0.464 c0.471,0.181,1.06,0.502,1.618,0.485c0.378-0.011,0.754-0.208,1.135-0.347c1.116-0.403,2.21-0.865,3.652-0.648 c1.733,0.262,2.963,1.032,3.723,2.22c-1.466,0.933-2.625,2.339-2.427,4.74C17.818,14.688,19.086,15.964,20.67,16.716z"></path>
+            </svg>
+            Apple
+          </button>
+        </div>
+      </form>
+
+      <!-- VISTA 2: FORMULARIO DE REGISTRO (Mismo estilo Uiverse.io con campos requeridos) -->
+      <form class="form" id="signUpForm" style="display: none;" onsubmit="handleSignUpSubmit(event)">
+        <div class="flex-column">
+          <label for="regName">Nombre y apellido</label>
+        </div>
+        <div class="inputForm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user input-icon"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" class="input" id="regName" placeholder="Tu nombre y apellido" required autocomplete="name" />
+        </div>
+
+        <div class="flex-column">
+          <label for="regEmail">Email</label>
+        </div>
+        <div class="inputForm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-at-sign input-icon"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>
+          <input type="email" class="input" id="regEmail" placeholder="Enter your Email" required autocomplete="email" />
+        </div>
+
+        <div class="flex-column">
+          <label for="regPassword">Contraseña</label>
+        </div>
+        <div class="inputForm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock input-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" class="input" id="regPassword" placeholder="Crea tu contraseña (mínimo 6 caracteres)" required autocomplete="new-password" />
+          <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('regPassword', this)" title="Mostrar / ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye eye-show"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off eye-hide" style="display:none;"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+          </button>
+        </div>
+
+        <div class="flex-column">
+          <label for="regConfirmPassword">Confirmar contraseña</label>
+        </div>
+        <div class="inputForm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock input-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" class="input" id="regConfirmPassword" placeholder="Confirma tu contraseña" required autocomplete="new-password" />
+          <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('regConfirmPassword', this)" title="Mostrar / ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye eye-show"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off eye-hide" style="display:none;"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
+          </button>
+        </div>
+
+        <button type="submit" class="button-submit" id="signUpSubmitBtn">
+          <span>Crear cuenta</span>
+        </button>
+
+        <p class="p">
+          ¿Ya tenés una cuenta? <span class="span" onclick="switchView('signin')">Sign In</span>
+        </p>
+
+        <p class="p line">Or With</p>
+
+        <div class="flex-row">
+          <button type="button" class="btn google" onclick="handleSocialAuth('Google')">
+            <svg version="1.1" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <path style="fill:#FBBB00;" d="M113.47,309.408L95.648,375.94l-65.139,1.378C11.042,341.211,0,299.9,0,256 c0-42.451,10.324-82.483,28.624-117.732h0.014l57.992,10.632l25.404,57.644c-5.317,15.501-8.215,32.141-8.215,49.456 C103.821,274.792,107.225,292.797,113.47,309.408z"></path>
+              <path style="fill:#518EF8;" d="M507.527,208.176C510.467,223.662,512,239.655,512,256c0,18.328-1.927,36.206-5.598,53.451 c-12.462,58.683-45.025,109.925-90.134,146.187l-0.014-0.014l-73.044-3.727l-10.338-64.535 c29.932-17.554,53.324-45.025,65.646-77.911h-136.89V208.176h138.887L507.527,208.176L507.527,208.176z"></path>
+              <path style="fill:#28B446;" d="M416.253,455.624l0.014,0.014C372.396,490.901,316.666,512,256,512 c-97.491,0-182.252-54.491-225.491-134.681l82.961-67.91c21.619,57.698,77.278,98.771,142.53,98.771 c28.047,0,54.323-7.582,76.87-20.818L416.253,455.624z"></path>
+              <path style="fill:#F14336;" d="M419.404,58.936l-82.933,67.896c-23.335-14.586-50.919-23.012-80.471-23.012 c-66.729,0-123.429,42.957-143.965,102.724l-83.397-68.276h-0.014C71.23,56.123,157.06,0,256,0 C318.115,0,375.068,22.126,419.404,58.936z"></path>
+            </svg>
+            Google
+          </button>
+          <button type="button" class="btn apple" onclick="handleSocialAuth('Apple')">
+            <svg version="1.1" height="20" width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.773 22.773">
+              <path d="M15.769,0c0.053,0,0.106,0,0.162,0c0.13,1.606-0.483,2.806-1.228,3.675c-0.731,0.863-1.732,1.7-3.351,1.573 c-0.108-1.583,0.506-2.694,1.25-3.561C13.292,0.879,14.557,0.16,15.769,0z"></path>
+              <path d="M20.67,16.716c0,0.016,0,0.03,0,0.045c-0.455,1.378-1.104,2.559-1.896,3.655c-0.723,0.995-1.609,2.334-3.191,2.334 c-1.367,0-2.275-0.879-3.676-0.903c-1.482-0.024-2.297,0.735-3.652,0.926c-0.155,0-0.31,0-0.462,0 c-0.995-0.144-1.798-0.932-2.383-1.642c-1.725-2.098-3.058-4.808-3.306-8.276c0-0.34,0-0.679,0-1.019 c0.105-2.482,1.311-4.5,2.914-5.478c0.846-0.52,2.009-0.963,3.304-0.765c0.555,0.086,1.122,0.276,1.619,0.464 c0.471,0.181,1.06,0.502,1.618,0.485c0.378-0.011,0.754-0.208,1.135-0.347c1.116-0.403,2.21-0.865,3.652-0.648 c1.733,0.262,2.963,1.032,3.723,2.22c-1.466,0.933-2.625,2.339-2.427,4.74C17.818,14.688,19.086,15.964,20.67,16.716z"></path>
+            </svg>
+            Apple
+          </button>
+        </div>
+      </form>
+
+      <!-- VISTA 3: GATE DE VERIFICACIÓN DE EMAIL -->
+      <div class="form verify-card" id="verifyCard">
+        <div class="verify-icon-bubble">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h9"></path>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+            <path d="m16 19 2 2 4-4"></path>
+          </svg>
+        </div>
+        <h2 class="verify-title">¡Verificá tu correo electrónico! 👋</h2>
+        <p class="verify-desc">
+          Enviamos un correo de verificación a <br /><span class="verify-email-badge" id="pendingVerifyEmail">usuario@correo.com</span>.<br />
+          Para proteger tu negocio, no es posible acceder hasta validar tu identidad.
+        </p>
+
+        <div style="display:flex; justify-content:center;">
+          <span class="verify-status-badge">
+            <span class="spinner" style="border-top-color:#b45309; width:12px; height:12px;"></span>
+            Esperando confirmación...
+          </span>
+        </div>
+
+        <button type="button" class="button-submit" id="simulateVerifyBtn" onclick="simulateVerificationSuccess()">
+          <span>✓ Confirmar enlace del correo y entrar</span>
+        </button>
+
+        <button type="button" class="btn" onclick="resendVerificationEmail()">
+          <span>Reenviar correo de verificación</span>
+        </button>
+
+        <p class="p" style="margin-top: 14px;">
+          ¿Querés usar otra cuenta? <span class="span" onclick="switchView('signin')">Volver al login</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- MODAL: RECUPERO DE CONTRASEÑA -->
+    <div class="lite-modal-backdrop" id="forgotModal">
+      <div class="lite-modal-box">
+        <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #151717;">Restablecer contraseña</h3>
+        <p style="margin: 0 0 16px 0; font-size: 13.5px; color: #52525b; line-height: 1.4;">
+          Ingresá tu correo electrónico registrado y te enviaremos un enlace de recuperación seguro.
+        </p>
+        <div class="inputForm" style="margin-bottom: 16px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-at-sign input-icon"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>
+          <input type="email" class="input" id="forgotEmail" placeholder="Enter your Email" required />
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="btn" style="width: auto; margin-top:0; padding: 0 16px;" onclick="closeForgotModal()">Cancelar</button>
+          <button type="button" class="button-submit" style="width: auto; margin: 0; padding: 0 18px;" onclick="sendRecoveryEmail()">Enviar enlace</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LÓGICA DE AUTENTICACIÓN INTEGRAL (Local + Supabase ready) -->
+    <script>
+      const AUTH_STORAGE_USERS = "comerciando_auth_users_v1";
+      const AUTH_STORAGE_SESSION = "comerciando_auth_session";
+      const APP_STATE_KEY = "comerciando_emprendedores_state_v2";
+
+      let pendingEmail = "";
+
+      // Inicialización
+      window.addEventListener("DOMContentLoaded", () => {
+        initUsersDb();
+        checkExistingSession();
+
+        // Pestañas
+        document.getElementById("tabSignIn").addEventListener("click", () => switchView("signin"));
+        document.getElementById("tabSignUp").addEventListener("click", () => switchView("signup"));
+      });
+
+      function initUsersDb() {
+        try {
+          const raw = localStorage.getItem(AUTH_STORAGE_USERS);
+          if (!raw) {
+            // Usuario inicial si no existe ninguno
+            const initialUsers = [
+              {
+                id: "usr_1",
+                name: "Guillermo",
+                firstName: "Guillermo",
+                lastName: "",
+                email: "guillermo@comercio.com",
+                passwordHash: "123456",
+                role: "Administrador",
+                photo: "",
+                verified: true,
+                createdAt: new Date().toISOString()
+              }
+            ];
+            localStorage.setItem(AUTH_STORAGE_USERS, JSON.stringify(initialUsers));
+          }
+        } catch (e) {
+          console.warn("Error inicializando BD usuarios:", e);
+        }
+      }
+
+      function checkExistingSession() {
+        try {
+          const sessionRaw = localStorage.getItem(AUTH_STORAGE_SESSION);
+          if (sessionRaw) {
+            const session = JSON.parse(sessionRaw);
+            if (session && session.user && session.user.verified) {
+              showAlert(`Sesión activa como ${session.user.name}. Redirigiendo al panel…`, "info");
+              setTimeout(() => {
+                window.location.href = "index.html";
+              }, 1200);
+            }
+          }
+        } catch {}
+      }
+
+      function switchView(view) {
+        hideAlert();
+        const signInForm = document.getElementById("signInForm");
+        const signUpForm = document.getElementById("signUpForm");
+        const verifyCard = document.getElementById("verifyCard");
+        const tabSignIn = document.getElementById("tabSignIn");
+        const tabSignUp = document.getElementById("tabSignUp");
+        const switchBar = document.getElementById("authSwitchBar");
+
+        switchBar.style.display = "flex";
+        signInForm.style.display = "none";
+        signUpForm.style.display = "none";
+        verifyCard.classList.remove("show");
+
+        if (view === "signin") {
+          signInForm.style.display = "flex";
+          tabSignIn.classList.add("active");
+          tabSignUp.classList.remove("active");
+        } else if (view === "signup") {
+          signUpForm.style.display = "flex";
+          tabSignUp.classList.add("active");
+          tabSignIn.classList.remove("active");
+        } else if (view === "verify") {
+          switchBar.style.display = "none";
+          verifyCard.classList.add("show");
+          document.getElementById("pendingVerifyEmail").textContent = pendingEmail;
+        }
+      }
+
+      function togglePasswordVisibility(inputId, btnEl) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const isPwd = input.type === "password";
+        input.type = isPwd ? "text" : "password";
+
+        if (btnEl) {
+          const eyeShow = btnEl.querySelector(".eye-show");
+          const eyeHide = btnEl.querySelector(".eye-hide");
+          if (eyeShow && eyeHide) {
+            eyeShow.style.display = isPwd ? "none" : "block";
+            eyeHide.style.display = isPwd ? "block" : "none";
+          }
+        }
+      }
+
+      function showAlert(msg, type = "error") {
+        const box = document.getElementById("authAlert");
+        box.textContent = msg;
+        box.className = `alert-box show ${type}`;
+      }
+
+      function hideAlert() {
+        const box = document.getElementById("authAlert");
+        box.className = "alert-box";
+        box.textContent = "";
+      }
+
+      function setButtonLoading(btn, isLoading, defaultText = "Ingresar") {
+        if (isLoading) {
+          btn.disabled = true;
+          btn.innerHTML = `<span class="spinner"></span> <span>Procesando…</span>`;
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = `<span>${defaultText}</span>`;
+        }
+      }
+
+      /* ═══ PROCESO DE REGISTRO ═══ */
+      async function handleSignUpSubmit(e) {
+        e.preventDefault();
+        hideAlert();
+
+        const nameInput = document.getElementById("regName").value.trim();
+        const emailInput = document.getElementById("regEmail").value.trim().toLowerCase();
+        const pwdInput = document.getElementById("regPassword").value;
+        const confirmPwdInput = document.getElementById("regConfirmPassword").value;
+        const btn = document.getElementById("signUpSubmitBtn");
+
+        if (!nameInput) {
+          showAlert("Por favor ingresá tu nombre y apellido.", "error");
+          return;
+        }
+
+        if (!validateEmail(emailInput)) {
+          showAlert("Por favor ingresá una dirección de correo válida.", "error");
+          return;
+        }
+
+        if (pwdInput.length < 6) {
+          showAlert("La contraseña debe tener un mínimo de 6 caracteres.", "error");
+          return;
+        }
+
+        if (pwdInput !== confirmPwdInput) {
+          showAlert("Las contraseñas no coinciden. Por favor verificalas.", "error");
+          return;
+        }
+
+        setButtonLoading(btn, true);
+
+        // Simulación de delay de red / llamada a backend o Supabase
+        await new Promise(r => setTimeout(r, 650));
+
+        try {
+          const usersRaw = localStorage.getItem(AUTH_STORAGE_USERS);
+          const users = usersRaw ? JSON.parse(usersRaw) : [];
+
+          // Validar si el email ya existe
+          const exists = users.find(u => u.email.toLowerCase() === emailInput);
+          if (exists) {
+            setButtonLoading(btn, false, "Crear cuenta");
+            showAlert("Ya existe una cuenta registrada con este correo electrónico.", "error");
+            return;
+          }
+
+          // Separar nombre y apellido
+          const parts = nameInput.split(" ");
+          const firstName = parts[0] || nameInput;
+          const lastName = parts.slice(1).join(" ") || "";
+
+          // REGLA CLAVE: El primer usuario es automáticamente ADMINISTRADOR
+          const isFirstUser = users.length === 0;
+          const assignedRole = isFirstUser ? "Administrador" : "Colaborador";
+
+          const newUser = {
+            id: "usr_" + (users.length + 1),
+            name: nameInput,
+            firstName,
+            lastName,
+            email: emailInput,
+            passwordHash: pwdInput,
+            role: assignedRole,
+            photo: "",
+            status: "Activo",
+            verified: false, // NO PERMITIR ACCESO HASTA VERIFICAR
+            verifyToken: "tok_" + Math.random().toString(36).substring(2, 10),
+            createdAt: new Date().toISOString()
+          };
+
+          users.push(newUser);
+          localStorage.setItem(AUTH_STORAGE_USERS, JSON.stringify(users));
+
+          // Sincronizar en state de la app si es el primer usuario
+          syncToAppState(newUser);
+
+          pendingEmail = emailInput;
+          setButtonLoading(btn, false, "Crear cuenta");
+          switchView("verify");
+        } catch (err) {
+          console.error(err);
+          setButtonLoading(btn, false, "Crear cuenta");
+          showAlert("Ocurrió un error al procesar el registro. Intentá nuevamente.", "error");
+        }
+      }
+
+      /* ═══ PROCESO DE INICIO DE SESIÓN ═══ */
+      async function handleSignInSubmit(e) {
+        e.preventDefault();
+        hideAlert();
+
+        const emailInput = document.getElementById("loginEmail").value.trim().toLowerCase();
+        const pwdInput = document.getElementById("loginPassword").value;
+        const rememberMe = document.getElementById("rememberMe").checked;
+        const btn = document.getElementById("signInSubmitBtn");
+
+        if (!validateEmail(emailInput)) {
+          showAlert("Por favor ingresá un email válido.", "error");
+          return;
+        }
+
+        setButtonLoading(btn, true);
+        await new Promise(r => setTimeout(r, 600));
+
+        try {
+          const usersRaw = localStorage.getItem(AUTH_STORAGE_USERS);
+          const users = usersRaw ? JSON.parse(usersRaw) : [];
+
+          const user = users.find(u => u.email.toLowerCase() === emailInput);
+
+          if (!user || user.passwordHash !== pwdInput) {
+            setButtonLoading(btn, false, "Sign In");
+            showAlert("Email o contraseña incorrectos. Verificá los datos ingresados.", "error");
+            return;
+          }
+
+          // REGLA CLAVE: No permitir acceso si no está verificado
+          if (!user.verified) {
+            pendingEmail = user.email;
+            setButtonLoading(btn, false, "Sign In");
+            showAlert("Tu cuenta aún no está verificada. Revisá tu bandeja de correo.", "error");
+            setTimeout(() => {
+              switchView("verify");
+            }, 800);
+            return;
+          }
+
+          // Crear sesión activa
+          const session = {
+            user: {
+              id: user.id,
+              name: user.name,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              role: user.role,
+              photo: user.photo,
+              verified: user.verified
+            },
+            rememberMe,
+            token: "sess_" + Math.random().toString(36).substring(2, 12),
+            timestamp: Date.now()
+          };
+
+          localStorage.setItem(AUTH_STORAGE_SESSION, JSON.stringify(session));
+          syncToAppState(user);
+
+          showAlert("¡Ingreso exitoso! Redirigiendo a tu panel…", "success");
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 800);
+        } catch (err) {
+          console.error(err);
+          setButtonLoading(btn, false, "Sign In");
+          showAlert("Error al iniciar sesión. Intenta nuevamente.", "error");
+        }
+      }
+
+      /* ═══ CONFIRMACIÓN DE VERIFICACIÓN ═══ */
+      async function simulateVerificationSuccess() {
+        const btn = document.getElementById("simulateVerifyBtn");
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> <span>Verificando correo…</span>`;
+
+        await new Promise(r => setTimeout(r, 700));
+
+        try {
+          const usersRaw = localStorage.getItem(AUTH_STORAGE_USERS);
+          const users = usersRaw ? JSON.parse(usersRaw) : [];
+
+          const userIdx = users.findIndex(u => u.email.toLowerCase() === pendingEmail.toLowerCase());
+          if (userIdx !== -1) {
+            users[userIdx].verified = true;
+            delete users[userIdx].verifyToken;
+            localStorage.setItem(AUTH_STORAGE_USERS, JSON.stringify(users));
+
+            // Iniciar sesión automáticamente
+            const user = users[userIdx];
+            const session = {
+              user: {
+                id: user.id,
+                name: user.name,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                role: user.role,
+                photo: user.photo,
+                verified: true
+              },
+              rememberMe: true,
+              token: "sess_" + Math.random().toString(36).substring(2, 12),
+              timestamp: Date.now()
+            };
+            localStorage.setItem(AUTH_STORAGE_SESSION, JSON.stringify(session));
+            syncToAppState(user);
+
+            btn.innerHTML = `<span>✓ Correo verificado con éxito</span>`;
+            showAlert("¡Tu correo ha sido verificado! Redirigiendo al panel del comercio…", "success");
+            setTimeout(() => {
+              window.location.href = "index.html";
+            }, 900);
+          } else {
+            btn.disabled = false;
+            btn.innerHTML = `<span>✓ Confirmar enlace del correo y entrar</span>`;
+            showAlert("No se encontró el usuario pendiente de verificación.", "error");
+          }
+        } catch (err) {
+          console.error(err);
+          btn.disabled = false;
+          btn.innerHTML = `<span>✓ Confirmar enlace del correo y entrar</span>`;
+          showAlert("Error al verificar. Intentá nuevamente.", "error");
+        }
+      }
+
+      function resendVerificationEmail() {
+        showAlert(`Se ha reenviado el correo de activación a ${pendingEmail}.`, "info");
+      }
+
+      /* ═══ AUTENTICACIÓN CON GOOGLE / APPLE ═══ */
+      async function handleSocialAuth(provider) {
+        hideAlert();
+        showAlert(`Conectando con ${provider} OAuth…`, "info");
+
+        await new Promise(r => setTimeout(r, 600));
+
+        // En Google y Apple el correo ya viene validado y verificado por el proveedor
+        const defaultName = provider === "Google" ? "Usuario Google" : "Usuario Apple";
+        const email = provider === "Google" ? "usuario@gmail.com" : "usuario@icloud.com";
+
+        try {
+          const usersRaw = localStorage.getItem(AUTH_STORAGE_USERS);
+          const users = usersRaw ? JSON.parse(usersRaw) : [];
+
+          let user = users.find(u => u.email === email);
+          if (!user) {
+            const isFirst = users.length === 0;
+            user = {
+              id: "usr_" + (users.length + 1),
+              name: defaultName,
+              firstName: defaultName.split(" ")[0],
+              lastName: defaultName.split(" ")[1] || "",
+              email,
+              role: isFirst ? "Administrador" : "Colaborador",
+              photo: "",
+              verified: true,
+              authProvider: provider.toLowerCase(),
+              createdAt: new Date().toISOString()
+            };
+            users.push(user);
+            localStorage.setItem(AUTH_STORAGE_USERS, JSON.stringify(users));
+          }
+
+          const session = {
+            user: {
+              id: user.id,
+              name: user.name,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              role: user.role,
+              photo: user.photo,
+              verified: true
+            },
+            provider,
+            token: "oauth_" + Math.random().toString(36).substring(2, 12),
+            timestamp: Date.now()
+          };
+
+          localStorage.setItem(AUTH_STORAGE_SESSION, JSON.stringify(session));
+          syncToAppState(user);
+
+          showAlert(`¡Autenticado con ${provider}! Ingresando…`, "success");
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 800);
+        } catch (e) {
+          showAlert(`Error al autenticar con ${provider}.`, "error");
+        }
+      }
+
+      /* ═══ RECUPERO DE CONTRASEÑA ═══ */
+      function openForgotModal() {
+        document.getElementById("forgotModal").classList.add("show");
+        const currentEmail = document.getElementById("loginEmail").value;
+        if (currentEmail) {
+          document.getElementById("forgotEmail").value = currentEmail;
+        }
+      }
+
+      function closeForgotModal() {
+        document.getElementById("forgotModal").classList.remove("show");
+      }
+
+      function sendRecoveryEmail() {
+        const email = document.getElementById("forgotEmail").value.trim();
+        if (!validateEmail(email)) {
+          alert("Por favor ingresá un email válido.");
+          return;
+        }
+        closeForgotModal();
+        showAlert(`Hemos enviado las instrucciones para restablecer tu contraseña a ${email}.`, "info");
+      }
+
+      /* ═══ SINCRONIZACIÓN CON EL ESTADO DEL SISTEMA ═══ */
+      function syncToAppState(user) {
+        try {
+          const raw = localStorage.getItem(APP_STATE_KEY);
+          let appState = raw ? JSON.parse(raw) : null;
+          if (!appState || typeof appState !== "object") return;
+
+          if (!Array.isArray(appState.users)) {
+            appState.users = [];
+          }
+
+          // Eliminar maquetas de ejemplo si aún persistieran
+          appState.users = appState.users.filter(u => {
+            const uName = typeof u === "string" ? u : u.name;
+            return uName !== "Marina López" && uName !== "Santiago Díaz";
+          });
+
+          // Verificar si ya existe el usuario
+          const idx = appState.users.findIndex(u => (u.id === user.id || u.email === user.email));
+          if (idx !== -1) {
+            appState.users[idx] = { ...appState.users[idx], ...user };
+          } else {
+            // El primer usuario registrado es siempre Administrador
+            if (appState.users.length === 0) {
+              user.role = "Administrador";
+            }
+            appState.users.unshift(user);
+          }
+
+          // Asegurar caja cerrada por defecto al iniciar
+          appState.cash = false;
+
+          localStorage.setItem(APP_STATE_KEY, JSON.stringify(appState));
+        } catch (e) {
+          console.warn("No se pudo sincronizar usuario en app state:", e);
+        }
+      }
+
+      function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+    </script>
+  </body>
+</html>
