@@ -62,19 +62,19 @@ Object.assign(ICON, {
   plus: `<path d="M12 5v14"/><path d="M5 12h14"/>`,
 });
 const chevronRight = () =>
-  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#707B8E" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`;
+  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>`;
 const posPlus = () =>
-  `<svg width="256" height="256" viewBox="0 0 24 24" fill="none" stroke="#89AEFF" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`;
+  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`;
 const posMinus = () =>
-  `<svg width="256" height="256" viewBox="0 0 24 24" fill="none" stroke="#89AEFF" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg>`;
+  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus" aria-hidden="true"><path d="M5 12h14"/></svg>`;
 const iconGrid = () =>
   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-grid" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>`;
 const iconList = () =>
   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-list" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><path d="M14 4h7"/><path d="M14 9h7"/><path d="M14 15h7"/><path d="M14 20h7"/></svg>`;
-const ic = (k) =>
+const ic = (k, size = 20) =>
   k === "chevronRight"
     ? chevronRight()
-    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">${ICON[k] || ICON.home}</svg>`;
+    : `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-${k}" aria-hidden="true">${ICON[k] || ICON.home}</svg>`;
 const NAV = [
   ["home", "Inicio"],
   ["pos", "Punto de venta Lite"],
@@ -248,11 +248,23 @@ const state = {
     },
   ],
   movements: [],
-  cash: true,
+  cash: false,
   sound: true,
   theme: "light",
   store: "Mi emprendimiento",
-  users: ["Marina López", "Santiago Díaz"],
+  users: [
+    {
+      id: "usr_1",
+      name: "Guillermo",
+      firstName: "Guillermo",
+      lastName: "",
+      email: "guillermo@comercio.com",
+      role: "Administrador",
+      photo: "",
+      status: "Activo",
+      verified: true,
+    },
+  ],
 };
 let view = "home",
   cart = {},
@@ -260,6 +272,8 @@ let view = "home",
   searchTerm = "",
   editingId = null,
   editingPhoto = "",
+  editingUserId = null,
+  editingUserPhoto = "",
   editingCategory = null,
   payment = "Efectivo",
   delivery = "Retiro",
@@ -351,7 +365,8 @@ function loadState() {
     if (Array.isArray(data.sales)) state.sales = data.sales;
     if (Array.isArray(data.deliveries)) state.deliveries = data.deliveries;
     if (Array.isArray(data.movements)) state.movements = data.movements;
-    if (typeof data.cash === "boolean") state.cash = data.cash;
+    // Caja cerrada por defecto al ingresar a la app
+    state.cash = false;
     if (typeof data.sound === "boolean") state.sound = data.sound;
     if (data.soundStyle) soundStyle = data.soundStyle;
     if (data.theme === "light" || data.theme === "dark") {
@@ -359,7 +374,34 @@ function loadState() {
       document.documentElement.dataset.theme = state.theme;
     }
     if (data.store) state.store = data.store;
-    if (Array.isArray(data.users) && data.users.length) state.users = data.users;
+    if (Array.isArray(data.users) && data.users.length) {
+      const filtered = data.users.filter((u) => {
+        const uName = typeof u === "string" ? u : u.name;
+        return uName !== "Marina López" && uName !== "Santiago Díaz";
+      });
+      if (filtered.length) {
+        state.users = filtered.map((u, i) => {
+          if (typeof u === "string") {
+            const parts = u.trim().split(" ");
+            return {
+              id: "usr_" + (i + 1),
+              name: u,
+              firstName: parts[0] || u,
+              lastName: parts.slice(1).join(" ") || "",
+              email: "",
+              role: i === 0 ? "Administrador" : "Colaborador",
+              photo: "",
+              status: "Activo",
+              verified: true,
+            };
+          }
+          return {
+            ...u,
+            role: i === 0 ? "Administrador" : u.role || "Colaborador",
+          };
+        });
+      }
+    }
     if (data.stockViewMode === "cards" || data.stockViewMode === "table") {
       stockViewMode = data.stockViewMode;
     }
@@ -642,6 +684,30 @@ function applySidebarMode() {
     el.title = el.textContent.trim() + (selected ? " (seleccionado)" : "");
   });
 }
+function getCurrentUser() {
+  return (
+    state.users[0] || {
+      id: "usr_1",
+      name: "Guillermo",
+      firstName: "Guillermo",
+      lastName: "",
+      email: "guillermo@comercio.com",
+      role: "Administrador",
+      photo: "",
+      status: "Activo",
+    }
+  );
+}
+function getGreeting(name) {
+  const hour = new Date().getHours();
+  let greet = "Buenas noches";
+  if (hour >= 5 && hour < 12) {
+    greet = "Buen día";
+  } else if (hour >= 12 && hour < 20) {
+    greet = "Buenas tardes";
+  }
+  return `${greet}, ${esc(name || "Emprendedor")} 👋`;
+}
 function renderNav() {
   const nav = $("#nav");
   if (!nav.querySelector(".lite-nav-flat")) {
@@ -664,6 +730,33 @@ function renderNav() {
     : "Avisos silenciados";
   $("#soundIcon").innerHTML = ic(state.sound ? "soundOn" : "soundOff");
   $("#storeNameSide").textContent = state.store;
+
+  const user = getCurrentUser();
+  const initials = (
+    (user.firstName?.[0] || user.name?.[0] || "U") +
+    (user.lastName?.[0] || "")
+  ).toUpperCase();
+  const avatarHtml = user.photo
+    ? `<img src="${user.photo}" alt="${esc(user.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`
+    : esc(initials);
+
+  const meAvatar = $("#meAvatar");
+  if (meAvatar) meAvatar.innerHTML = avatarHtml;
+
+  const userCountSide = $("#userCountSide");
+  if (userCountSide)
+    userCountSide.textContent = `Emprendedor · ${state.users.length}/3 usuarios`;
+
+  const topUserCircle = $("#topUserCircle");
+  if (topUserCircle) topUserCircle.innerHTML = avatarHtml;
+
+  const topUserName = $("#topUserName");
+  if (topUserName)
+    topUserName.textContent = user.name || user.firstName || "Usuario";
+
+  const topUserRole = $("#topUserRole");
+  if (topUserRole) topUserRole.textContent = user.role || "Administrador";
+
   document.querySelectorAll("[data-pref]").forEach((el) => {
     el.setAttribute(
       "aria-pressed",
@@ -687,9 +780,12 @@ function go(page) {
   $("#m").scrollTop = 0;
 }
 function setCashText() {
-  $("#cashHeader").textContent = state.cash
+  const headerBtn = $("#cashHeader");
+  if (!headerBtn) return;
+  headerBtn.textContent = state.cash
     ? "● Caja abierta"
     : "○ Caja cerrada";
+  headerBtn.classList.toggle("w", !state.cash);
 }
 function render() {
   renderNav();
@@ -727,7 +823,7 @@ function home() {
   const moneyValue = (v) => new Intl.NumberFormat("es-AR").format(v);
   return `<div class="ex-dashboard premium-dashboard">
  <div class="ex-welcome premium-hero">
-  <div class="premium-hero-copy"><div class="premium-eyebrow">PANEL DE MI NEGOCIO <span>·</span> PLAN EMPRENDEDORES</div><h1>Buen día, Marina 👋</h1><p>Acá tenés el resumen de tu emprendimiento. Todo en una sola vista.</p></div>
+  <div class="premium-hero-copy"><div class="premium-eyebrow">PANEL DE MI NEGOCIO <span>·</span> PLAN EMPRENDEDORES</div><h1>${getGreeting(getCurrentUser().firstName || getCurrentUser().name)}</h1><p>Acá tenés el resumen de tu emprendimiento. Todo en una sola vista.</p></div>
   <div class="ex-date premium-date"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>${new Date().toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })}</div>
   <div class="premium-swoosh one" aria-hidden="true"></div><div class="premium-swoosh two" aria-hidden="true"></div>
   <svg class="premium-store" viewBox="0 0 300 220" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -1170,7 +1266,253 @@ function liteReportExport() {
 }
 
 function settings() {
-  return `<div class="v8-screen">${title("Configuración", "Preferencias del emprendimiento y usuarios Lite.")}<div class="lite-summary"><div class="v8-panel"><div class="v8-panelhead"><h2>Datos del comercio</h2><p>Configuración general y preferencias de tu comercio.</p></div><div class="v8-panel-inner"><div class="lite-form"><label class="full">Nombre del negocio<input id="storeEdit" class="lite-input" value="${esc(state.store)}" maxlength="60"></label><label>Tema<select id="themeEdit" class="lite-input"><option value="dark" ${state.theme === "dark" ? "selected" : ""}>Oscuro</option><option value="light" ${state.theme === "light" ? "selected" : ""}>Claro</option></select></label><label>Sonidos<select id="soundEdit" class="lite-input"><option value="true" ${state.sound ? "selected" : ""}>Activados</option><option value="false" ${!state.sound ? "selected" : ""}>Desactivados</option></select></label><label>Estilo de sonido<select id="soundStyleEdit" class="lite-input"><option value="suave" ${soundStyle === "suave" ? "selected" : ""}>Suave · Campanillas discretas</option><option value="digital" ${soundStyle === "digital" ? "selected" : ""}>Digital · Tonos breves</option></select></label></div><div class="lite-sound-tools"><h3>Probar sonidos de Emprendedores</h3><p>Ya no hay bip al navegar ni al tocar cada botón. Los avisos acompañan sólo acciones importantes.</p><div class="lite-sound-examples"><button class="btn g sm" data-action="sound-preview:add">Agregar producto</button><button class="btn g sm" data-action="sound-preview:success">Venta confirmada</button><button class="btn g sm" data-action="sound-preview:warning">Advertencia</button></div><small class="lite-sound-hint">Elegí el estilo y presioná un botón para escucharlo. Si están silenciados no sonará.</small></div><div style="margin-top:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">${action("Guardar preferencias", "save-settings", "")}${action("Restablecer demo", "reset-demo", "g sm")}</div></div></div><div class="v8-panel"><div class="v8-panelhead"><h2>Usuarios · máximo 3</h2><p>Tope de usuarios permitido por el plan Emprendedores.</p></div><div class="v8-panel-inner"><div class="lite-rows">${state.users.map((u, i) => `<div class="lite-row"><div class="lite-pick"><span class="v8-usercircle">${u.slice(0, 2).toUpperCase()}</span><div><b>${esc(u)}</b><small>${i === 0 ? "Administrador" : "Colaborador"}</small></div></div>${label("Activo", "ok")}</div>`).join("")}</div><div style="margin-top:17px">${action(state.users.length >= 3 ? "Límite alcanzado" : "+ Invitar usuario", "new-user", state.users.length >= 3 ? "g sm" : "")}<p class="lite-note" style="margin-top:11px">${state.users.length} de 3 usuarios. Las invitaciones se gestionan por correo electrónico.</p></div></div></div></div></div>`;
+  const userCount = state.users.length;
+  const isLimit = userCount >= 3;
+  return `<div class="v8-screen">${title("Configuración", "Preferencias del emprendimiento y gestión de usuarios.")}<div class="lite-summary"><div class="v8-panel"><div class="v8-panelhead"><h2>Datos del comercio</h2><p>Configuración general y preferencias de tu comercio.</p></div><div class="v8-panel-inner"><div class="lite-form"><label class="full">Nombre del negocio<input id="storeEdit" class="lite-input" value="${esc(state.store)}" maxlength="60"></label><label>Tema<select id="themeEdit" class="lite-input"><option value="dark" ${state.theme === "dark" ? "selected" : ""}>Oscuro</option><option value="light" ${state.theme === "light" ? "selected" : ""}>Claro</option></select></label><label>Sonidos<select id="soundEdit" class="lite-input"><option value="true" ${state.sound ? "selected" : ""}>Activados</option><option value="false" ${!state.sound ? "selected" : ""}>Desactivados</option></select></label><label>Estilo de sonido<select id="soundStyleEdit" class="lite-input"><option value="suave" ${soundStyle === "suave" ? "selected" : ""}>Suave · Campanillas discretas</option><option value="digital" ${soundStyle === "digital" ? "selected" : ""}>Digital · Tonos breves</option></select></label></div><div class="lite-sound-tools"><h3>Probar sonidos de Emprendedores</h3><p>Ya no hay bip al navegar ni al tocar cada botón. Los avisos acompañan sólo acciones importantes.</p><div class="lite-sound-examples"><button class="btn g sm" data-action="sound-preview:add">Agregar producto</button><button class="btn g sm" data-action="sound-preview:success">Venta confirmada</button><button class="btn g sm" data-action="sound-preview:warning">Advertencia</button></div><small class="lite-sound-hint">Elegí el estilo y presioná un botón para escucharlo. Si están silenciados no sonará.</small></div><div style="margin-top:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">${action("Guardar preferencias", "save-settings", "")}${action("Restablecer demo", "reset-demo", "g sm")}</div></div></div><div class="v8-panel"><div class="v8-panelhead"><div><h2>Usuarios · máximo 3</h2><p>Tope de usuarios permitido por el plan Emprendedores.</p></div><span class="pill premium-pill">${userCount}/3 activos</span></div><div class="v8-panel-inner"><div class="lite-rows">${state.users.map((u, i) => {
+    const nameStr = u.name || `${u.firstName || ""} ${u.lastName || ""}`.trim() || "Usuario";
+    const initials = ((u.firstName?.[0] || nameStr[0] || "U") + (u.lastName?.[0] || "")).toUpperCase();
+    const avatarContent = u.photo
+      ? `<img src="${u.photo}" alt="${esc(nameStr)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`
+      : initials;
+    const roleStr = u.role || (i === 0 ? "Administrador" : "Colaborador");
+    return `<div class="lite-row user-row-item"><div class="lite-pick"><span class="v8-usercircle" style="overflow:hidden;padding:0">${avatarContent}</span><div><b>${esc(nameStr)}</b><small>${esc(roleStr)}${u.email ? " · " + esc(u.email) : ""}</small></div></div><div style="display:flex;align-items:center;gap:8px">${label("Activo", "ok")}<button type="button" class="btn g sm" data-action="edit-user:${u.id || i}">Editar</button></div></div>`;
+  }).join("")}</div><div style="margin-top:17px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px"><button type="button" class="btn ${isLimit ? "g sm" : ""}" data-action="new-user">${isLimit ? "Límite alcanzado" : "+ Invitar usuario"}</button><p class="lite-note" style="margin:0">${userCount} de 3 usuarios. Las invitaciones se gestionan por correo electrónico.</p></div></div></div></div></div>`;
+}
+
+function promptToggleCash() {
+  if (!state.cash) {
+    openModal(
+      "Apertura de caja",
+      "Control operativo de cobros y ventas",
+      `<div style="display:flex;flex-direction:column;gap:12px;padding:6px 0">
+        <p style="font-size:15px;color:var(--ink);margin:0;line-height:1.4">¿Estás seguro de que querés realizar la <b>apertura de caja</b>?</p>
+        <div style="background:var(--s2,#f1f5f9);border:1px solid var(--line,#e2e8f0);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted)">
+          <b style="color:var(--ink);display:block;margin-bottom:4px">Reinicio de jornada:</b>
+          Al abrir la caja se reiniciarán a 0 todos los contadores de ventas, operaciones y totales del día para que puedas iniciar la jornada con datos limpios.
+        </div>
+      </div>`,
+      `<button class="btn" data-action="confirm-open-cash">Confirmar</button><button class="btn g sm" data-action="close-modal">Cancelar</button>`
+    );
+  } else {
+    openModal(
+      "Cierre de caja",
+      "Finalización de jornada",
+      `<div style="display:flex;flex-direction:column;gap:12px;padding:6px 0">
+        <p style="font-size:15px;color:var(--ink);margin:0;line-height:1.4">¿Estás seguro de que querés realizar el <b>cierre de caja</b>?</p>
+        <p class="lite-note" style="margin:0">Al cerrar la caja no se podrán registrar nuevas operaciones en el Punto de Venta hasta volver a abrirla.</p>
+      </div>`,
+      `<button class="btn" data-action="confirm-close-cash">Confirmar</button><button class="btn g sm" data-action="close-modal">Cancelar</button>`
+    );
+  }
+}
+
+function openEditUserModal(uid) {
+  const u = state.users.find(
+    (x, idx) => (x.id ? x.id === uid : String(idx) === String(uid)),
+  );
+  if (!u) return toast("Usuario no encontrado", true);
+  editingUserId = u.id || uid;
+  editingUserPhoto = u.photo || "";
+
+  const nameStr =
+    u.name || `${u.firstName || ""} ${u.lastName || ""}`.trim();
+  const initials = (
+    (u.firstName?.[0] || nameStr[0] || "U") + (u.lastName?.[0] || "")
+  ).toUpperCase();
+
+  const content = `
+    <form id="editUserForm" onsubmit="event.preventDefault();" class="lite-form" style="gap:14px">
+      <div style="display:flex;align-items:center;gap:16px;grid-column:1/-1;padding:8px 0;border-bottom:1px solid var(--line,#e2e8f0);margin-bottom:4px">
+        <div id="userPhotoPreviewWrap" class="user-photo-preview">
+          ${editingUserPhoto ? `<img src="${editingUserPhoto}" style="width:100%;height:100%;object-fit:cover" id="userPhotoImg">` : `<span style="color:#fff;font-size:22px;font-weight:700" id="userPhotoInitials">${initials}</span>`}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label class="btn g sm" style="cursor:pointer;margin:0;display:inline-flex;align-items:center;gap:6px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            <span>Subir foto de perfil</span>
+            <input type="file" id="userPhotoInput" accept="image/*" style="display:none">
+          </label>
+          <button type="button" class="btn g sm" id="btnRemoveUserPhoto" style="${editingUserPhoto ? "" : "display:none;"}color:#dc2626">Quitar foto</button>
+        </div>
+      </div>
+      <label>Nombre
+        <input type="text" id="editUserFirst" class="lite-input" value="${esc(u.firstName || nameStr)}" required>
+      </label>
+      <label>Apellido
+        <input type="text" id="editUserLast" class="lite-input" value="${esc(u.lastName || "")}">
+      </label>
+      <label class="full">Correo electrónico
+        <input type="email" id="editUserEmail" class="lite-input" value="${esc(u.email || "")}" placeholder="ejemplo@comercio.com" required>
+      </label>
+      <label class="full">Rol asignado
+        <select id="editUserRole" class="lite-input">
+          <option value="Administrador" ${(u.role || "Administrador") === "Administrador" ? "selected" : ""}>Administrador (Acceso y control total)</option>
+          <option value="Colaborador" ${u.role === "Colaborador" ? "selected" : ""}>Colaborador (Ventas y Stock)</option>
+        </select>
+      </label>
+      <div style="grid-column:1/-1;padding:12px;background:var(--s2,#f1f5f9);border-radius:12px;border:1px solid var(--line,#e2e8f0);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:4px">
+        <div>
+          <b style="font-size:13px;display:block">Restablecimiento de clave</b>
+          <small style="color:var(--muted)">Enviá un email seguro para actualizar la contraseña.</small>
+        </div>
+        <button type="button" class="btn g sm" data-action="send-reset-email:${u.id || uid}">Enviar recupero de clave</button>
+      </div>
+    </form>
+  `;
+
+  openModal(
+    "Editar usuario",
+    "Modificá los datos personales, rol o foto de perfil.",
+    content,
+    `<button class="btn" data-action="save-user-edit">Guardar cambios</button><button class="btn g sm" data-action="close-modal">Cancelar</button>`,
+  );
+
+  setTimeout(() => {
+    const input = $("#userPhotoInput");
+    if (input) {
+      input.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          editingUserPhoto = ev.target.result;
+          const wrap = $("#userPhotoPreviewWrap");
+          if (wrap)
+            wrap.innerHTML = `<img src="${editingUserPhoto}" style="width:100%;height:100%;object-fit:cover" id="userPhotoImg">`;
+          const rem = $("#btnRemoveUserPhoto");
+          if (rem) rem.style.display = "";
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    const remBtn = $("#btnRemoveUserPhoto");
+    if (remBtn) {
+      remBtn.addEventListener("click", () => {
+        editingUserPhoto = "";
+        const wrap = $("#userPhotoPreviewWrap");
+        if (wrap)
+          wrap.innerHTML = `<span style="color:#fff;font-size:22px;font-weight:700" id="userPhotoInitials">${initials}</span>`;
+        remBtn.style.display = "none";
+      });
+    }
+  }, 50);
+}
+
+function saveUserEdit() {
+  const first = ($("#editUserFirst")?.value || "").trim();
+  const last = ($("#editUserLast")?.value || "").trim();
+  const email = ($("#editUserEmail")?.value || "").trim();
+  const role = $("#editUserRole")?.value || "Colaborador";
+
+  if (!first) return toast("Ingresá al menos el nombre del usuario.", true);
+
+  const u = state.users.find(
+    (x, idx) => (x.id ? x.id === editingUserId : String(idx) === String(editingUserId)),
+  );
+  if (!u) return toast("No se encontró el usuario.", true);
+
+  u.firstName = first;
+  u.lastName = last;
+  u.name = `${first} ${last}`.trim();
+  u.email = email;
+  u.role = role;
+  u.photo = editingUserPhoto;
+
+  saveState();
+  closeModal();
+  render();
+  tone("success");
+  toast("Usuario actualizado correctamente");
+}
+
+function openNewUserModal() {
+  if (state.users.length >= 3) {
+    openModal(
+      "Usuario adicional",
+      "Tope alcanzado en Plan Emprendedor (3 usuarios)",
+      `<div class="extra-user-modal" style="padding:6px 0">
+        <div style="background:var(--s2,#f1f5f9);border:1.5px solid var(--line,#e2e8f0);border-radius:14px;padding:16px;text-align:center">
+          <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:#edf3ff;color:#175bdf;margin-bottom:10px">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+          </div>
+          <h3 style="margin:0 0 6px;font-size:16px;color:var(--ink)">¿Querés sumar más colaboradores a tu comercio?</h3>
+          <p style="margin:0 0 12px;font-size:13px;color:var(--muted)">El plan base Emprendedor incluye hasta <b>3 usuarios</b> activos simultáneos.</p>
+          <div style="display:inline-flex;align-items:baseline;gap:4px;padding:6px 14px;background:#ffffff;border:1px solid #c8d9ff;border-radius:99px">
+            <b style="font-size:18px;color:#175bdf">$ 3.500</b>
+            <span style="font-size:12px;color:var(--muted)">/ mes por usuario extra</span>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;padding:0 4px">
+          <p style="margin:0 0 6px;color:var(--ink);font-weight:600">Beneficios incluidos:</p>
+          <ul style="margin:0;padding-left:18px">
+            <li>Acceso simultáneo e independiente para tu colaborador</li>
+            <li>Registro y trazabilidad de ventas por cada cajero</li>
+            <li>Facturación automática unificada en tu suscripción</li>
+          </ul>
+        </div>
+      </div>`,
+      `<button class="btn" data-action="confirm-extra-user-checkout">Procesar cobro adicional</button><button class="btn g sm" data-action="close-modal">Cancelar</button>`,
+    );
+    return;
+  }
+
+  openModal(
+    "Invitar usuario",
+    `Plan Emprendedor (${state.users.length} de 3 usuarios activos)`,
+    `<form id="newUserForm" onsubmit="event.preventDefault();" class="lite-form" style="gap:12px">
+      <label>Nombre
+        <input type="text" id="newUserFirst" class="lite-input" placeholder="Ej. Camila" required>
+      </label>
+      <label>Apellido
+        <input type="text" id="newUserLast" class="lite-input" placeholder="Ej. Romero">
+      </label>
+      <label class="full">Correo electrónico
+        <input type="email" id="newUserEmail" class="lite-input" placeholder="colaborador@comercio.com" required>
+      </label>
+      <label class="full">Rol
+        <select id="newUserRole" class="lite-input">
+          <option value="Colaborador" selected>Colaborador (Ventas y Stock)</option>
+          <option value="Administrador">Administrador (Control total)</option>
+        </select>
+      </label>
+      <p class="lite-note" style="grid-column:1/-1;margin:0">Se enviará un correo con el enlace para que el nuevo usuario active su acceso.</p>
+    </form>`,
+    `<button class="btn" data-action="confirm-invite-user">Enviar invitación</button><button class="btn g sm" data-action="close-modal">Cancelar</button>`,
+  );
+}
+
+function confirmInviteUser(isExtra = false) {
+  const first = ($("#newUserFirst")?.value || "").trim();
+  const last = ($("#newUserLast")?.value || "").trim();
+  const email = ($("#newUserEmail")?.value || "").trim();
+  const role = $("#newUserRole")?.value || "Colaborador";
+
+  if (!first) return toast("Ingresá el nombre del usuario.", true);
+  if (!email) return toast("Ingresá el correo electrónico.", true);
+
+  if (!isExtra && state.users.length >= 3) {
+    return toast("Límite de 3 usuarios alcanzado.", true);
+  }
+
+  const newUser = {
+    id: "usr_" + Date.now(),
+    name: `${first} ${last}`.trim(),
+    firstName: first,
+    lastName: last,
+    email,
+    role,
+    photo: "",
+    status: "Activo",
+    verified: true,
+    createdAt: new Date().toISOString(),
+  };
+
+  state.users.push(newUser);
+  saveState();
+  closeModal();
+  render();
+  tone("success");
+  toast(`Invitación enviada a ${email}. Usuario agregado.`);
 }
 function openModal(h, sub, content, actions = "") {
   $("#modalTitle").textContent = h;
@@ -1772,12 +2114,13 @@ document.addEventListener("click", (e) => {
     closeModal();
     return;
   }
-  if (target === $("#cashHeader")) {
-    state.cash = !state.cash;
-    saveState();
-    render();
+  if (target === $("#cashHeader") || target.closest("#cashHeader")) {
+    promptToggleCash();
+    return;
+  }
+  if (target === $("#planBadgeBtn") || target.closest("#planBadgeBtn")) {
     tone("notice");
-    toast(state.cash ? "Caja abierta" : "Caja cerrada");
+    toast("Plan Emprendedor activo: Tenés acceso por 7 días gratis.");
     return;
   }
   if (target === $("#navSearchBtn") || target.closest("#navSearchBtn")) {
@@ -1954,11 +2297,26 @@ document.addEventListener("click", (e) => {
     render();
     return toast("Carrito vaciado");
   }
-  if (code === "toggle-cash") {
-    state.cash = !state.cash;
+  if (code === "toggle-cash") return promptToggleCash();
+  if (code === "confirm-open-cash") {
+    state.cash = true;
+    state.sales = [];
+    state.deliveries = [];
+    state.movements = [];
+    cart = {};
     saveState();
+    closeModal();
     render();
-    return toast(state.cash ? "Caja abierta" : "Caja cerrada");
+    tone("success");
+    return toast("Caja abierta. Contadores del día reiniciados.");
+  }
+  if (code === "confirm-close-cash") {
+    state.cash = false;
+    saveState();
+    closeModal();
+    render();
+    tone("notice");
+    return toast("Caja cerrada.");
   }
   if (code.startsWith("sale:")) return saleDetail(code.slice(5));
   if (code.startsWith("advance:")) {
@@ -1994,27 +2352,50 @@ document.addEventListener("click", (e) => {
     }
     return;
   }
-  if (code === "new-user") {
-    if (state.users.length >= 3)
-      return toast("Este plan permite hasta 3 usuarios.", true);
-    openModal(
-      "Invitar usuario",
-      "Límite de usuarios activos del plan.",
-      `<label class="lite-form">Nombre completo<input class="lite-input" id="newUser" maxlength="60" placeholder="Nombre del usuario"></label>`,
-      `<button class="btn g" data-action="close-modal">Cancelar</button><button class="btn" data-action="add-user">Agregar usuario</button>`,
+  if (code.startsWith("edit-user:")) return openEditUserModal(code.slice(10));
+  if (code === "save-user-edit") return saveUserEdit();
+  if (code.startsWith("send-reset-email:")) {
+    const uid = code.slice(17);
+    const u = state.users.find(
+      (x, idx) => (x.id ? x.id === uid : String(idx) === String(uid)),
     );
+    const targetEmail = u?.email || "el correo registrado";
+    tone("notice");
+    return toast(`Correo de recuperación enviado a ${targetEmail}`);
+  }
+  if (code === "new-user") return openNewUserModal();
+  if (code === "confirm-invite-user") return confirmInviteUser(false);
+  if (code === "confirm-extra-user-checkout") {
+    closeModal();
+    tone("success");
+    toast("¡Cobro de usuario adicional procesado con éxito!");
+    setTimeout(() => {
+      openModal(
+        "Invitar usuario adicional",
+        "Usuario adicional habilitado",
+        `<form id="newUserForm" onsubmit="event.preventDefault();" class="lite-form" style="gap:12px">
+          <label>Nombre
+            <input type="text" id="newUserFirst" class="lite-input" placeholder="Ej. Camila" required>
+          </label>
+          <label>Apellido
+            <input type="text" id="newUserLast" class="lite-input" placeholder="Ej. Romero">
+          </label>
+          <label class="full">Correo electrónico
+            <input type="email" id="newUserEmail" class="lite-input" placeholder="colaborador@comercio.com" required>
+          </label>
+          <label class="full">Rol
+            <select id="newUserRole" class="lite-input">
+              <option value="Colaborador" selected>Colaborador (Ventas y Stock)</option>
+              <option value="Administrador">Administrador (Control total)</option>
+            </select>
+          </label>
+        </form>`,
+        `<button class="btn" data-action="confirm-invite-user-extra">Agregar usuario</button><button class="btn g sm" data-action="close-modal">Cancelar</button>`,
+      );
+    }, 350);
     return;
   }
-  if (code === "add-user") {
-    const val = ($("#newUser")?.value || "").trim();
-    if (!val) return toast("Ingresá un nombre.", true);
-    if (state.users.length >= 3) return toast("Límite de 3 usuarios.", true);
-    state.users.push(val);
-    saveState();
-    closeModal();
-    render();
-    return toast("Usuario agregado con éxito");
-  }
+  if (code === "confirm-invite-user-extra") return confirmInviteUser(true);
   modalAction(code);
 });
 document.addEventListener("input", (e) => {

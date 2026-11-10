@@ -14125,3 +14125,71 @@ body[data-view="pos"] #v #grid {
     -webkit-overflow-scrolling: touch !important;
   }
 }
+
+/* ==========================================================================
+   BOTÓN PLAN EMPRENDEDOR & MODAL DE USUARIOS
+   ========================================================================== */
+.plan-tag-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: #edf3ff !important;
+  border: 1.5px solid #c8d9ff !important;
+  border-radius: 999px !important;
+  color: #175bdf !important;
+  padding: 6px 13px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  cursor: pointer !important;
+  transition: all 0.16s ease !important;
+  white-space: nowrap !important;
+  box-shadow: 0 1px 3px rgba(23, 91, 223, 0.1) !important;
+  text-decoration: none !important;
+}
+
+.plan-tag-btn:hover {
+  background: #e1ebff !important;
+  border-color: #175bdf !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(23, 91, 223, 0.2) !important;
+}
+
+[data-theme="dark"] .plan-tag-btn {
+  background: rgba(23, 91, 223, 0.18) !important;
+  border-color: rgba(94, 161, 255, 0.35) !important;
+  color: #89aeff !important;
+}
+
+[data-theme="dark"] .plan-tag-btn:hover {
+  background: rgba(23, 91, 223, 0.28) !important;
+  border-color: #5ea1ff !important;
+}
+
+.user-row-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 12px 14px !important;
+}
+
+.user-photo-preview {
+  width: 70px !important;
+  height: 70px !important;
+  min-width: 70px !important;
+  min-height: 70px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  background-color: #343f50 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15) !important;
+}
+
+.extra-user-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
