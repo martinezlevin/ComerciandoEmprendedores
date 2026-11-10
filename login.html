@@ -5,8 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Iniciar Sesión — Comerciando Emprendedores</title>
     <link rel="icon" href="img/favicon.ico" sizes="any" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
     <style>
+      /* Tipografía Poppins */
+      .poppins-thin { font-family: "Poppins", sans-serif; font-weight: 100; font-style: normal; }
+      .poppins-extralight { font-family: "Poppins", sans-serif; font-weight: 200; font-style: normal; }
+      .poppins-light { font-family: "Poppins", sans-serif; font-weight: 300; font-style: normal; }
+      .poppins-regular { font-family: "Poppins", sans-serif; font-weight: 400; font-style: normal; }
+      .poppins-medium { font-family: "Poppins", sans-serif; font-weight: 500; font-style: normal; }
+      .poppins-semibold { font-family: "Poppins", sans-serif; font-weight: 600; font-style: normal; }
+      .poppins-bold { font-family: "Poppins", sans-serif; font-weight: 700; font-style: normal; }
+      .poppins-extrabold { font-family: "Poppins", sans-serif; font-weight: 800; font-style: normal; }
+      .poppins-black { font-family: "Poppins", sans-serif; font-weight: 900; font-style: normal; }
+      .poppins-thin-italic { font-family: "Poppins", sans-serif; font-weight: 100; font-style: italic; }
+      .poppins-extralight-italic { font-family: "Poppins", sans-serif; font-weight: 200; font-style: italic; }
+      .poppins-light-italic { font-family: "Poppins", sans-serif; font-weight: 300; font-style: italic; }
+      .poppins-regular-italic { font-family: "Poppins", sans-serif; font-weight: 400; font-style: italic; }
+      .poppins-medium-italic { font-family: "Poppins", sans-serif; font-weight: 500; font-style: italic; }
+      .poppins-semibold-italic { font-family: "Poppins", sans-serif; font-weight: 600; font-style: italic; }
+      .poppins-bold-italic { font-family: "Poppins", sans-serif; font-weight: 700; font-style: italic; }
+      .poppins-extrabold-italic { font-family: "Poppins", sans-serif; font-weight: 800; font-style: italic; }
+      .poppins-black-italic { font-family: "Poppins", sans-serif; font-weight: 900; font-style: italic; }
+
       /* Reset & Contenedor General */
       * {
         box-sizing: border-box;
@@ -21,7 +44,7 @@
         align-items: center;
         background: radial-gradient(circle at 50% 15%, #15274d 0%, #0b1426 70%, #070d1a 100%);
         padding: 24px 16px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         color: #151717;
       }
 
@@ -52,7 +75,7 @@
       .brand-text h1 {
         margin: 0;
         font-size: 20px;
-        font-weight: 700;
+        font-weight: 600;
         color: #ffffff;
         letter-spacing: -0.02em;
       }
@@ -149,12 +172,12 @@
         width: 450px;
         max-width: 100%;
         border-radius: 20px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.1);
       }
 
       ::placeholder {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       }
 
       .form button {
@@ -669,15 +692,15 @@
       function initUsersDb() {
         try {
           const raw = localStorage.getItem(AUTH_STORAGE_USERS);
-          if (!raw) {
-            // Usuario inicial si no existe ninguno
-            const initialUsers = [
+          let users = raw ? JSON.parse(raw) : null;
+          if (!users || !Array.isArray(users) || !users.length) {
+            users = [
               {
                 id: "usr_1",
-                name: "Guillermo",
-                firstName: "Guillermo",
+                name: "Invitado",
+                firstName: "Invitado",
                 lastName: "",
-                email: "guillermo@comercio.com",
+                email: "invitado@comercio.com",
                 passwordHash: "123456",
                 role: "Administrador",
                 photo: "",
@@ -685,8 +708,22 @@
                 createdAt: new Date().toISOString()
               }
             ];
-            localStorage.setItem(AUTH_STORAGE_USERS, JSON.stringify(initialUsers));
+          } else {
+            // Actualizar usuario legado a Invitado
+            users = users.map(u => {
+              if (["Guillermo", "Emprendedor", "Marina López", "Marina Lopez"].includes(u.name) ||
+                  ["guillermo@comercio.com", "emprendedor@comercio.com"].includes(u.email)) {
+                return { ...u, name: "Invitado", firstName: "Invitado", email: "invitado@comercio.com" };
+              }
+              return u;
+            });
+            // Eliminar maquetas de ejemplo si existieran
+            users = users.filter(u => {
+              const nm = (u.name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+              return nm !== "marina lopez" && nm !== "santiago diaz";
+            });
           }
+          localStorage.setItem(AUTH_STORAGE_USERS, JSON.stringify(users));
         } catch (e) {
           console.warn("Error inicializando BD usuarios:", e);
         }
@@ -1092,8 +1129,12 @@
 
           // Eliminar maquetas de ejemplo si aún persistieran
           appState.users = appState.users.filter(u => {
-            const uName = typeof u === "string" ? u : u.name;
-            return uName !== "Marina López" && uName !== "Santiago Díaz";
+            const uName = (typeof u === "string" ? u : u.name || "")
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .toLowerCase()
+              .trim();
+            return uName !== "marina lopez" && uName !== "santiago diaz";
           });
 
           // Verificar si ya existe el usuario

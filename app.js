@@ -255,10 +255,10 @@ const state = {
   users: [
     {
       id: "usr_1",
-      name: "Guillermo",
-      firstName: "Guillermo",
+      name: "Invitado",
+      firstName: "Invitado",
       lastName: "",
-      email: "guillermo@comercio.com",
+      email: "invitado@comercio.com",
       role: "Administrador",
       photo: "",
       status: "Activo",
@@ -376,30 +376,58 @@ function loadState() {
     if (data.store) state.store = data.store;
     if (Array.isArray(data.users) && data.users.length) {
       const filtered = data.users.filter((u) => {
-        const uName = typeof u === "string" ? u : u.name;
-        return uName !== "Marina López" && uName !== "Santiago Díaz";
+        const uName = (typeof u === "string" ? u : u.name || "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .trim();
+        return uName !== "marina lopez" && uName !== "santiago diaz";
       });
       if (filtered.length) {
         state.users = filtered.map((u, i) => {
           if (typeof u === "string") {
-            const parts = u.trim().split(" ");
+            const isDemo = ["guille", "guillermo", "emprendedor", "invitado"].includes(
+              u.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()
+            );
+            const rawName = isDemo ? "Invitado" : u;
+            const parts = rawName.trim().split(" ");
             return {
               id: "usr_" + (i + 1),
-              name: u,
-              firstName: parts[0] || u,
+              name: rawName,
+              firstName: parts[0] || rawName,
               lastName: parts.slice(1).join(" ") || "",
-              email: "",
+              email: rawName === "Invitado" ? "invitado@comercio.com" : "",
               role: i === 0 ? "Administrador" : "Colaborador",
               photo: "",
               status: "Activo",
               verified: true,
             };
           }
+          const isLegacyDemo = ["guille", "guillermo", "emprendedor", "invitado"].includes(
+            (u.name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()
+          );
           return {
             ...u,
+            name: isLegacyDemo ? "Invitado" : u.name,
+            firstName: isLegacyDemo ? "Invitado" : (u.firstName || u.name),
+            email: isLegacyDemo ? "invitado@comercio.com" : (u.email || ""),
             role: i === 0 ? "Administrador" : u.role || "Colaborador",
           };
         });
+      } else {
+        state.users = [
+          {
+            id: "usr_1",
+            name: "Invitado",
+            firstName: "Invitado",
+            lastName: "",
+            email: "invitado@comercio.com",
+            role: "Administrador",
+            photo: "",
+            status: "Activo",
+            verified: true,
+          },
+        ];
       }
     }
     const authSessionRaw = localStorage.getItem("comerciando_auth_session");
@@ -408,6 +436,14 @@ function loadState() {
         const authSession = JSON.parse(authSessionRaw);
         if (authSession && authSession.user) {
           const authUser = authSession.user;
+          const isLegacy = ["guille", "guillermo", "emprendedor"].includes(
+            (authUser.name || "").toLowerCase()
+          );
+          if (isLegacy) {
+            authUser.name = "Invitado";
+            authUser.firstName = "Invitado";
+            authUser.email = "invitado@comercio.com";
+          }
           const matchIdx = state.users.findIndex(
             (u) =>
               u.id === authUser.id ||
@@ -708,10 +744,10 @@ function getCurrentUser() {
   return (
     state.users[0] || {
       id: "usr_1",
-      name: "Guillermo",
-      firstName: "Guillermo",
+      name: "Invitado",
+      firstName: "Invitado",
       lastName: "",
-      email: "guillermo@comercio.com",
+      email: "invitado@comercio.com",
       role: "Administrador",
       photo: "",
       status: "Activo",
@@ -726,7 +762,7 @@ function getGreeting(name) {
   } else if (hour >= 12 && hour < 20) {
     greet = "Buenas tardes";
   }
-  return `${greet}, ${esc(name || "Emprendedor")} 👋`;
+  return `${greet}, ${esc(name || "Invitado")} 👋`;
 }
 function renderNav() {
   const nav = $("#nav");
@@ -765,7 +801,7 @@ function renderNav() {
 
   const userCountSide = $("#userCountSide");
   if (userCountSide)
-    userCountSide.textContent = `Emprendedor · ${state.users.length}/3 usuarios`;
+    userCountSide.textContent = `${user.firstName || user.name || "Invitado"} · ${state.users.length}/3 usuarios`;
 
   const topUserCircle = $("#topUserCircle");
   if (topUserCircle) topUserCircle.innerHTML = avatarHtml;

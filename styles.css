@@ -98,7 +98,7 @@
   --bads: #fce8e8;
   --sh: 0 1px 2px rgba(20, 20, 40, 0.04), 0 8px 24px rgba(20, 20, 40, 0.05);
   --sh-lg: 0 16px 40px rgba(20, 20, 40, 0.12);
-  --f: "Instrument Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --f: "Poppins", -apple-system, "Segoe UI", system-ui, sans-serif;
   --fm: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
 }
 
@@ -210,6 +210,7 @@ aside::-webkit-scrollbar-thumb {
 }
 .brand b {
   font-size: 17px;
+  font-weight: 600;
   letter-spacing: -0.02em;
   display: block;
   line-height: 1.1;
@@ -5527,7 +5528,7 @@ html[data-theme="dark"] .sp-policy-pill.restricted {
   --acs: #eaf0ff;
   --ac-border: #cbdaff;
   --sh: 0 4px 18px rgba(20, 44, 84, 0.045), 0 14px 34px rgba(17, 42, 85, 0.025);
-  --f: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --f: "Poppins", -apple-system, "Segoe UI", system-ui, sans-serif;
 }
 [data-theme="dark"] {
   --bg: #0c1220;
@@ -5574,7 +5575,7 @@ aside#side .brand {
 aside#side .brand b {
   color: #fff;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 600;
 }
 aside#side .brand small {
   color: #a8b8d5;
@@ -7541,7 +7542,7 @@ body {
   min-width: 0;
 }
 body {
-  font-family: "Instrument Sans", "Inter", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--f);
   font-size: 14px;
 }
 body > .wrap {
@@ -9670,7 +9671,7 @@ html[data-theme="dark"] {
   min-width: 0;
 }
 body {
-  font-family: "Instrument Sans", Inter, "Segoe UI", system-ui, sans-serif;
+  font-family: var(--f);
 }
 body > .wrap {
   background: #f3f6ff;
@@ -9700,7 +9701,7 @@ body #side .brand {
 }
 body #side .brand b {
   font-size: 19px !important;
-  font-weight: 850 !important;
+  font-weight: 600 !important;
   letter-spacing: -0.65px;
 }
 body #side .brand small {
