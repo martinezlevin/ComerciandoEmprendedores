@@ -11310,7 +11310,7 @@ body main#m .in,
     max-height: none !important;
     overflow: visible !important;
   }
-  body[data-view="pos"] #v #grid {
+  body[data-view="pos"] #v #grid:not(.pro-list-container) {
     display: grid !important;
     flex: none !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -11649,7 +11649,7 @@ body main#m .in,
   #v .v8-title-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  body[data-view="pos"] #v #grid {
+  body[data-view="pos"] #v #grid:not(.pro-list-container) {
     gap: 8px !important;
   }
   body[data-view="pos"] #v #grid .pr {
@@ -13300,8 +13300,8 @@ html[data-theme="dark"] .nav-search-btn svg circle {
 
 /* Contenedor Grid Responsivo */
 .pro-cards-grid,
-body[data-view="pos"] #grid,
-body[data-view="pos"] #v #grid {
+body[data-view="pos"] #grid:not(.pro-list-container),
+body[data-view="pos"] #v #grid:not(.pro-list-container) {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)) !important;
   gap: 16px !important;
@@ -13323,8 +13323,8 @@ body[data-view="pos"] #v #grid {
 
 @media (max-width: 1024px) {
   .pro-cards-grid,
-  body[data-view="pos"] #grid,
-  body[data-view="pos"] #v #grid {
+  body[data-view="pos"] #grid:not(.pro-list-container),
+  body[data-view="pos"] #v #grid:not(.pro-list-container) {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
     gap: 14px !important;
   }
@@ -13332,8 +13332,8 @@ body[data-view="pos"] #v #grid {
 
 @media (max-width: 680px) {
   .pro-cards-grid,
-  body[data-view="pos"] #grid,
-  body[data-view="pos"] #v #grid {
+  body[data-view="pos"] #grid:not(.pro-list-container),
+  body[data-view="pos"] #v #grid:not(.pro-list-container) {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 12px !important;
     padding: 4px 0 20px !important;
@@ -13342,8 +13342,8 @@ body[data-view="pos"] #v #grid {
 
 @media (max-width: 360px) {
   .pro-cards-grid,
-  body[data-view="pos"] #grid,
-  body[data-view="pos"] #v #grid {
+  body[data-view="pos"] #grid:not(.pro-list-container),
+  body[data-view="pos"] #v #grid:not(.pro-list-container) {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
   }
@@ -13822,8 +13822,8 @@ body[data-view="pos"] #v #grid {
   justify-content: space-between !important;
   gap: 12px !important;
   background: var(--s, #ffffff) !important;
-  border: 1.5px solid rgba(0, 0, 0, 0.08) !important;
-  border-radius: 16px !important;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.08)) !important;
+  border-radius: 14px !important;
   padding: 10px 14px !important;
   box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.04) !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
@@ -13832,8 +13832,9 @@ body[data-view="pos"] #v #grid {
   cursor: pointer;
 }
 
-[data-theme="dark"] .pro-list-row {
-  background: #1c2436 !important;
+[data-theme="dark"] .pro-list-row,
+html[data-theme="dark"] .pro-list-row {
+  background: #141f33 !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.35) !important;
 }
@@ -13844,7 +13845,9 @@ body[data-view="pos"] #v #grid {
   box-shadow: 0 6px 16px -2px rgba(8, 90, 133, 0.12) !important;
 }
 
-[data-theme="dark"] .pro-list-row:hover {
+[data-theme="dark"] .pro-list-row:hover,
+html[data-theme="dark"] .pro-list-row:hover {
+  background: #1a273f !important;
   border-color: rgba(94, 161, 255, 0.35) !important;
   box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.5) !important;
 }
