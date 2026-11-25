@@ -11018,18 +11018,80 @@ body main#m .in,
     gap: 8px;
   }
   #v .lite-catalog-item {
-    flex-wrap: wrap !important;
-    justify-content: flex-start !important;
-    gap: 9px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    padding: 12px 14px !important;
     min-width: 0;
   }
-  #v .lite-catalog-item > div {
-    min-width: 0;
+  #v .lite-catalog-item > .v8-prodcell {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
   }
-  #v .lite-catalog-item > .btn,
-  #v .lite-catalog-item > button {
-    width: 100%;
-    min-height: 44px !important;
+  #v .lite-catalog-item .v8-prodcell-info {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+  #v .lite-catalog-item .v8-prodcell-info b {
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 13px !important;
+  }
+  #v .lite-catalog-item .v8-prodcell-info small {
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 11px !important;
+  }
+  #v .lite-catalog-item > .lite-actions {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    flex-wrap: nowrap !important;
+    margin-left: auto !important;
+  }
+  #v .lite-catalog-item .catalog-status-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    border-radius: 999px !important;
+    white-space: nowrap !important;
+  }
+  #v .lite-catalog-item .catalog-status-pill svg {
+    flex: none !important;
+    display: block !important;
+  }
+  #v .lite-catalog-item .catalog-toggle-btn {
+    width: auto !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 0 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    border-radius: 9px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+  }
+  #v .lite-catalog-item .catalog-toggle-btn svg {
+    flex: none !important;
+    display: block !important;
   }
   #v .lite-catalog-preview {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -14176,4 +14238,205 @@ html[data-theme="dark"] .pro-list-row:hover {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* En vista celular (mobile): ocultar el badge del plan del header para darle más espacio al buscador */
+@media (max-width: 768px) {
+  #planBadgeBtn,
+  .plan-tag-btn {
+    display: none !important;
+  }
+  .nav-search-wrap {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    margin-inline: 4px !important;
+  }
+  .nav-search-form {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  .nav-search-input {
+    width: 100% !important;
+    min-width: 90px !important;
+    flex: 1 1 auto !important;
+  }
+}
+
+/* ==========================================================================
+   MEJORA DE ESTRUCTURA Y DISPOSICIÓN POS MOBILE Y TABLET
+   Asegura orden natural: 1. Buscador/Chips/Listado -> 2. Carrito (Venta Actual)
+   ========================================================================== */
+@media (max-width: 850px) {
+  body[data-view="pos"] .pos,
+  body[data-view="pos"] #v .pos {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  /* El bloque de productos (búsqueda, categorías, listado/tarjetas) va primero */
+  body[data-view="pos"] .pos > div:first-child,
+  body[data-view="pos"] #v .pos > div:first-child {
+    order: 1 !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* El bloque de venta actual / carrito va debajo en el flujo vertical */
+  body[data-view="pos"] .pos > .cart,
+  body[data-view="pos"] #v .pos > .cart {
+    order: 2 !important;
+    width: 100% !important;
+    margin-top: 14px !important;
+  }
+
+  /* En vista lista aseguramos que ocupe todo el ancho sin solapamientos */
+  body[data-view="pos"] .pro-list-container {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding-bottom: 12px !important;
+  }
+
+  body[data-view="pos"] .pro-list-row {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Tablet (851px a 1180px): split balanceado de 2 columnas donde no se superpongan */
+@media (min-width: 851px) and (max-width: 1180px) {
+  body[data-view="pos"] .pos,
+  body[data-view="pos"] #v .pos {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 330px !important;
+    gap: 16px !important;
+    align-items: start !important;
+  }
+
+  body[data-view="pos"] .pos > .cart,
+  body[data-view="pos"] #v .pos > .cart {
+    position: sticky !important;
+    top: 76px !important;
+    max-height: calc(100vh - 100px) !important;
+    overflow: hidden !important;
+  }
+}
+
+/* ==========================================================================
+   OPTIMIZACIÓN CATÁLOGO VIRTUAL LITE (DESKTOP & MOBILE)
+   Nombre del producto a la izquierda, pill de estado e icono a la derecha
+   ========================================================================== */
+.lite-catalog-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  padding: 13px 18px !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+.lite-catalog-item .v8-prodcell {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.lite-catalog-item .v8-prodcell-info {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.lite-catalog-item .v8-prodcell-info b {
+  display: block !important;
+  font-size: 13.5px !important;
+  line-height: 1.35 !important;
+  color: var(--ink) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.lite-catalog-item .v8-prodcell-info small {
+  display: block !important;
+  font-size: 11.5px !important;
+  color: var(--mute) !important;
+  margin-top: 2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.lite-catalog-item .lite-actions {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+}
+
+.lite-catalog-item .catalog-status-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 5px 10px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+}
+
+.lite-catalog-item .catalog-status-pill svg {
+  flex: none !important;
+  display: block !important;
+}
+
+.lite-catalog-item .catalog-toggle-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 0 11px !important;
+  border-radius: 9px !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.16s ease !important;
+}
+
+.lite-catalog-item .catalog-toggle-btn svg {
+  flex: none !important;
+  display: block !important;
+}
+
+/* En mobile muy estrecho (<= 480px) se optimiza el espacio usando sólo el icono en el botón */
+@media (max-width: 480px) {
+  .lite-catalog-item {
+    padding: 10px 12px !important;
+    gap: 8px !important;
+  }
+  .lite-catalog-item .catalog-btn-text {
+    display: none !important;
+  }
+  .lite-catalog-item .catalog-toggle-btn {
+    padding: 0 9px !important;
+    min-width: 34px !important;
+  }
+  .lite-catalog-item .catalog-status-pill {
+    padding: 4px 7px !important;
+    font-size: 10.5px !important;
+  }
+  .lite-catalog-item .catalog-status-pill svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
 }

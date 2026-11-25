@@ -60,6 +60,11 @@ Object.assign(ICON, {
   download: `<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>`,
   info: `<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>`,
   plus: `<path d="M12 5v14"/><path d="M5 12h14"/>`,
+  logout: `<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>`,
+  logoutSquare: `<path d="M3 12h10"/><path d="M3 8V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3"/><path d="m9 16 4-4-4-4"/>`,
+  eyeOff: `<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>`,
+  globeCheck: `<path d="m15 6 2 2 4-4"/><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"/>`,
+  globeX: `<path d="m16 3 5 5"/><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"/><path d="m21 3-5 5"/>`,
 });
 const chevronRight = () =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>`;
@@ -581,6 +586,18 @@ function avatar(p) {
   }
   return `<div class="lite-productmark">${esc(p?.emoji || "📦")}</div>`;
 }
+function parseProductTitle(rawName) {
+  const str = String(rawName || "").trim();
+  const regex = /\s+(\d+(?:[.,]\d+)?\s*(?:kg|g|gr|grs|mg|l|lt|lts|ml|cc|cm3|u|unidades|pack|u\.)(?:\s.*)?)$/i;
+  const match = str.match(regex);
+  if (match) {
+    return {
+      title: str.slice(0, match.index).trim(),
+      spec: match[1].trim(),
+    };
+  }
+  return { title: str, spec: "" };
+}
 function renderProductCard(p, mode = "pos") {
   const isPos = mode === "pos";
   const idText = p.barcode ? `ID: ${esc(p.barcode)}` : `ID: ${p.id}`;
@@ -785,7 +802,8 @@ function renderNav() {
     ? "Avisos sonoros activados"
     : "Avisos silenciados";
   $("#soundIcon").innerHTML = ic(state.sound ? "soundOn" : "soundOff");
-  $("#storeNameSide").textContent = state.store;
+  const storeNameSide = $("#storeNameSide");
+  if (storeNameSide) storeNameSide.textContent = state.store;
 
   const user = getCurrentUser();
   const initials = (
@@ -1009,7 +1027,55 @@ function stockView() {
 }
 function catalogView() {
   const published = state.products.filter((p) => p.published).length;
-  return `<div class="v8-screen">${title("Catálogo virtual Lite", "Elegí qué artículos mostrar en un catálogo público de ejemplo.", action("Vista previa", "preview", ""))}<div class="v8-metrics three">${kpi("Productos publicados", published, "Visibles", "mint")}${kpi("Sin publicar", state.products.length - published, "Ocultos", "amber")}${kpi("Precio promedio", money(state.products.reduce((a, p) => a + p.price, 0) / state.products.length), "Artículos", "sky")}</div><div class="v8-panel"><div class="v8-panelhead"><h2>Publicación de productos</h2><p>Catálogo digital optimizado para exhibición y pedidos.</p></div>${state.products.map((p) => `<div class="lite-catalog-item"><div class="v8-prodcell">${avatar(p)}<div><b>${esc(p.name)}</b><small>${money(p.price)} · ${p.stock} disponibles</small></div></div><div class="lite-actions">${p.published ? label("Publicado", "ok") : label("Oculto", "warn")}<button class="btn g sm" data-action="publish:${p.id}">${p.published ? "Ocultar" : "Publicar"}</button></div></div>`).join("")}</div></div>`;
+  return `<div class="v8-screen">${title(
+    "Catálogo virtual Lite",
+    "Elegí qué artículos mostrar en un catálogo público de ejemplo.",
+    action("Vista previa", "preview", "")
+  )}<div class="v8-metrics three">${kpi(
+    "Productos publicados",
+    published,
+    "Visibles",
+    "mint"
+  )}${kpi(
+    "Sin publicar",
+    state.products.length - published,
+    "Ocultos",
+    "amber"
+  )}${kpi(
+    "Precio promedio",
+    money(
+      state.products.reduce((a, p) => a + p.price, 0) / state.products.length
+    ),
+    "Artículos",
+    "sky"
+  )}</div><div class="v8-panel"><div class="v8-panelhead"><h2>Publicación de productos</h2><p>Catálogo digital optimizado para exhibición y pedidos.</p></div>${state.products
+    .map((p) => {
+      const parsed = parseProductTitle(p.name);
+      const subInfo = [
+        parsed.spec ? parsed.spec : null,
+        money(p.price),
+        `${p.stock} disponibles`,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      return `<div class="lite-catalog-item">
+        <div class="v8-prodcell">${avatar(p)}<div class="v8-prodcell-info"><b title="${esc(
+        p.name
+      )}">${esc(parsed.title || p.name)}</b><small>${subInfo}</small></div></div>
+        <div class="lite-actions">
+          ${
+            p.published
+              ? `<span class="v8-label ok catalog-status-pill">${ic("globeCheck", 14)}<span>Publicado</span></span>`
+              : `<span class="v8-label warn catalog-status-pill">${ic("globeX", 14)}<span>Oculto</span></span>`
+          }
+          <button class="btn g sm catalog-toggle-btn ${p.published ? "is-published" : "is-hidden"}" data-action="publish:${p.id}" title="${p.published ? "Ocultar del catálogo" : "Publicar en catálogo"}" aria-label="${p.published ? "Ocultar " + esc(p.name) : "Publicar " + esc(p.name)}">
+            ${ic(p.published ? "eyeOff" : "web", 15)}
+            <span class="catalog-btn-text">${p.published ? "Ocultar" : "Publicar"}</span>
+          </button>
+        </div>
+      </div>`;
+    })
+    .join("")}</div></div>`;
 }
 function reports() {
   return liteReportRender();
@@ -2589,7 +2655,7 @@ $("#topUserBadge")?.addEventListener("click", () => {
         <b>Colaboradores:</b> ${state.users.length} de 3 activos
       </div>
     </div>`,
-    `<button class="btn" data-action="logout" style="background:#dc2626;border-color:#dc2626">Cerrar sesión</button><button class="btn g sm" data-action="close-modal">Cerrar</button>`
+    `<button class="btn g sm" data-action="close-modal">Cerrar</button>`
   );
 });
 const initialHash = location.hash.replace("#", "");
