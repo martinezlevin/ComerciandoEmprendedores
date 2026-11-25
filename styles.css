@@ -344,9 +344,10 @@ nav button.on .badge-count {
   place-items: center;
   font-size: 16px;
 }
-.crumb {
-  color: var(--mute);
-  font-size: 13px;
+.top .crumb,
+.crumb,
+body .top .crumb {
+  display: none !important;
 }
 .crumb b {
   color: var(--ink);
@@ -14082,19 +14083,25 @@ html[data-theme="dark"] .pro-list-price {
   transform: scale(0.97) !important;
 }
 
-.pro-list-btn:disabled {
-  background-color: #94a3b8 !important;
-  cursor: not-allowed !important;
-  opacity: 0.75 !important;
+.pro-list-btn:disabled,
+.pro-list-btn.out-of-stock-btn {
+  background-color: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border: 1px solid #e2e8f0 !important;
+  cursor: pointer !important;
   box-shadow: none !important;
 }
 
-[data-theme="dark"] .pro-list-btn:disabled {
-  background-color: #475569 !important;
+[data-theme="dark"] .pro-list-btn:disabled,
+[data-theme="dark"] .pro-list-btn.out-of-stock-btn,
+html[data-theme="dark"] .pro-list-btn.out-of-stock-btn {
+  background-color: #1e293b !important;
   color: #94a3b8 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-.pro-btn-plus {
+.pro-btn-plus,
+.pro-btn-nostock {
   display: none !important;
 }
 
@@ -14109,6 +14116,17 @@ html[data-theme="dark"] .pro-list-price {
     font-size: 19px !important;
     font-weight: 700 !important;
     line-height: 1 !important;
+  }
+  .pro-list-btn .pro-btn-nostock {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .pro-list-btn .pro-btn-nostock svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: #ef4444 !important;
+    display: block !important;
   }
   .pro-list-btn {
     width: 38px !important;
@@ -14697,14 +14715,104 @@ html[data-theme="dark"] .cart .ln .q {
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* En Desktop (mayor a 850px) el carrito puede mostrarse siempre desplegado de forma natural */
+/* En Desktop (mayor a 850px) el carrito tiene altura fija/completa con scroll en productos y total fijo abajo */
 @media (min-width: 851px) {
   .cart-toggle-btn {
     display: none !important;
   }
-  .cart.collapsed .cart-body {
+
+  body[data-view="pos"] main#m,
+  body[data-view="pos"] #m {
+    overflow: hidden !important;
+    padding-bottom: 16px !important;
+  }
+
+  body[data-view="pos"] #v,
+  body[data-view="pos"] #v .in {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
+  }
+
+  body[data-view="pos"] #v .pos {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 360px !important;
+    gap: 16px !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    align-items: stretch !important;
+  }
+
+  body[data-view="pos"] #v .pos > div:first-child {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  body[data-view="pos"] #grid,
+  body[data-view="pos"] .pro-cards-grid,
+  body[data-view="pos"] .pro-list-container {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    padding-right: 6px !important;
+  }
+
+  body[data-view="pos"] .cart,
+  body[data-view="pos"] #v .cart {
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+    top: auto !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+  }
+
+  .cart.collapsed .cart-body,
+  .cart.expanded .cart-body,
+  .cart .cart-body {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  body[data-view="pos"] .cart .ch,
+  body[data-view="pos"] #v .cart .ch {
+    flex: 0 0 auto !important;
+    cursor: default !important;
+  }
+
+  body[data-view="pos"] .cart .lines,
+  body[data-view="pos"] #v .cart .lines {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+  }
+
+  body[data-view="pos"] .cart .tot,
+  body[data-view="pos"] #v .cart .tot {
+    flex: 0 0 auto !important;
+    margin-top: auto !important;
+    border-top: 1px solid var(--line) !important;
+    background: var(--s2) !important;
   }
 }
 

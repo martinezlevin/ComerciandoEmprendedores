@@ -72,6 +72,8 @@ const chevronDown = () =>
   `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`;
 const chevronUp = () =>
   `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>`;
+const iconWarningStock = () =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f00000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-exclamation-point" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`;
 const posPlus = () =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`;
 const posMinus = () =>
@@ -701,15 +703,15 @@ function renderProductListRow(p, mode = "pos") {
        </div>`;
 
   const actionHtml = isPos
-    ? `<button type="button" class="pro-list-btn" data-add="${p.id}" ${outOfStock ? "disabled" : ""} aria-label="Agregar ${esc(p.name)} al carrito">
-         ${outOfStock ? "Sin stock" : '<span class="pro-btn-text">+ Agregar</span><span class="pro-btn-plus" aria-hidden="true">+</span>'}
+    ? `<button type="button" class="pro-list-btn ${outOfStock ? "out-of-stock-btn" : ""}" data-add="${p.id}" ${outOfStock ? 'data-out-of-stock="true"' : ""} aria-label="${outOfStock ? `Sin stock: ${esc(p.name)}` : `Agregar ${esc(p.name)} al carrito`}">
+         ${outOfStock ? `<span class="pro-btn-text">Sin stock</span><span class="pro-btn-plus pro-btn-nostock">${iconWarningStock()}</span>` : '<span class="pro-btn-text">+ Agregar</span><span class="pro-btn-plus" aria-hidden="true">+</span>'}
        </button>`
     : `<button type="button" class="pro-list-btn" data-action="edit:${p.id}" aria-label="Editar ${esc(p.name)}">
          Editar
        </button>`;
 
   const clickAttr = isPos
-    ? (outOfStock ? "" : `data-add="${p.id}"`)
+    ? `data-add="${p.id}" ${outOfStock ? 'data-out-of-stock="true"' : ""}`
     : `data-action="edit:${p.id}"`;
 
   return `
@@ -867,7 +869,8 @@ function go(page) {
     history.replaceState(null, "", "#" + page);
   } catch {}
   document.body.dataset.view = page;
-  $("#crumb").innerHTML = `Comerciando Emprendedores · <b>${NAME[page]}</b>`;
+  const crumbEl = $("#crumb");
+  if (crumbEl) crumbEl.innerHTML = "";
   closeNav();
   render();
   $("#m").scrollTop = 0;
@@ -953,7 +956,7 @@ function pos() {
     ),
     qty = Object.values(cart).reduce((a, b) => a + b, 0),
     total = cartTotal();
-  return `${title("Punto de venta", "Venta rápida, cobro y actualización de stock desde una misma pantalla.", `<span class="pill ${state.cash ? "" : "w"}">${state.cash ? "CAJA ABIERTA" : "CAJA CERRADA"}</span>${action("Vaciar", "clear-cart")}`)}<div class="pos"><div><div class="bar pos-bar"><input id="posSearch" class="search" placeholder="Buscar por nombre o código..." value="${esc(searchTerm)}" aria-label="Buscar producto"><div class="stock-view-toggle pos-view-toggle" role="group" aria-label="Modo de visualización en punto de venta"><button type="button" class="${posViewMode === "cards" ? "on" : ""}" data-pos-view="cards" title="Vista en tarjetas (Foto 1)">${iconGrid()} Tarjetas</button><button type="button" class="${posViewMode === "list" ? "on" : ""}" data-pos-view="list" title="Vista en lista">${iconList()} Lista</button></div></div><div class="chips">${cats.map((c) => `<button class="${category === c ? "on" : ""}" data-category="${esc(c)}">${esc(c)}</button>`).join("")}</div>${posViewMode === "cards" ? `<div id="grid" class="grid pro-cards-grid">${items.map((p) => renderProductCard(p, "pos")).join("") || '<p class="lite-empty" style="grid-column:1/-1">No hay productos para este filtro.</p>'}</div>` : `<div id="grid" class="pro-list-container">${items.map((p) => renderProductListRow(p, "pos")).join("") || '<p class="lite-empty">No hay productos para este filtro.</p>'}</div>`}</div><div class="card cart ${cartCollapsed ? "collapsed" : "expanded"}"><div class="ch" data-action="toggle-cart" role="button" tabindex="0" aria-expanded="${!cartCollapsed}" aria-label="Alternar venta actual"><div class="ch-info"><h2>Venta actual</h2><p>${qty} ${qty === 1 ? "unidad" : "unidades"} · <b class="cart-ch-total">${money(total)}</b></p></div><div class="ch-actions"><span class="pill a">NUEVA</span><button type="button" class="cart-toggle-btn" data-action="toggle-cart" aria-label="${cartCollapsed ? "Desplegar venta actual" : "Minimizar venta actual"}">${cartCollapsed ? chevronUp() : chevronDown()}</button></div></div><div class="cart-body"><div class="lines" id="lines">${
+  return `${title("Punto de venta", "Venta rápida, cobro y actualización de stock desde una misma pantalla.", action("Vaciar", "clear-cart"))}<div class="pos"><div><div class="bar pos-bar"><input id="posSearch" class="search" placeholder="Buscar por nombre o código..." value="${esc(searchTerm)}" aria-label="Buscar producto"><div class="stock-view-toggle pos-view-toggle" role="group" aria-label="Modo de visualización en punto de venta"><button type="button" class="${posViewMode === "cards" ? "on" : ""}" data-pos-view="cards" title="Vista en tarjetas (Foto 1)">${iconGrid()} Tarjetas</button><button type="button" class="${posViewMode === "list" ? "on" : ""}" data-pos-view="list" title="Vista en lista">${iconList()} Lista</button></div></div><div class="chips">${cats.map((c) => `<button class="${category === c ? "on" : ""}" data-category="${esc(c)}">${esc(c)}</button>`).join("")}</div>${posViewMode === "cards" ? `<div id="grid" class="grid pro-cards-grid">${items.map((p) => renderProductCard(p, "pos")).join("") || '<p class="lite-empty" style="grid-column:1/-1">No hay productos para este filtro.</p>'}</div>` : `<div id="grid" class="pro-list-container">${items.map((p) => renderProductListRow(p, "pos")).join("") || '<p class="lite-empty">No hay productos para este filtro.</p>'}</div>`}</div><div class="card cart ${cartCollapsed ? "collapsed" : "expanded"}"><div class="ch" data-action="toggle-cart" role="button" tabindex="0" aria-expanded="${!cartCollapsed}" aria-label="Alternar venta actual"><div class="ch-info"><h2>Venta actual</h2><p>${qty} ${qty === 1 ? "unidad" : "unidades"} · <b class="cart-ch-total">${money(total)}</b></p></div><div class="ch-actions"><span class="pill a">NUEVA</span><button type="button" class="cart-toggle-btn" data-action="toggle-cart" aria-label="${cartCollapsed ? "Desplegar venta actual" : "Minimizar venta actual"}">${cartCollapsed ? chevronUp() : chevronDown()}</button></div></div><div class="cart-body"><div class="lines" id="lines">${
     Object.entries(cart)
       .map(([id, q]) => {
         const p = state.products.find((p) => p.id === Number(id));
@@ -2364,7 +2367,30 @@ document.addEventListener("click", (e) => {
     return;
   }
   if (target.dataset.add) {
+    if (!state.cash) {
+      tone("warning");
+      openModal(
+        "Caja cerrada",
+        "Apertura de caja requerida",
+        `<div style="display:flex;flex-direction:column;gap:14px;padding:6px 0">
+          <div style="display:flex;align-items:center;gap:12px;background:rgba(239, 68, 68, 0.1);border:1px solid rgba(239, 68, 68, 0.25);border-radius:12px;padding:12px 14px">
+            <span style="font-size:24px">🔒</span>
+            <div style="font-size:14px;color:var(--ink);line-height:1.4">
+              <b>La caja se encuentra cerrada.</b><br>
+              Para agregar productos e iniciar una venta debés abrir la caja primero.
+            </div>
+          </div>
+          <p class="lite-note" style="margin:0">Al abrir la caja podrás registrar ventas, cobrar con diferentes medios de pago y actualizar el stock en tiempo real.</p>
+        </div>`,
+        `<button class="btn" data-action="confirm-open-cash">Abrir caja ahora</button><button class="btn g sm" data-action="close-modal">Cancelar</button>`
+      );
+      return;
+    }
     const p = state.products.find((p) => p.id === Number(target.dataset.add));
+    if (!p || p.stock <= 0) {
+      tone("warning");
+      return toast("Sin stock disponible de este producto.", true);
+    }
     if ((cart[p.id] || 0) >= p.stock)
       return toast("Sin más existencias.", true);
     cart[p.id] = (cart[p.id] || 0) + 1;
