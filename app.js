@@ -616,6 +616,12 @@ function renderProductCard(p, mode = "pos") {
     ? `<span class="pro-card-spec" title="Presentación / Gramaje">${esc(parsed.spec)}</span>`
     : "";
 
+  // Categoría arriba de la foto: visible solo si el filtro activo es "Todas" (o no hay categoría seleccionada)
+  const showCategoryAbove = (category === "Todas" || !category) && p.cat;
+  const catAboveHtml = showCategoryAbove
+    ? `<div class="pro-card-top-cat" title="${esc(p.cat)}">${esc(p.cat)}</div>`
+    : "";
+
   const mediaContent = p.image
     ? `<img src="${p.image}" alt="${esc(p.name)}" class="pro-card-img" loading="lazy">`
     : `<div class="pro-card-placeholder" aria-label="${esc(p.name)}">
@@ -626,7 +632,6 @@ function renderProductCard(p, mode = "pos") {
     ? `<div class="pro-card-meta">
          <span class="pro-card-stock ${isLowStock ? "warn" : "ok"}">${outOfStock ? "Agotado" : `${p.stock} u. disp.`}</span>
          ${specBadge}
-         <span class="pro-card-cat">${esc(p.cat || "")}</span>
        </div>`
     : `<div class="pro-card-meta">
          <span class="pro-card-stock ${isLowStock ? "warn" : "ok"}">${isLowStock ? "Reponer: " : "Stock: "}${p.stock} u.</span>
@@ -635,34 +640,33 @@ function renderProductCard(p, mode = "pos") {
        </div>`;
 
   const actionHtml = isPos
-    ? `<button type="button" class="pro-card-btn" data-add="${p.id}" ${outOfStock ? "disabled" : ""} aria-label="Agregar ${esc(p.name)} al carrito">
-         ${outOfStock ? "Sin stock" : "Agregar al carrito"}
+    ? `<button type="button" class="pro-card-round-btn ${outOfStock ? "out-of-stock-btn" : ""}" data-add="${p.id}" ${outOfStock ? 'data-out-of-stock="true"' : ""} aria-label="${outOfStock ? `Sin stock: ${esc(p.name)}` : `Agregar ${esc(p.name)} al carrito`}" title="${outOfStock ? "Sin stock disponible" : "Agregar al carrito"}">
+         ${outOfStock ? iconWarningStock() : '<span class="pro-round-plus" aria-hidden="true">+</span>'}
        </button>`
     : `<button type="button" class="pro-card-btn" data-action="edit:${p.id}" aria-label="Editar ${esc(p.name)}">
          Editar producto
        </button>`;
 
   const clickAttr = isPos
-    ? (outOfStock ? "" : `data-add="${p.id}"`)
+    ? `data-add="${p.id}" ${outOfStock ? 'data-out-of-stock="true"' : ""}`
     : `data-action="edit:${p.id}"`;
 
   return `
-    <article class="pro-card" data-product-id="${p.id}">
+    <article class="pro-card ${outOfStock ? "out-of-stock" : ""}" data-product-id="${p.id}">
+      ${catAboveHtml}
       <div class="pro-card-media" ${clickAttr} role="button" tabindex="0">
         ${mediaContent}
       </div>
       <div class="pro-card-body">
-        <div class="pro-card-row">
-          <div class="pro-card-left">
-            <h3 class="pro-card-title" title="${esc(p.name)}">${esc(displayName)}</h3>
-            <div class="pro-card-id">${idText}</div>
-          </div>
-          <div class="pro-card-price">${money(p.price)}</div>
-        </div>
+        <h3 class="pro-card-title" title="${esc(p.name)}" ${clickAttr} role="button" tabindex="0">${esc(displayName)}</h3>
+        <div class="pro-card-id">${idText}</div>
         ${metaHtml}
       </div>
-      <div class="pro-card-action">
-        ${actionHtml}
+      <div class="pro-card-footer">
+        <div class="pro-card-price">${money(p.price)}</div>
+        <div class="pro-card-action">
+          ${actionHtml}
+        </div>
       </div>
     </article>
   `;
@@ -956,7 +960,7 @@ function pos() {
     ),
     qty = Object.values(cart).reduce((a, b) => a + b, 0),
     total = cartTotal();
-  return `${title("Punto de venta", "Venta rápida, cobro y actualización de stock desde una misma pantalla.", action("Vaciar", "clear-cart"))}<div class="pos"><div><div class="bar pos-bar"><input id="posSearch" class="search" placeholder="Buscar por nombre o código..." value="${esc(searchTerm)}" aria-label="Buscar producto"><div class="stock-view-toggle pos-view-toggle" role="group" aria-label="Modo de visualización en punto de venta"><button type="button" class="${posViewMode === "cards" ? "on" : ""}" data-pos-view="cards" title="Vista en tarjetas (Foto 1)">${iconGrid()} Tarjetas</button><button type="button" class="${posViewMode === "list" ? "on" : ""}" data-pos-view="list" title="Vista en lista">${iconList()} Lista</button></div></div><div class="chips">${cats.map((c) => `<button class="${category === c ? "on" : ""}" data-category="${esc(c)}">${esc(c)}</button>`).join("")}</div>${posViewMode === "cards" ? `<div id="grid" class="grid pro-cards-grid">${items.map((p) => renderProductCard(p, "pos")).join("") || '<p class="lite-empty" style="grid-column:1/-1">No hay productos para este filtro.</p>'}</div>` : `<div id="grid" class="pro-list-container">${items.map((p) => renderProductListRow(p, "pos")).join("") || '<p class="lite-empty">No hay productos para este filtro.</p>'}</div>`}</div><div class="card cart ${cartCollapsed ? "collapsed" : "expanded"}"><div class="ch" data-action="toggle-cart" role="button" tabindex="0" aria-expanded="${!cartCollapsed}" aria-label="Alternar venta actual"><div class="ch-info"><h2>Venta actual</h2><p>${qty} ${qty === 1 ? "unidad" : "unidades"} · <b class="cart-ch-total">${money(total)}</b></p></div><div class="ch-actions"><span class="pill a">NUEVA</span><button type="button" class="cart-toggle-btn" data-action="toggle-cart" aria-label="${cartCollapsed ? "Desplegar venta actual" : "Minimizar venta actual"}">${cartCollapsed ? chevronUp() : chevronDown()}</button></div></div><div class="cart-body"><div class="lines" id="lines">${
+  return `${title("Punto de venta", "Cobro rápido de mostrador y control de ventas.")}<div class="pos"><div><div class="bar pos-bar"><input id="posSearch" class="search" placeholder="Buscar por nombre o código..." value="${esc(searchTerm)}" aria-label="Buscar producto"><div class="stock-view-toggle pos-view-toggle" role="group" aria-label="Modo de visualización en punto de venta"><button type="button" class="${posViewMode === "cards" ? "on" : ""}" data-pos-view="cards" title="Vista en tarjetas (Foto 1)">${iconGrid()} Tarjetas</button><button type="button" class="${posViewMode === "list" ? "on" : ""}" data-pos-view="list" title="Vista en lista">${iconList()} Lista</button></div></div><div class="chips">${cats.map((c) => `<button class="${category === c ? "on" : ""}" data-category="${esc(c)}">${esc(c)}</button>`).join("")}</div>${posViewMode === "cards" ? `<div id="grid" class="grid pro-cards-grid">${items.map((p) => renderProductCard(p, "pos")).join("") || '<p class="lite-empty" style="grid-column:1/-1">No hay productos para este filtro.</p>'}</div>` : `<div id="grid" class="pro-list-container">${items.map((p) => renderProductListRow(p, "pos")).join("") || '<p class="lite-empty">No hay productos para este filtro.</p>'}</div>`}</div><div class="card cart ${cartCollapsed ? "collapsed" : "expanded"}"><div class="ch" data-action="toggle-cart" role="button" tabindex="0" aria-expanded="${!cartCollapsed}" aria-label="Alternar venta actual"><div class="ch-info"><h2>Venta actual</h2><p>${qty} ${qty === 1 ? "unidad" : "unidades"} · <b class="cart-ch-total">${money(total)}</b></p></div><div class="ch-actions"><button type="button" class="cart-toggle-btn" data-action="toggle-cart" aria-label="${cartCollapsed ? "Desplegar venta actual" : "Minimizar venta actual"}">${cartCollapsed ? chevronUp() : chevronDown()}</button></div></div><div class="cart-body"><div class="lines" id="lines">${
     Object.entries(cart)
       .map(([id, q]) => {
         const p = state.products.find((p) => p.id === Number(id));
@@ -967,7 +971,7 @@ function pos() {
       })
       .join("") ||
     '<p class="lite-empty">Tocá un producto para empezar la venta.</p>'
-  }</div><div class="tot"><div class="row"><span>Subtotal</span><b class="num">${money(total)}</b></div><div class="row"><span>Productos</span><span>${qty}</span></div><div class="row t2"><span>Total</span><b class="num">${money(total)}</b></div><p class="lite-note">Medio de pago y entrega se eligen al cobrar.</p><button class="btn" data-action="checkout" ${qty === 0 || !state.cash ? "disabled" : ""}>Cobrar venta</button></div></div></div></div>`;
+  }</div><div class="tot"><div class="row"><span>Subtotal</span><b class="num">${money(total)}</b></div><div class="row"><span>Productos</span><span>${qty}</span></div><div class="row t2"><span>Total</span><b class="num">${money(total)}</b></div><p class="lite-note">Medio de pago y entrega se eligen al cobrar.</p><div class="cart-tot-actions"><button type="button" class="btn-clear-cart" data-action="prompt-clear-cart" ${qty === 0 ? "disabled" : ""} title="Vaciar todos los productos del carrito">Vaciar carrito</button><button class="btn" data-action="checkout" ${qty === 0 || !state.cash ? "disabled" : ""}>Cobrar venta</button></div></div></div></div></div>`;
 }
 
 function cartTotal() {
@@ -2469,6 +2473,30 @@ document.addEventListener("click", (e) => {
   if (code === "new-delivery") return deliveryModal();
   if (code === "go-pos") return go("pos");
   if (code === "checkout") return checkout();
+  if (code === "prompt-clear-cart") {
+    const qty = Object.values(cart).reduce((a, b) => a + b, 0);
+    if (qty === 0) return;
+    tone("warning");
+    openModal(
+      "Vaciar carrito",
+      "Confirmación requerida",
+      `<div style="display:flex;flex-direction:column;gap:12px;padding:6px 0">
+        <p style="font-size:15px;color:var(--ink);margin:0;line-height:1.4">
+          ¿Seguro que querés vaciar los <b>${qty} ${qty === 1 ? "producto" : "productos"}</b> agregados a la venta actual?
+        </p>
+        <p class="lite-note" style="margin:0">Esta acción removerá todos los artículos de la venta en curso.</p>
+      </div>`,
+      `<button class="btn g" data-action="close-modal">Cancelar</button><button class="btn danger" data-action="confirm-clear-cart">Sí, vaciar carrito</button>`
+    );
+    return;
+  }
+  if (code === "confirm-clear-cart") {
+    cart = {};
+    closeModal();
+    render();
+    tone("remove");
+    return toast("Carrito vaciado correctamente");
+  }
   if (code === "clear-cart") {
     cart = {};
     render();

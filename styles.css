@@ -13419,16 +13419,16 @@ body[data-view="pos"] #v #grid:not(.pro-list-container) {
   }
 }
 
-/* Tarjeta de Producto (Estilo Foto 1) */
+/* Tarjeta de Producto (Diseño Universal Limpio y Optimizado) */
 .pro-card {
   display: flex !important;
   flex-direction: column !important;
-  justify-content: space-between !important;
+  justify-content: flex-start !important;
   background: var(--s, #ffffff) !important;
   border: 1.5px solid rgba(0, 0, 0, 0.08) !important;
   border-radius: 20px !important;
-  padding: 14px !important;
-  gap: 12px !important;
+  padding: 13px !important;
+  gap: 10px !important;
   box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease !important;
   position: relative !important;
@@ -13436,12 +13436,18 @@ body[data-view="pos"] #v #grid:not(.pro-list-container) {
   width: 100% !important;
   text-align: left !important;
   cursor: default !important;
+  touch-action: pan-y !important;
+  -webkit-touch-callout: none;
 }
 
 [data-theme="dark"] .pro-card {
   background: #1c2436 !important;
   border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 6px 18px -2px rgba(0, 0, 0, 0.35) !important;
+}
+
+.pro-card.out-of-stock {
+  opacity: 0.75;
 }
 
 .pro-card:hover {
@@ -13455,7 +13461,25 @@ body[data-view="pos"] #v #grid:not(.pro-list-container) {
   box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* Área de imagen / media (Foto 1) */
+/* Categoría sutil encima de la foto (solo en "Todas") */
+.pro-card-top-cat {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  color: #64748b !important;
+  line-height: 1 !important;
+  padding: 0 2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+[data-theme="dark"] .pro-card-top-cat {
+  color: #94a3b8 !important;
+}
+
+/* Área de imagen / media */
 .pro-card-media {
   width: 100% !important;
   aspect-ratio: 1 / 1 !important;
@@ -13468,6 +13492,7 @@ body[data-view="pos"] #v #grid:not(.pro-list-container) {
   position: relative !important;
   flex: none !important;
   cursor: pointer;
+  touch-action: pan-y !important;
 }
 
 .pro-card-img {
@@ -13500,39 +13525,25 @@ body[data-view="pos"] #v #grid:not(.pro-list-container) {
 .pro-card-body {
   display: flex !important;
   flex-direction: column !important;
-  gap: 6px !important;
+  gap: 4px !important;
   flex: 1 1 auto !important;
   min-width: 0 !important;
-}
-
-.pro-card-row {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: flex-start !important;
-  gap: 8px !important;
   width: 100% !important;
-}
-
-.pro-card-left {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 2px !important;
-  min-width: 0 !important;
-  flex: 1 1 auto !important;
 }
 
 .pro-card-title {
   margin: 0 !important;
-  font-size: 1.1rem !important;
+  font-size: 0.98rem !important;
   font-weight: 700 !important;
   color: var(--ink, #0f172a) !important;
-  line-height: 1.25 !important;
+  line-height: 1.3 !important;
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
   line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
   overflow: hidden !important;
   overflow-wrap: break-word !important;
+  cursor: pointer !important;
 }
 
 [data-theme="dark"] .pro-card-title {
@@ -13540,7 +13551,7 @@ body[data-view="pos"] #v #grid:not(.pro-list-container) {
 }
 
 .pro-card-id {
-  font-size: 0.825rem !important;
+  font-size: 0.775rem !important;
   color: #64748b !important;
   font-weight: 500 !important;
   white-space: nowrap !important;
@@ -13552,30 +13563,14 @@ body[data-view="pos"] #v #grid:not(.pro-list-container) {
   color: #94a3b8 !important;
 }
 
-.pro-card-price {
-  font-size: 1.15rem !important;
-  font-weight: 700 !important;
-  color: #3D9E64 !important;
-  white-space: nowrap !important;
-  text-align: right !important;
-  letter-spacing: -0.02em !important;
-  flex: 0 0 auto !important;
-  line-height: 1.2 !important;
-}
-
-[data-theme="dark"] .pro-card-price,
-html[data-theme="dark"] .pro-card-price {
-  color: #4ade80 !important;
-}
-
+/* Metadatos (stock, gramaje, margen) */
 .pro-card-meta {
   display: flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
-  gap: 6px !important;
+  gap: 5px !important;
   font-size: 0.775rem !important;
   color: #64748b !important;
-  margin-top: 2px !important;
+  margin-top: 4px !important;
   flex-wrap: wrap !important;
 }
 
@@ -13587,7 +13582,7 @@ html[data-theme="dark"] .pro-card-price {
   display: inline-flex !important;
   align-items: center !important;
   gap: 4px !important;
-  padding: 2px 7px !important;
+  padding: 2.5px 7px !important;
   border-radius: 6px !important;
   font-size: 0.75rem !important;
   font-weight: 600 !important;
@@ -13618,9 +13613,9 @@ html[data-theme="dark"] .pro-card-price {
   display: inline-flex !important;
   align-items: center !important;
   gap: 3px !important;
-  padding: 3px 9px !important;
-  border-radius: 7px !important;
-  font-size: 0.8rem !important;
+  padding: 2.5px 8px !important;
+  border-radius: 6px !important;
+  font-size: 0.775rem !important;
   font-weight: 800 !important;
   letter-spacing: 0.02em !important;
   background: #fef3c7 !important;
@@ -13644,54 +13639,190 @@ html[data-theme="dark"] .pro-card-spec {
   color: var(--muted, #64748b) !important;
 }
 
-/* Botón de acción al pie de la tarjeta (Foto 1) */
-.pro-card-action {
+/* Pie de tarjeta con precio grande a la izquierda y botón redondo a la derecha */
+.pro-card-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
   width: 100% !important;
   margin-top: auto !important;
+  padding-top: 6px !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
-.pro-card-btn {
-  width: 100% !important;
+[data-theme="dark"] .pro-card-footer {
+  border-top-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.pro-card-price {
+  font-size: 1.18rem !important;
+  font-weight: 800 !important;
+  color: #3D9E64 !important;
+  white-space: nowrap !important;
+  text-align: left !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.1 !important;
+}
+
+[data-theme="dark"] .pro-card-price,
+html[data-theme="dark"] .pro-card-price {
+  color: #4ade80 !important;
+}
+
+.pro-card-action {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+/* Botón Redondo con signo + o ícono de sin stock */
+.pro-card-round-btn {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border-radius: 50% !important;
+  background-color: #085a85 !important;
+  color: #ffffff !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px !important;
-  background-color: #085a85 !important;
-  color: #ffffff !important;
-  font-size: 0.95rem !important;
-  font-weight: 600 !important;
-  padding: 12px 14px !important;
-  border-radius: 10px !important;
   border: none !important;
   cursor: pointer !important;
   transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease !important;
-  box-shadow: 0 2px 6px rgba(8, 90, 133, 0.25) !important;
-  text-decoration: none !important;
+  box-shadow: 0 2px 7px rgba(8, 90, 133, 0.3) !important;
   user-select: none !important;
   box-sizing: border-box !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.pro-card-round-btn:hover:not(:disabled) {
+  background-color: #06476b !important;
+  box-shadow: 0 4px 12px rgba(8, 90, 133, 0.45) !important;
+  transform: scale(1.06) !important;
+}
+
+.pro-card-round-btn:active:not(:disabled) {
+  transform: scale(0.94) !important;
+}
+
+.pro-card-round-btn .pro-round-plus {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  display: inline-block !important;
+  line-height: 1 !important;
+  margin-top: -1px !important;
+}
+
+.pro-card-round-btn.out-of-stock-btn,
+.pro-card-round-btn:disabled {
+  background-color: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+.pro-card-round-btn.out-of-stock-btn svg {
+  width: 18px !important;
+  height: 18px !important;
+  stroke: #ef4444 !important;
+  display: block !important;
+}
+
+[data-theme="dark"] .pro-card-round-btn.out-of-stock-btn,
+[data-theme="dark"] .pro-card-round-btn:disabled {
+  background-color: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Botón genérico estándar para vistas no-pos (ej: Stock Lite Editar) */
+.pro-card-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  background-color: #085a85 !important;
+  color: #ffffff !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  padding: 7px 12px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease, transform 0.1s ease !important;
 }
 
 .pro-card-btn:hover:not(:disabled) {
   background-color: #06476b !important;
-  box-shadow: 0 4px 12px rgba(8, 90, 133, 0.35) !important;
+}
+
+/* Acciones en el pie del carrito (Vaciar + Cobrar) */
+.cart-tot-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  margin-top: 10px !important;
+}
+
+.cart-tot-actions .btn {
+  flex: 1 1 auto !important;
+  margin: 0 !important;
+}
+
+.btn-clear-cart {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px 14px !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: #dc2626 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease !important;
+  text-decoration: none !important;
+  line-height: 1.2 !important;
+}
+
+.btn-clear-cart:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.16) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #b91c1c !important;
   transform: translateY(-1px) !important;
 }
 
-.pro-card-btn:active:not(:disabled) {
-  transform: scale(0.98) !important;
+.btn-clear-cart:active:not(:disabled) {
+  transform: scale(0.97) !important;
 }
 
-.pro-card-btn:disabled {
-  background-color: #94a3b8 !important;
-  color: #f1f5f9 !important;
+.btn-clear-cart:disabled {
+  opacity: 0.4 !important;
   cursor: not-allowed !important;
-  box-shadow: none !important;
-  opacity: 0.8 !important;
+  color: #94a3b8 !important;
+  background: transparent !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
 }
 
-[data-theme="dark"] .pro-card-btn:disabled {
-  background-color: #475569 !important;
-  color: #94a3b8 !important;
+[data-theme="dark"] .btn-clear-cart {
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+[data-theme="dark"] .btn-clear-cart:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .btn-clear-cart:disabled {
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Selector de vista en Stock Lite (Tarjetas / Tabla) */
@@ -14822,6 +14953,16 @@ html[data-theme="dark"] .cart .ln .q {
   body[data-view="pos"] main#m,
   body[data-view="pos"] #m {
     padding-bottom: calc(90px + env(safe-area-inset-bottom, 20px)) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+  }
+
+  body[data-view="pos"] #grid,
+  body[data-view="pos"] .pro-cards-grid,
+  body[data-view="pos"] .pro-list-container {
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   body[data-view="pos"] .pos > .cart,
