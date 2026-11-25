@@ -78,6 +78,8 @@ const posPlus = () =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`;
 const posMinus = () =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus" aria-hidden="true"><path d="M5 12h14"/></svg>`;
+const iconTrash = (size = 18) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash" aria-hidden="true"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`;
 const iconGrid = () =>
   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-grid" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>`;
 const iconList = () =>
@@ -707,8 +709,8 @@ function renderProductListRow(p, mode = "pos") {
        </div>`;
 
   const actionHtml = isPos
-    ? `<button type="button" class="pro-list-btn ${outOfStock ? "out-of-stock-btn" : ""}" data-add="${p.id}" ${outOfStock ? 'data-out-of-stock="true"' : ""} aria-label="${outOfStock ? `Sin stock: ${esc(p.name)}` : `Agregar ${esc(p.name)} al carrito`}">
-         ${outOfStock ? `<span class="pro-btn-text">Sin stock</span><span class="pro-btn-plus pro-btn-nostock">${iconWarningStock()}</span>` : '<span class="pro-btn-text">+ Agregar</span><span class="pro-btn-plus" aria-hidden="true">+</span>'}
+    ? `<button type="button" class="pro-card-round-btn ${outOfStock ? "out-of-stock-btn" : ""}" data-add="${p.id}" ${outOfStock ? 'data-out-of-stock="true"' : ""} aria-label="${outOfStock ? `Sin stock: ${esc(p.name)}` : `Agregar ${esc(p.name)} al carrito`}" title="${outOfStock ? "Sin stock disponible" : "Agregar al carrito"}">
+         ${outOfStock ? iconWarningStock() : '<span class="pro-round-plus" aria-hidden="true">+</span>'}
        </button>`
     : `<button type="button" class="pro-list-btn" data-action="edit:${p.id}" aria-label="Editar ${esc(p.name)}">
          Editar
@@ -971,7 +973,7 @@ function pos() {
       })
       .join("") ||
     '<p class="lite-empty">Tocá un producto para empezar la venta.</p>'
-  }</div><div class="tot"><div class="row"><span>Subtotal</span><b class="num">${money(total)}</b></div><div class="row"><span>Productos</span><span>${qty}</span></div><div class="row t2"><span>Total</span><b class="num">${money(total)}</b></div><p class="lite-note">Medio de pago y entrega se eligen al cobrar.</p><div class="cart-tot-actions"><button type="button" class="btn-clear-cart" data-action="prompt-clear-cart" ${qty === 0 ? "disabled" : ""} title="Vaciar todos los productos del carrito">Vaciar carrito</button><button class="btn" data-action="checkout" ${qty === 0 || !state.cash ? "disabled" : ""}>Cobrar venta</button></div></div></div></div></div>`;
+  }</div><div class="tot"><div class="row"><span>Subtotal</span><b class="num">${money(total)}</b></div><div class="row"><span>Productos</span><span>${qty}</span></div><div class="row t2"><span>Total</span><b class="num">${money(total)}</b></div><p class="lite-note">Medio de pago y entrega se eligen al cobrar.</p><div class="cart-tot-actions"><button type="button" class="btn-clear-cart" data-action="prompt-clear-cart" ${qty === 0 ? "disabled" : ""} aria-label="Vaciar carrito" title="Vaciar todos los productos del carrito">${iconTrash(19)}</button><button class="btn" data-action="checkout" ${qty === 0 || !state.cash ? "disabled" : ""}>Cobrar venta</button></div></div></div></div></div>`;
 }
 
 function cartTotal() {
