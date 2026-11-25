@@ -84,6 +84,28 @@ const iconGrid = () =>
   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-grid" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>`;
 const iconList = () =>
   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-list" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><path d="M14 4h7"/><path d="M14 9h7"/><path d="M14 15h7"/><path d="M14 20h7"/></svg>`;
+const iconBanknote = (size = 18) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-banknote" aria-hidden="true"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>`;
+const iconCreditCard = (size = 18) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/><path d="M6 14h2"/></svg>`;
+const iconQrCode = (size = 18) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-qr-code" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>`;
+const iconStore = (size = 18) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-store" aria-hidden="true"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg>`;
+const iconShoppingBag = (size = 18) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag" aria-hidden="true"><path d="M16 10a4 4 0 0 1-8 0"/><path d="M3.103 6.034h17.794"/><path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"/></svg>`;
+const iconMoped = (size = 18) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moped" aria-hidden="true"><path d="m18.16 14.12-2.927-8.447A1 1 0 0 0 14.288 5H13"/><path d="M19 10a7 7 0 0 0-6.928 6"/><path d="M2 10h5.5a3 3 0 0 1 2.747 1.795l1.669 3.803A1 1 0 0 1 11.01 17H8"/><circle cx="19" cy="17" r="3"/><circle cx="5" cy="17" r="3"/></svg>`;
+const iconPackage = (size = 17) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>`;
+const iconPercent = (size = 16) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-percent" aria-hidden="true"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`;
+const iconCheck = (size = 17) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
+const iconArrowRight = (size = 17) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`;
+const iconArrowLeft = (size = 17) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>`;
 const ic = (k, size = 20) =>
   k === "chevronRight"
     ? chevronRight()
@@ -289,7 +311,16 @@ let view = "home",
   editingUserPhoto = "",
   editingCategory = null,
   payment = "Efectivo",
-  delivery = "Retiro",
+  delivery = "Mostrador",
+  checkoutStep = 1,
+  prevCheckoutStep = 1,
+  checkoutCustomer = "",
+  checkoutAddress = "",
+  checkoutPhone = "",
+  checkoutShippingCost = "",
+  checkoutCashReceived = "",
+  checkoutShowItems = false,
+  checkoutErrors = {},
   salesFilter = "all",
   stockFilter = "all",
   stockViewMode = "cards",
@@ -325,6 +356,7 @@ function syncCategories() {
 }
 
 const STATE_STORAGE_KEY = "comerciando_emprendedores_state_v2";
+const CART_STORAGE_PREFIX = "comerciando_pos_cart_v1_";
 
 function saveState() {
   try {
@@ -379,8 +411,8 @@ function loadState() {
     if (Array.isArray(data.sales)) state.sales = data.sales;
     if (Array.isArray(data.deliveries)) state.deliveries = data.deliveries;
     if (Array.isArray(data.movements)) state.movements = data.movements;
-    // Caja cerrada por defecto al ingresar a la app
-    state.cash = false;
+    // Restaurar estado de caja guardada (cerrada por defecto si no existe)
+    if (typeof data.cash === "boolean") state.cash = data.cash;
     if (typeof data.sound === "boolean") state.sound = data.sound;
     if (data.soundStyle) soundStyle = data.soundStyle;
     if (data.theme === "light" || data.theme === "dark") {
@@ -485,6 +517,7 @@ function loadState() {
 
 loadState();
 syncCategories();
+restoreCart();
 saveState();
 const THEME_PREF_KEY = "comerciando_emprendedores_theme_v1";
 try {
@@ -522,7 +555,7 @@ let lastSoundAt = 0;
 function tone(kind = "") {
   // sólo eventos concretos. Silencio por defecto para navegación y botones.
   if (typeof kind !== "string" || !kind || !state.sound) return;
-  if (!["add", "success", "warning", "notice"].includes(kind)) return;
+  if (!["add", "success", "warning", "notice", "sale"].includes(kind)) return;
   const now = performance.now();
   if (now - lastSoundAt < 85) return;
   lastSoundAt = now;
@@ -533,6 +566,7 @@ function tone(kind = "") {
     if (ctx.state === "suspended") void ctx.resume().catch(() => {});
     const at = ctx.currentTime + 0.006;
     const modern = soundStyle === "digital";
+    const peakGain = kind === "sale" ? (modern ? 0.055 : 0.048) : modern ? 0.019 : 0.014;
     const notes = {
       add: modern ? [[600, 0, 0.055]] : [[630, 0, 0.075]],
       success: modern
@@ -543,6 +577,18 @@ function tone(kind = "") {
         : [
             [523, 0, 0.095],
             [784, 0.105, 0.125],
+          ],
+      sale: modern
+        ? [
+            [659.25, 0, 0.08],
+            [880, 0.075, 0.095],
+            [1318.51, 0.155, 0.24],
+          ]
+        : [
+            [523.25, 0, 0.095],
+            [659.25, 0.08, 0.105],
+            [783.99, 0.16, 0.12],
+            [1046.5, 0.24, 0.28],
           ],
       warning: modern
         ? [
@@ -559,7 +605,7 @@ function tone(kind = "") {
       o.type = modern ? "triangle" : "sine";
       o.frequency.setValueAtTime(freq, t);
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(modern ? 0.019 : 0.014, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(peakGain, t + 0.012);
       g.gain.exponentialRampToValueAtTime(0.0001, t + len);
       o.connect(g);
       g.connect(ctx.destination);
@@ -974,6 +1020,95 @@ function pos() {
       .join("") ||
     '<p class="lite-empty">Tocá un producto para empezar la venta.</p>'
   }</div><div class="tot"><div class="row"><span>Subtotal</span><b class="num">${money(total)}</b></div><div class="row"><span>Productos</span><span>${qty}</span></div><div class="row t2"><span>Total</span><b class="num">${money(total)}</b></div><p class="lite-note">Medio de pago y entrega se eligen al cobrar.</p><div class="cart-tot-actions"><button type="button" class="btn-clear-cart" data-action="prompt-clear-cart" ${qty === 0 ? "disabled" : ""} aria-label="Vaciar carrito" title="Vaciar todos los productos del carrito">${iconTrash(19)}</button><button class="btn" data-action="checkout" ${qty === 0 || !state.cash ? "disabled" : ""}>Cobrar venta</button></div></div></div></div></div>`;
+}
+
+function getCartStorageKey() {
+  let userKey = "default";
+  try {
+    const authRaw = localStorage.getItem("comerciando_auth_session");
+    if (authRaw) {
+      const auth = JSON.parse(authRaw);
+      const u = auth?.user;
+      if (u) {
+        userKey = u.id || u.email || u.name || "default";
+      }
+    }
+  } catch {}
+  if (userKey === "default") {
+    const cur = typeof getCurrentUser === "function" ? getCurrentUser() : state.users?.[0];
+    if (cur) userKey = cur.id || cur.email || cur.name || "default";
+  }
+  const safeKey = String(userKey).toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+  return CART_STORAGE_PREFIX + safeKey;
+}
+
+function clearSavedCart() {
+  try {
+    localStorage.removeItem(getCartStorageKey());
+  } catch (err) {
+    console.warn("No se pudo limpiar el carrito guardado:", err);
+  }
+}
+
+function saveCart() {
+  try {
+    const entries = Object.entries(cart).filter(([, q]) => Number(q) > 0);
+    if (!entries.length) {
+      clearSavedCart();
+      return;
+    }
+    const payload = {
+      items: Object.fromEntries(entries),
+      discount: Number(discount) || 0,
+      updatedAt: Date.now(),
+    };
+    localStorage.setItem(getCartStorageKey(), JSON.stringify(payload));
+  } catch (err) {
+    console.warn("No se pudo guardar el carrito en localStorage:", err);
+  }
+}
+
+function restoreCart() {
+  try {
+    const raw = localStorage.getItem(getCartStorageKey());
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== "object" || !data.items || typeof data.items !== "object") {
+      cart = {};
+      discount = 0;
+      clearSavedCart();
+      return;
+    }
+    const restored = {};
+    let adjusted = false;
+    for (const [idStr, rawQty] of Object.entries(data.items)) {
+      const pid = Number(idStr);
+      const p = state.products.find((prod) => prod.id === pid);
+      const qty = Math.floor(Number(rawQty) || 0);
+      if (!p || p.stock <= 0 || qty <= 0) {
+        adjusted = true;
+        continue;
+      }
+      const clampedQty = Math.min(qty, p.stock);
+      if (clampedQty !== qty) adjusted = true;
+      restored[p.id] = clampedQty;
+    }
+    if (!Object.keys(restored).length) {
+      cart = {};
+      discount = 0;
+      clearSavedCart();
+      return;
+    }
+    cart = restored;
+    const sum = cartTotal();
+    discount = Math.max(0, Math.min(sum, Number(data.discount) || 0));
+    if (adjusted) saveCart();
+  } catch (err) {
+    console.warn("No se pudo restaurar el carrito guardado:", err);
+    cart = {};
+    discount = 0;
+    clearSavedCart();
+  }
 }
 
 function cartTotal() {
@@ -1668,6 +1803,7 @@ function confirmInviteUser(isExtra = false) {
   toast(`Invitación enviada a ${email}. Usuario agregado.`);
 }
 function openModal(h, sub, content, actions = "") {
+  $("#modal").classList.remove("checkout-success-modal");
   $("#modalTitle").textContent = h;
   $("#modalSubtitle").textContent = sub;
   $("#modalBody").innerHTML = content;
@@ -1679,53 +1815,285 @@ function openModal(h, sub, content, actions = "") {
 function closeModal() {
   $("#modal").classList.remove("open");
   $("#modal").classList.remove("lite-detail-drawer");
+  $("#modal").classList.remove("checkout-success-modal");
   document.body.style.overflow = "";
 }
 function checkout() {
   if (!state.cash) return toast("Abrí caja antes de cobrar", true);
   if (!cartTotal()) return;
   payment = "Efectivo";
-  delivery = "Retiro";
-  discount = 0;
+  delivery = "Mostrador";
+  checkoutStep = 1;
+  prevCheckoutStep = 1;
+  checkoutCustomer = "";
+  checkoutAddress = "";
+  checkoutPhone = "";
+  checkoutShippingCost = "";
+  checkoutCashReceived = "";
+  checkoutShowItems = false;
+  checkoutErrors = {};
+  discount = Math.max(0, Math.min(cartTotal(), Number(discount) || 0));
   renderCheckout();
 }
+function getCheckoutTotals() {
+  const sum = cartTotal();
+  const baseTotal = Math.max(0, sum - discount);
+  const shippingExtra =
+    delivery === "Envío" ? Math.max(0, Number(checkoutShippingCost) || 0) : 0;
+  return {
+    sum,
+    baseTotal,
+    shippingExtra,
+    finalTotal: baseTotal + shippingExtra,
+  };
+}
+function syncCheckoutInputs() {
+  const c = $("#customer"),
+    a = $("#address"),
+    p = $("#customerPhone"),
+    s = $("#shippingCostInput"),
+    r = $("#cashReceivedInput");
+  if (c) checkoutCustomer = c.value;
+  if (a) checkoutAddress = a.value;
+  if (p) checkoutPhone = p.value;
+  if (s) checkoutShippingCost = s.value;
+  if (r) checkoutCashReceived = r.value;
+}
+function validateCheckoutStep(step) {
+  syncCheckoutInputs();
+  const { baseTotal } = getCheckoutTotals();
+  if (step === 1) {
+    if (
+      payment === "Efectivo" &&
+      checkoutCashReceived !== "" &&
+      Number(checkoutCashReceived) < baseTotal
+    ) {
+      toast("El monto recibido es menor al total a cobrar.", true);
+      $("#cashReceivedInput")?.focus();
+      return false;
+    }
+    return true;
+  }
+  if (step === 2) {
+    checkoutErrors = {};
+    if (delivery === "Retiro" || delivery === "Envío") {
+      if (!checkoutCustomer.trim()) {
+        checkoutErrors.customer = "Ingresá el nombre completo del cliente.";
+      }
+      if (!checkoutPhone.trim()) {
+        checkoutErrors.phone = "Ingresá un teléfono o WhatsApp de contacto.";
+      }
+    }
+    if (delivery === "Envío" && !checkoutAddress.trim()) {
+      checkoutErrors.address = "Ingresá la dirección de entrega.";
+    }
+    if (Object.keys(checkoutErrors).length) {
+      renderCheckout();
+      if (checkoutErrors.customer) $("#customer")?.focus();
+      else if (checkoutErrors.phone) $("#customerPhone")?.focus();
+      else if (checkoutErrors.address) $("#address")?.focus();
+      return false;
+    }
+    return true;
+  }
+  return true;
+}
+function updateCashChangeUI(total) {
+  const box = $("#cashChangeBox");
+  if (!box) return;
+  if (checkoutCashReceived === "") {
+    box.className = "checkout-change";
+    box.innerHTML =
+      '<span class="lite-note">Ingresá con cuánto abona para calcular el vuelto.</span>';
+    return;
+  }
+  const received = Number(checkoutCashReceived) || 0;
+  if (received >= total) {
+    box.className = "checkout-change ok";
+    box.innerHTML = `<span>Vuelto a entregar</span><strong>${money(received - total)}</strong>`;
+  } else {
+    box.className = "checkout-change warn";
+    box.innerHTML = `<span>Falta abonar</span><strong>${money(total - received)}</strong>`;
+  }
+}
 function renderCheckout() {
-  const sum = cartTotal(),
-    total = Math.max(0, sum - discount);
-  const customer = $("#customer")?.value || "",
-    address = $("#address")?.value || "";
-  openModal(
-    "Cobrar venta",
-    "Revisá el detalle antes de registrar esta operación.",
-    `<div class="lite-total"><span>TOTAL A COBRAR</span><strong id="payTotal">${money(total)}</strong></div><div class="lite-rows">${Object.entries(
-      cart,
-    )
+  const { sum, baseTotal, shippingExtra, finalTotal } = getCheckoutTotals(),
+    qty = Object.values(cart).reduce((a, b) => a + b, 0);
+  const steps = [
+    [1, "Cobro"],
+    [2, "Entrega"],
+    [3, "Resumen"],
+  ];
+  const fromPct = Math.max(0, Math.min(100, (prevCheckoutStep - 1) * 50));
+  const toPct = Math.max(0, Math.min(100, (checkoutStep - 1) * 50));
+  prevCheckoutStep = checkoutStep;
+  const stepperHtml = `<nav class="bs-stepper" aria-label="Etapas de cobro"><div class="bs-stepper-grid"><div class="bs-stepper-track" aria-hidden="true"><div class="bs-stepper-fill" style="--stepper-from:${fromPct}%;--stepper-to:${toPct}%"></div></div>${steps
+    .map(([num, labelText]) => {
+      const isDone = checkoutStep > num;
+      const isActive = checkoutStep === num;
+      return `<button type="button" class="bs-stepper-item ${isActive ? "is-active" : ""} ${isDone ? "is-completed" : ""}" data-checkout-step="${num}" aria-current="${isActive ? "step" : "false"}"><span class="bs-stepper-circle">${num}</span><span class="bs-stepper-label">${labelText}</span></button>`;
+    })
+    .join("")}</div></nav>`;
+
+  let stepBody = "";
+  let footerHtml = "";
+
+  if (checkoutStep === 1) {
+    const itemsHtml = Object.entries(cart)
       .map(([id, q]) => {
-        const p = state.products.find((p) => p.id === Number(id));
+        const p = state.products.find((prod) => prod.id === Number(id));
         return `<div class="lite-row"><div><b>${esc(p?.name || "")}</b><div class="lite-note">${q} × ${money(p?.price || 0)}</div></div><strong>${money(q * (p?.price || 0))}</strong></div>`;
       })
-      .join(
-        "",
-      )}</div><div class="lite-form" style="margin-top:16px"><label class="full">Descuento fijo (ARS)<input id="discountInput" type="number" min="0" max="${sum}" class="lite-input" value="${discount}"><small class="lite-note">Aplicable sólo a esta venta.</small></label><label class="full">Medio de pago<div class="lite-choice">${["Efectivo", "Transferencia"].map((x) => `<button type="button" data-payment="${x}" class="${payment === x ? "active" : ""}">${x}</button>`).join("")}</div></label><label class="full">Tipo de entrega<div class="lite-choice">${["Retiro", "Envío"].map((x) => `<button type="button" data-delivery="${x}" class="${delivery === x ? "active" : ""}">${x}</button>`).join("")}</div></label><label class="full">Nombre del cliente<input id="customer" class="lite-input" value="${esc(customer)}" placeholder="Nombre de quien recibe o retira"></label>${delivery === "Envío" ? `<label class="full">Dirección de entrega<input id="address" class="lite-input" value="${esc(address)}" placeholder="Dirección de entrega"></label>` : ""}</div><p class="lite-note" style="margin-top:15px">Registro de cobro y actualización automática de existencias.</p>`,
-    `<button class="btn g" data-action="close-modal">Volver</button><button class="btn" data-action="confirm-sale">✓ Confirmar venta</button>`,
+      .join("");
+    stepBody = `<button type="button" class="checkout-items-toggle" data-action="toggle-checkout-items" aria-expanded="${checkoutShowItems}">
+      <span class="checkout-items-toggle-left">${iconPackage(16)}<span>Ver detalle de productos (${qty})</span></span>
+      ${checkoutShowItems ? chevronUp() : chevronDown()}
+    </button>
+    ${checkoutShowItems ? `<div class="checkout-items-box"><div class="lite-rows">${itemsHtml}</div></div>` : ""}
+    <div class="lite-total" style="margin-top:12px"><div><span>TOTAL A COBRAR</span>${discount > 0 ? `<div class="lite-note">Descuento aplicado: −${money(discount)}</div>` : ""}</div><strong id="payTotal">${money(baseTotal)}</strong></div>
+    <div class="lite-form" style="margin-top:14px">
+      <label class="full"><span class="label-with-icon">${iconPercent(15)}<span>Descuento fijo (ARS)</span> <span class="opt-tag">(opcional)</span></span><input id="discountInput" type="number" min="0" max="${sum}" class="lite-input" value="${discount || ""}" placeholder="0"></label>
+      <label class="full">Medio de pago
+        <div class="lite-choice two-col">
+          <button type="button" data-payment="Efectivo" class="${payment === "Efectivo" ? "active" : ""}">${iconBanknote(18)}<span>Efectivo</span></button>
+          <button type="button" data-payment="Transferencia" class="${payment === "Transferencia" ? "active" : ""}">${iconCreditCard(18)}<span>Transferencia</span></button>
+          <button type="button" data-payment="QR" class="${payment === "QR" ? "active" : ""}">${iconQrCode(18)}<span>QR</span></button>
+          <button type="button" class="payment-arca-disabled" disabled aria-label="Facturación electrónica ARCA (no incluida)" title="Facturación electrónica ARCA no incluida de forma nativa">
+            <img src="https://www.afip.gob.ar/frameworkAFIP/img/Arca-logo-grande-blanco.svg" alt="ARCA" class="arca-logo-icon" />
+          </button>
+        </div>
+      </label>
+      ${
+        payment === "Efectivo"
+          ? `<div class="full checkout-cash-box">
+              <div class="checkout-cash-head">
+                <label for="cashReceivedInput">Monto con el que paga <span class="opt-tag">(opcional)</span></label>
+                <button type="button" class="btn g sm" data-action="cash-exact">Monto exacto</button>
+              </div>
+              <input id="cashReceivedInput" type="number" min="0" class="lite-input" value="${esc(checkoutCashReceived)}" placeholder="Ej: ${Math.ceil(baseTotal / 1000) * 1000}">
+              <div id="cashChangeBox" class="checkout-change"></div>
+            </div>`
+          : ""
+      }
+    </div>`;
+    footerHtml = `<button type="button" class="btn g" data-action="close-modal">Cancelar</button><button type="button" class="btn" data-action="checkout-next"><span>Continuar</span>${iconArrowRight(17)}</button>`;
+  } else if (checkoutStep === 2) {
+    const reqClient = delivery === "Retiro" || delivery === "Envío";
+    const hintText =
+      delivery === "Mostrador"
+        ? "Venta rápida en mostrador: los datos del cliente son opcionales."
+        : delivery === "Retiro"
+          ? "Retiro en local: completá nombre completo y teléfono de contacto."
+          : "Envío a domicilio: completá los datos del cliente y el costo de envío si corresponde.";
+    stepBody = `<div class="lite-form">
+      <label class="full">Medio de entrega
+        <div class="lite-choice three">
+          <button type="button" data-delivery="Mostrador" class="${delivery === "Mostrador" ? "active" : ""}">${iconStore(18)}<span>Mostrador</span></button>
+          <button type="button" data-delivery="Envío" class="${delivery === "Envío" ? "active" : ""}">${iconMoped(18)}<span>Envío</span></button>
+          <button type="button" data-delivery="Retiro" class="${delivery === "Retiro" ? "active" : ""}">${iconShoppingBag(18)}<span>Retiro</span></button>
+        </div>
+      </label>
+      <div class="full checkout-delivery-hint">${hintText}</div>
+      <label class="full"><span>Nombre completo ${reqClient ? '<span class="req-tag">*</span>' : '<span class="opt-tag">(opcional)</span>'}</span><input id="customer" class="lite-input ${checkoutErrors.customer ? "is-invalid" : ""}" value="${esc(checkoutCustomer)}" placeholder="${reqClient ? "Nombre completo del cliente" : "Opcional en mostrador"}">${checkoutErrors.customer ? `<span class="field-error">${esc(checkoutErrors.customer)}</span>` : ""}</label>
+      <label class="full"><span>Teléfono / WhatsApp de contacto ${reqClient ? '<span class="req-tag">*</span>' : '<span class="opt-tag">(opcional)</span>'}</span><input id="customerPhone" type="tel" class="lite-input ${checkoutErrors.phone ? "is-invalid" : ""}" value="${esc(checkoutPhone)}" placeholder="Ej: 11 2345 6789">${checkoutErrors.phone ? `<span class="field-error">${esc(checkoutErrors.phone)}</span>` : ""}</label>
+      ${
+        delivery === "Envío"
+          ? `<label class="full"><span>Dirección de entrega <span class="req-tag">*</span></span><input id="address" class="lite-input ${checkoutErrors.address ? "is-invalid" : ""}" value="${esc(checkoutAddress)}" placeholder="Calle, número, piso/depto">${checkoutErrors.address ? `<span class="field-error">${esc(checkoutErrors.address)}</span>` : ""}</label>
+             <label class="full"><span>Monto de envío extra (ARS) <span class="opt-tag">(opcional)</span></span><input id="shippingCostInput" type="number" min="0" class="lite-input" value="${esc(checkoutShippingCost)}" placeholder="0"></label>`
+          : ""
+      }
+    </div>`;
+    footerHtml = `<button type="button" class="btn g" data-action="checkout-prev">${iconArrowLeft(17)}<span>Atrás</span></button><button type="button" class="btn" data-action="checkout-next"><span>Continuar</span>${iconArrowRight(17)}</button>`;
+  } else {
+    const received = Number(checkoutCashReceived) || 0;
+    const hasCashInfo = payment === "Efectivo" && checkoutCashReceived !== "";
+    stepBody = `<div class="lite-total"><div><span>TOTAL FINAL</span>${shippingExtra > 0 ? `<div class="lite-note">Incluye ${money(shippingExtra)} de envío</div>` : ""}</div><strong>${money(finalTotal)}</strong></div>
+    <div class="checkout-summary">
+      <div class="checkout-summary-row"><span>Productos</span><b>${qty} ${qty === 1 ? "unidad" : "unidades"} (${money(sum)})</b></div>
+      ${discount > 0 ? `<div class="checkout-summary-row"><span>Descuento</span><b>−${money(discount)}</b></div>` : ""}
+      <div class="checkout-summary-row"><span>Medio de pago</span><b>${esc(payment)}</b></div>
+      ${hasCashInfo ? `<div class="checkout-summary-row"><span>Paga con</span><b>${money(received)}</b></div><div class="checkout-summary-row"><span>Vuelto</span><b>${money(Math.max(0, received - finalTotal))}</b></div>` : ""}
+      <div class="checkout-summary-row"><span>Entrega</span><b>${esc(delivery)}</b></div>
+      ${delivery === "Envío" ? `<div class="checkout-summary-row"><span>Envío extra</span><b>${money(shippingExtra)}</b></div>` : ""}
+      <div class="checkout-summary-row"><span>Cliente</span><b>${esc(checkoutCustomer.trim() || "Consumidor final")}</b></div>
+      ${checkoutPhone.trim() ? `<div class="checkout-summary-row"><span>Teléfono / WhatsApp</span><b>${esc(checkoutPhone.trim())}</b></div>` : ""}
+      ${delivery === "Envío" ? `<div class="checkout-summary-row"><span>Dirección</span><b>${esc(checkoutAddress.trim())}</b></div>` : ""}
+    </div>
+    <p class="lite-note" style="margin-top:14px">Al finalizar se registrará el cobro y se actualizará el stock automáticamente.</p>`;
+    footerHtml = `<button type="button" class="btn g" data-action="checkout-prev">${iconArrowLeft(17)}<span>Atrás</span></button><button type="button" class="btn" data-action="confirm-sale">${iconCheck(17)}<span>Finalizar venta</span></button>`;
+  }
+
+  openModal(
+    "Cobrar venta",
+    `Etapa ${checkoutStep} de 3 · Revisá y confirmá la operación.`,
+    `${stepperHtml}<div class="checkout-step-body">${stepBody}</div>`,
+    footerHtml,
   );
-  $("#discountInput").addEventListener("input", (e) => {
-    discount = Math.max(0, Math.min(sum, Number(e.target.value) || 0));
-    $("#payTotal").textContent = money(sum - discount);
-  });
+
+  if (checkoutStep === 1) {
+    $("#discountInput")?.addEventListener("input", (e) => {
+      discount = Math.max(0, Math.min(sum, Number(e.target.value) || 0));
+      const newTotal = Math.max(0, sum - discount);
+      $("#payTotal").textContent = money(newTotal);
+      updateCashChangeUI(newTotal);
+      saveCart();
+    });
+    $("#cashReceivedInput")?.addEventListener("input", (e) => {
+      checkoutCashReceived = e.target.value;
+      updateCashChangeUI(Math.max(0, sum - discount));
+    });
+    updateCashChangeUI(baseTotal);
+  } else if (checkoutStep === 2) {
+    $("#customer")?.addEventListener("input", (e) => {
+      checkoutCustomer = e.target.value;
+      if (checkoutErrors.customer && checkoutCustomer.trim()) {
+        delete checkoutErrors.customer;
+        e.target.classList.remove("is-invalid");
+        e.target.parentElement?.querySelector(".field-error")?.remove();
+      }
+    });
+    $("#customerPhone")?.addEventListener("input", (e) => {
+      checkoutPhone = e.target.value;
+      if (checkoutErrors.phone && checkoutPhone.trim()) {
+        delete checkoutErrors.phone;
+        e.target.classList.remove("is-invalid");
+        e.target.parentElement?.querySelector(".field-error")?.remove();
+      }
+    });
+    $("#address")?.addEventListener("input", (e) => {
+      checkoutAddress = e.target.value;
+      if (checkoutErrors.address && checkoutAddress.trim()) {
+        delete checkoutErrors.address;
+        e.target.classList.remove("is-invalid");
+        e.target.parentElement?.querySelector(".field-error")?.remove();
+      }
+    });
+    $("#shippingCostInput")?.addEventListener("input", (e) => {
+      checkoutShippingCost = e.target.value;
+    });
+  }
 }
 function confirmSale() {
+  if (checkoutStep < 3) {
+    if (!validateCheckoutStep(checkoutStep)) return;
+    checkoutStep = 3;
+    return renderCheckout();
+  }
   const missing = Object.entries(cart).find(
     ([id, q]) =>
       (state.products.find((p) => p.id === Number(id))?.stock || 0) < q,
   );
   if (missing)
     return toast("Stock insuficiente para confirmar esta venta.", true);
-  const customer = ($("#customer")?.value || "").trim(),
-    address = ($("#address")?.value || "").trim();
-  if (!customer) return toast("Ingresá el nombre del cliente.", true);
-  if (delivery === "Envío" && !address)
-    return toast("Ingresá la dirección de envío.", true);
+  if (!validateCheckoutStep(2)) {
+    checkoutStep = 2;
+    return renderCheckout();
+  }
+  const customer =
+      checkoutCustomer.trim() ||
+      (delivery === "Mostrador" ? "Consumidor final" : ""),
+    address = checkoutAddress.trim(),
+    phone = checkoutPhone.trim();
   const id = "V-" + String(1001 + state.sales.length);
   let rows = Object.entries(cart).map(([pid, qty]) => {
     const p = state.products.find((p) => p.id === Number(pid));
@@ -1738,29 +2106,113 @@ function confirmSale() {
     });
     return { id: p.id, name: p.name, qty, price: p.price };
   });
-  state.sales.unshift({
+  const { shippingExtra, finalTotal } = getCheckoutTotals();
+  const received =
+    payment === "Efectivo" && checkoutCashReceived !== ""
+      ? Number(checkoutCashReceived) || 0
+      : null;
+  const saleRecord = {
     id,
     at: new Date().toISOString(),
-    total: Math.max(0, cartTotal() - discount),
+    total: finalTotal,
+    discount,
+    shippingCost: shippingExtra,
     payment,
+    cashReceived: received,
+    change: received !== null ? Math.max(0, received - finalTotal) : null,
     delivery,
     customer,
-    items: rows,
-  });
-  state.deliveries.unshift({
-    id: "P-" + String(101 + state.deliveries.length),
-    sale: id,
-    customer,
-    type: delivery,
     address,
-    status: "Pendiente",
-  });
+    phone,
+    items: rows,
+  };
+  state.sales.unshift(saleRecord);
+  if (delivery !== "Mostrador") {
+    state.deliveries.unshift({
+      id: "P-" + String(101 + state.deliveries.length),
+      sale: id,
+      customer,
+      type: delivery,
+      address,
+      phone,
+      shippingCost: shippingExtra,
+      status: "Pendiente",
+    });
+  }
   cart = {};
+  discount = 0;
+  checkoutStep = 1;
+  prevCheckoutStep = 1;
+  checkoutCustomer = "";
+  checkoutAddress = "";
+  checkoutPhone = "";
+  checkoutShippingCost = "";
+  checkoutCashReceived = "";
+  checkoutShowItems = false;
+  checkoutErrors = {};
+  clearSavedCart();
   saveState();
-  closeModal();
   render();
-  tone("success");
+  renderCheckoutSuccess(saleRecord);
+  tone("sale");
   toast("Venta registrada con éxito");
+}
+function renderCheckoutSuccess(sale) {
+  const sparkles = [
+    ["-58px", "-46px", "-25deg", "0.08s", "#22c55e"],
+    ["56px", "-48px", "25deg", "0.11s", "#38bdf8"],
+    ["-72px", "6px", "-40deg", "0.14s", "#facc15"],
+    ["72px", "4px", "40deg", "0.12s", "#34d399"],
+    ["-46px", "54px", "18deg", "0.16s", "#60a5fa"],
+    ["48px", "52px", "-18deg", "0.15s", "#22c55e"],
+    ["0px", "-70px", "0deg", "0.1s", "#4ade80"],
+    ["-26px", "-64px", "-12deg", "0.18s", "#fbbf24"],
+    ["28px", "-62px", "14deg", "0.17s", "#38bdf8"],
+    ["0px", "68px", "0deg", "0.19s", "#34d399"],
+  ]
+    .map(
+      ([tx, ty, rot, delay, color]) =>
+        `<span class="sale-sparkle" style="--tx:${tx};--ty:${ty};--rot:${rot};--delay:${delay};--sp-color:${color}" aria-hidden="true"></span>`,
+    )
+    .join("");
+
+  const changeHtml =
+    sale.change !== null && sale.change > 0
+      ? `<div class="sale-success-meta-row"><span>Vuelto entregado</span><strong>${money(sale.change)}</strong></div>`
+      : "";
+
+  const bodyHtml = `<div class="sale-success-stage">
+    <div class="sale-check-wrap" aria-hidden="true">
+      <span class="sale-ring"></span>
+      <span class="sale-ring sale-ring-2"></span>
+      ${sparkles}
+      <svg class="sale-check-svg" viewBox="0 0 64 64" fill="none">
+        <circle class="sale-check-bg" cx="32" cy="32" r="28" />
+        <circle class="sale-check-circle" cx="32" cy="32" r="28" />
+        <path class="sale-check-mark" d="M20 33.5L28.5 41.5L45 24" />
+      </svg>
+    </div>
+    <h3 class="sale-success-heading">¡Compra procesada con éxito!</h3>
+    <p class="sale-success-sub">Comprobante <b>${esc(sale.id)}</b> · Stock actualizado</p>
+    <div class="sale-success-card">
+      <div class="sale-success-total">
+        <span>Total cobrado</span>
+        <strong>${money(sale.total)}</strong>
+      </div>
+      <div class="sale-success-meta">
+        <div class="sale-success-meta-row"><span>Medio de pago</span><b>${esc(sale.payment)}</b></div>
+        <div class="sale-success-meta-row"><span>Entrega</span><b>${esc(sale.delivery)}</b></div>
+        <div class="sale-success-meta-row"><span>Cliente</span><b>${esc(sale.customer || "Consumidor final")}</b></div>
+        ${changeHtml}
+      </div>
+    </div>
+  </div>`;
+
+  const footerHtml = `<button type="button" class="btn g" data-action="sale:${esc(sale.id)}">Ver comprobante</button><button type="button" class="btn" id="checkoutSuccessDone" data-action="close-modal">${iconCheck(17)}<span>Listo</span></button>`;
+
+  openModal("¡Venta exitosa!", `Operación ${sale.id} registrada.`, bodyHtml, footerHtml);
+  $("#modal").classList.add("checkout-success-modal");
+  $("#checkoutSuccessDone")?.focus();
 }
 function refreshProductProfit() {
   const cost = Number($('#productForm [name="cost"]')?.value || 0),
@@ -2400,6 +2852,7 @@ document.addEventListener("click", (e) => {
     if ((cart[p.id] || 0) >= p.stock)
       return toast("Sin más existencias.", true);
     cart[p.id] = (cart[p.id] || 0) + 1;
+    saveCart();
     uiMotion = { type: "pos-add", id: p.id };
     render();
     tone("add");
@@ -2413,6 +2866,8 @@ document.addEventListener("click", (e) => {
       (cart[id] || 0) + Number(target.dataset.delta),
     );
     if (cart[id] <= 0) delete cart[id];
+    if (!Object.keys(cart).length) discount = 0;
+    saveCart();
     uiMotion = { type: "pos-qty", id };
     render();
     tone("add");
@@ -2425,25 +2880,63 @@ document.addEventListener("click", (e) => {
     return;
   }
   if (target.dataset.payment) {
-    const customer = $("#customer")?.value || "",
-      addr = $("#address")?.value || "";
+    syncCheckoutInputs();
     payment = target.dataset.payment;
     renderCheckout();
-    $("#customer").value = customer;
-    if ($("#address")) $("#address").value = addr;
     return;
   }
   if (target.dataset.delivery) {
-    const customer = $("#customer")?.value || "",
-      addr = $("#address")?.value || "";
+    syncCheckoutInputs();
     delivery = target.dataset.delivery;
+    checkoutErrors = {};
     renderCheckout();
-    $("#customer").value = customer;
-    if ($("#address")) $("#address").value = addr;
+    return;
+  }
+  if (target.dataset.checkoutStep) {
+    const nextStep = Number(target.dataset.checkoutStep);
+    if (nextStep === checkoutStep) return;
+    if (nextStep < checkoutStep) {
+      syncCheckoutInputs();
+      checkoutStep = nextStep;
+      renderCheckout();
+      return;
+    }
+    for (let s = checkoutStep; s < nextStep; s++) {
+      if (!validateCheckoutStep(s)) return;
+    }
+    checkoutStep = nextStep;
+    renderCheckout();
     return;
   }
   const code = target.dataset.action;
   if (!code) return;
+  if (code === "toggle-checkout-items") {
+    syncCheckoutInputs();
+    checkoutShowItems = !checkoutShowItems;
+    renderCheckout();
+    return;
+  }
+  if (code === "cash-exact") {
+    const total = Math.max(0, cartTotal() - discount);
+    checkoutCashReceived = String(total);
+    const inp = $("#cashReceivedInput");
+    if (inp) inp.value = checkoutCashReceived;
+    updateCashChangeUI(total);
+    return;
+  }
+  if (code === "checkout-next") {
+    if (!validateCheckoutStep(checkoutStep)) return;
+    checkoutStep = Math.min(3, checkoutStep + 1);
+    renderCheckout();
+    return;
+  }
+  if (code === "checkout-prev") {
+    syncCheckoutInputs();
+    checkoutErrors = {};
+    checkoutStep = Math.max(1, checkoutStep - 1);
+    renderCheckout();
+    return;
+  }
   if (code === "jump-cart") {
     cartCollapsed = false;
     render();
@@ -2454,6 +2947,22 @@ document.addEventListener("click", (e) => {
   }
   if (code === "toggle-cart") {
     cartCollapsed = !cartCollapsed;
+    const cartEl = document.querySelector("#v .cart");
+    if (cartEl) {
+      cartEl.classList.toggle("collapsed", cartCollapsed);
+      cartEl.classList.toggle("expanded", !cartCollapsed);
+      const headerEl = cartEl.querySelector(".ch");
+      const toggleBtn = cartEl.querySelector(".cart-toggle-btn");
+      if (headerEl) headerEl.setAttribute("aria-expanded", String(!cartCollapsed));
+      if (toggleBtn) {
+        toggleBtn.setAttribute(
+          "aria-label",
+          cartCollapsed ? "Desplegar venta actual" : "Minimizar venta actual",
+        );
+        toggleBtn.innerHTML = cartCollapsed ? chevronUp() : chevronDown();
+      }
+      return;
+    }
     render();
     return;
   }
@@ -2494,6 +3003,8 @@ document.addEventListener("click", (e) => {
   }
   if (code === "confirm-clear-cart") {
     cart = {};
+    discount = 0;
+    clearSavedCart();
     closeModal();
     render();
     tone("remove");
@@ -2501,6 +3012,8 @@ document.addEventListener("click", (e) => {
   }
   if (code === "clear-cart") {
     cart = {};
+    discount = 0;
+    clearSavedCart();
     render();
     return toast("Carrito vaciado");
   }
@@ -2511,6 +3024,8 @@ document.addEventListener("click", (e) => {
     state.deliveries = [];
     state.movements = [];
     cart = {};
+    discount = 0;
+    clearSavedCart();
     saveState();
     closeModal();
     render();
@@ -2519,6 +3034,9 @@ document.addEventListener("click", (e) => {
   }
   if (code === "confirm-close-cash") {
     state.cash = false;
+    cart = {};
+    discount = 0;
+    clearSavedCart();
     saveState();
     closeModal();
     render();
@@ -2702,6 +3220,8 @@ document.addEventListener("keydown", (e) => {
     if (delta > 0 && (cart[id] || 0) >= product.stock) return;
     cart[id] = (cart[id] || 0) + delta;
     if (cart[id] <= 0) delete cart[id];
+    if (!Object.keys(cart).length) discount = 0;
+    saveCart();
     uiMotion = { type: "pos-qty", id };
     render();
     tone("add");
