@@ -1959,7 +1959,7 @@ function renderCheckout() {
           <button type="button" data-payment="Transferencia" class="${payment === "Transferencia" ? "active" : ""}">${iconCreditCard(18)}<span>Transferencia</span></button>
           <button type="button" data-payment="QR" class="${payment === "QR" ? "active" : ""}">${iconQrCode(18)}<span>QR</span></button>
           <button type="button" class="payment-arca-disabled" disabled aria-label="Facturación electrónica ARCA (no incluida)" title="Facturación electrónica ARCA no incluida de forma nativa">
-            <img src="https://www.afip.gob.ar/frameworkAFIP/img/Arca-logo-grande-blanco.svg" alt="ARCA" class="arca-logo-icon" />
+            <img src="https://www.afip.gob.ar/frameworkAFIP/img/logo_arca_blanco.svg" alt="ARCA" class="arca-logo-icon" />
           </button>
         </div>
       </label>
