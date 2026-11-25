@@ -68,6 +68,10 @@ Object.assign(ICON, {
 });
 const chevronRight = () =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>`;
+const chevronDown = () =>
+  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`;
+const chevronUp = () =>
+  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>`;
 const posPlus = () =>
   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`;
 const posMinus = () =>
@@ -286,6 +290,7 @@ let view = "home",
   stockFilter = "all",
   stockViewMode = "cards",
   posViewMode = "cards",
+  cartCollapsed = true,
   soundStyle = "suave",
   globalSearchTerm = "",
   discount = 0,
@@ -603,6 +608,11 @@ function renderProductCard(p, mode = "pos") {
   const idText = p.barcode ? `ID: ${esc(p.barcode)}` : `ID: ${p.id}`;
   const outOfStock = p.stock <= 0;
   const isLowStock = p.stock <= p.min;
+  const parsed = parseProductTitle(p.name);
+  const displayName = isPos && parsed.spec ? parsed.title : p.name;
+  const specBadge = parsed.spec
+    ? `<span class="pro-card-spec" title="Presentación / Gramaje">${esc(parsed.spec)}</span>`
+    : "";
 
   const mediaContent = p.image
     ? `<img src="${p.image}" alt="${esc(p.name)}" class="pro-card-img" loading="lazy">`
@@ -613,10 +623,12 @@ function renderProductCard(p, mode = "pos") {
   const metaHtml = isPos
     ? `<div class="pro-card-meta">
          <span class="pro-card-stock ${isLowStock ? "warn" : "ok"}">${outOfStock ? "Agotado" : `${p.stock} u. disp.`}</span>
+         ${specBadge}
          <span class="pro-card-cat">${esc(p.cat || "")}</span>
        </div>`
     : `<div class="pro-card-meta">
          <span class="pro-card-stock ${isLowStock ? "warn" : "ok"}">${isLowStock ? "Reponer: " : "Stock: "}${p.stock} u.</span>
+         ${specBadge}
          <span class="pro-card-margin">Margen: ${marginOnSale(p.cost, p.price).toFixed(0)}%</span>
        </div>`;
 
@@ -640,7 +652,7 @@ function renderProductCard(p, mode = "pos") {
       <div class="pro-card-body">
         <div class="pro-card-row">
           <div class="pro-card-left">
-            <h3 class="pro-card-title" title="${esc(p.name)}">${esc(p.name)}</h3>
+            <h3 class="pro-card-title" title="${esc(p.name)}">${esc(displayName)}</h3>
             <div class="pro-card-id">${idText}</div>
           </div>
           <div class="pro-card-price">${money(p.price)}</div>
@@ -658,6 +670,11 @@ function renderProductListRow(p, mode = "pos") {
   const idText = p.barcode ? `ID: ${esc(p.barcode)}` : `ID: ${p.id}`;
   const outOfStock = p.stock <= 0;
   const isLowStock = p.stock <= p.min;
+  const parsed = parseProductTitle(p.name);
+  const displayName = isPos && parsed.spec ? parsed.title : p.name;
+  const specBadge = parsed.spec
+    ? `<span class="pro-card-spec" title="Presentación / Gramaje">${esc(parsed.spec)}</span>`
+    : "";
 
   const mediaContent = p.image
     ? `<img src="${p.image}" alt="${esc(p.name)}" class="pro-list-img" loading="lazy">`
@@ -672,6 +689,7 @@ function renderProductListRow(p, mode = "pos") {
          <span class="pro-list-cat">${esc(p.cat || "")}</span>
          <span class="pro-list-dot">·</span>
          <span class="pro-card-stock ${isLowStock ? "warn" : "ok"}">${outOfStock ? "Agotado" : `${p.stock} u. disp.`}</span>
+         ${specBadge ? `<span class="pro-list-dot">·</span>${specBadge}` : ""}
        </div>`
     : `<div class="pro-list-meta">
          <span class="pro-list-id">${idText}</span>
@@ -679,11 +697,12 @@ function renderProductListRow(p, mode = "pos") {
          <span class="pro-list-cat">${esc(p.cat || "")}</span>
          <span class="pro-list-dot">·</span>
          <span class="pro-card-stock ${isLowStock ? "warn" : "ok"}">${isLowStock ? "Reponer: " : "Stock: "}${p.stock} u.</span>
+         ${specBadge ? `<span class="pro-list-dot">·</span>${specBadge}` : ""}
        </div>`;
 
   const actionHtml = isPos
     ? `<button type="button" class="pro-list-btn" data-add="${p.id}" ${outOfStock ? "disabled" : ""} aria-label="Agregar ${esc(p.name)} al carrito">
-         ${outOfStock ? "Sin stock" : "+ Agregar"}
+         ${outOfStock ? "Sin stock" : '<span class="pro-btn-text">+ Agregar</span><span class="pro-btn-plus" aria-hidden="true">+</span>'}
        </button>`
     : `<button type="button" class="pro-list-btn" data-action="edit:${p.id}" aria-label="Editar ${esc(p.name)}">
          Editar
@@ -699,7 +718,7 @@ function renderProductListRow(p, mode = "pos") {
         ${mediaContent}
       </div>
       <div class="pro-list-info" ${clickAttr} role="button" tabindex="0">
-        <h3 class="pro-list-title" title="${esc(p.name)}">${esc(p.name)}</h3>
+        <h3 class="pro-list-title" title="${esc(p.name)}">${esc(displayName)}</h3>
         ${metaHtml}
       </div>
       <div class="pro-list-right">
@@ -934,15 +953,18 @@ function pos() {
     ),
     qty = Object.values(cart).reduce((a, b) => a + b, 0),
     total = cartTotal();
-  return `${title("Punto de venta", "Venta rápida, cobro y actualización de stock desde una misma pantalla.", `<span class="pill ${state.cash ? "" : "w"}">${state.cash ? "CAJA ABIERTA" : "CAJA CERRADA"}</span>${action("Vaciar", "clear-cart")}`)}<div class="pos"><div><div class="bar pos-bar"><input id="posSearch" class="search" placeholder="Buscar por nombre o código..." value="${esc(searchTerm)}" aria-label="Buscar producto"><div class="stock-view-toggle pos-view-toggle" role="group" aria-label="Modo de visualización en punto de venta"><button type="button" class="${posViewMode === "cards" ? "on" : ""}" data-pos-view="cards" title="Vista en tarjetas (Foto 1)">${iconGrid()} Tarjetas</button><button type="button" class="${posViewMode === "list" ? "on" : ""}" data-pos-view="list" title="Vista en lista">${iconList()} Lista</button></div></div><div class="chips">${cats.map((c) => `<button class="${category === c ? "on" : ""}" data-category="${esc(c)}">${esc(c)}</button>`).join("")}</div>${posViewMode === "cards" ? `<div id="grid" class="grid pro-cards-grid">${items.map((p) => renderProductCard(p, "pos")).join("") || '<p class="lite-empty" style="grid-column:1/-1">No hay productos para este filtro.</p>'}</div>` : `<div id="grid" class="pro-list-container">${items.map((p) => renderProductListRow(p, "pos")).join("") || '<p class="lite-empty">No hay productos para este filtro.</p>'}</div>`}</div><div class="card cart"><div class="ch"><div><h2>Venta actual</h2><p>${qty} unidades</p></div><span class="pill a">NUEVA</span></div><div class="lines" id="lines">${
+  return `${title("Punto de venta", "Venta rápida, cobro y actualización de stock desde una misma pantalla.", `<span class="pill ${state.cash ? "" : "w"}">${state.cash ? "CAJA ABIERTA" : "CAJA CERRADA"}</span>${action("Vaciar", "clear-cart")}`)}<div class="pos"><div><div class="bar pos-bar"><input id="posSearch" class="search" placeholder="Buscar por nombre o código..." value="${esc(searchTerm)}" aria-label="Buscar producto"><div class="stock-view-toggle pos-view-toggle" role="group" aria-label="Modo de visualización en punto de venta"><button type="button" class="${posViewMode === "cards" ? "on" : ""}" data-pos-view="cards" title="Vista en tarjetas (Foto 1)">${iconGrid()} Tarjetas</button><button type="button" class="${posViewMode === "list" ? "on" : ""}" data-pos-view="list" title="Vista en lista">${iconList()} Lista</button></div></div><div class="chips">${cats.map((c) => `<button class="${category === c ? "on" : ""}" data-category="${esc(c)}">${esc(c)}</button>`).join("")}</div>${posViewMode === "cards" ? `<div id="grid" class="grid pro-cards-grid">${items.map((p) => renderProductCard(p, "pos")).join("") || '<p class="lite-empty" style="grid-column:1/-1">No hay productos para este filtro.</p>'}</div>` : `<div id="grid" class="pro-list-container">${items.map((p) => renderProductListRow(p, "pos")).join("") || '<p class="lite-empty">No hay productos para este filtro.</p>'}</div>`}</div><div class="card cart ${cartCollapsed ? "collapsed" : "expanded"}"><div class="ch" data-action="toggle-cart" role="button" tabindex="0" aria-expanded="${!cartCollapsed}" aria-label="Alternar venta actual"><div class="ch-info"><h2>Venta actual</h2><p>${qty} ${qty === 1 ? "unidad" : "unidades"} · <b class="cart-ch-total">${money(total)}</b></p></div><div class="ch-actions"><span class="pill a">NUEVA</span><button type="button" class="cart-toggle-btn" data-action="toggle-cart" aria-label="${cartCollapsed ? "Desplegar venta actual" : "Minimizar venta actual"}">${cartCollapsed ? chevronUp() : chevronDown()}</button></div></div><div class="cart-body"><div class="lines" id="lines">${
     Object.entries(cart)
       .map(([id, q]) => {
         const p = state.products.find((p) => p.id === Number(id));
-        return `<div class="ln">${avatar(p)}<div class="t"><b>${esc(p?.name || "")}</b><small>${money(p?.price || 0)} c/u</small></div><div class="q"><button class="pos-minus-button" data-qty="${id}" data-delta="-1" aria-label="Quitar uno">${posMinus()}</button><span class="num">${q}</span><button class="pos-plus-button" data-qty="${id}" data-delta="1" aria-label="Agregar uno">${posPlus()}</button></div></div>`;
+        const parsed = parseProductTitle(p?.name || "");
+        const titleText = parsed.title || p?.name || "";
+        const specText = parsed.spec ? `${esc(parsed.spec)} · ` : "";
+        return `<div class="ln">${avatar(p)}<div class="t"><b title="${esc(p?.name || "")}">${esc(titleText)}</b><small>${specText}${money(p?.price || 0)} c/u</small></div><div class="q"><button class="pos-minus-button" data-qty="${id}" data-delta="-1" aria-label="Quitar uno">${posMinus()}</button><span class="num">${q}</span><button class="pos-plus-button" data-qty="${id}" data-delta="1" aria-label="Agregar uno">${posPlus()}</button></div></div>`;
       })
       .join("") ||
     '<p class="lite-empty">Tocá un producto para empezar la venta.</p>'
-  }</div><div class="tot"><div class="row"><span>Subtotal</span><b class="num">${money(total)}</b></div><div class="row"><span>Productos</span><span>${qty}</span></div><div class="row t2"><span>Total</span><b class="num">${money(total)}</b></div><p class="lite-note">Medio de pago y entrega se eligen al cobrar.</p><button class="btn" data-action="checkout" ${qty === 0 || !state.cash ? "disabled" : ""}>Cobrar venta</button></div></div></div>${qty > 0 ? `<div class="mobile-pos-dock" role="group" aria-label="Acciones de venta en celular"><button type="button" class="mobile-pos-jump" data-action="jump-cart" aria-label="Ir al carrito con ${qty} unidades">Carrito · ${qty} u.</button><button type="button" class="mobile-pos-charge" data-action="checkout" ${state.cash ? "" : "disabled"}>${state.cash ? "Cobrar " + money(total) : "Caja cerrada"}</button></div>` : ""}`;
+  }</div><div class="tot"><div class="row"><span>Subtotal</span><b class="num">${money(total)}</b></div><div class="row"><span>Productos</span><span>${qty}</span></div><div class="row t2"><span>Total</span><b class="num">${money(total)}</b></div><p class="lite-note">Medio de pago y entrega se eligen al cobrar.</p><button class="btn" data-action="checkout" ${qty === 0 || !state.cash ? "disabled" : ""}>Cobrar venta</button></div></div></div></div>`;
 }
 
 function cartTotal() {
@@ -2391,9 +2413,16 @@ document.addEventListener("click", (e) => {
   const code = target.dataset.action;
   if (!code) return;
   if (code === "jump-cart") {
+    cartCollapsed = false;
+    render();
     document
       .querySelector("#v .cart")
       ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  if (code === "toggle-cart") {
+    cartCollapsed = !cartCollapsed;
+    render();
     return;
   }
   if (code.startsWith("sound-preview:")) {
