@@ -242,10 +242,51 @@ const state = {
     min: p[5],
     emoji: p[6],
     barcode: p[7],
-    published: i < 6,
+    published: true,
     image: p[8] || "",
   })),
-  categories: [...new Set(SEED.map((p) => p[1]))],
+  categories: [
+    ...new Set([
+      ...SEED.map((p) => p[1]),
+      "Bebidas alcohólicas",
+      "Caramelos",
+      "Lácteos",
+      "Panadería",
+      "Panadería dulce",
+      "Postres",
+      "Frutas y Verduras",
+      "Carnes",
+      "Pollería",
+      "Congelados",
+      "Sin gluten",
+      "Limpieza",
+      "Cuidado personal",
+      "Farmacia",
+      "Bebé",
+      "Mascotas",
+      "Hogar",
+      "Ferretería",
+      "Automotor",
+      "Tecnología",
+      "Librería",
+      "Juguetes",
+      "Regalos",
+      "Navidad",
+      "Indumentaria",
+      "Abrigos",
+      "Buzo",
+      "Sweater",
+      "Pantalones",
+      "Bermudas",
+      "Shorts",
+      "Calzas",
+      "Vestidos",
+      "Calzado",
+      "Sombreros",
+      "Lencería",
+      "Ropa interior",
+    ]),
+  ],
   sales: [
     {
       id: "V-1001",
@@ -2679,13 +2720,33 @@ function openGlobalSearch(initialTerm) {
     input.setSelectionRange(len, len);
   }
 }
+function getPublicCatalogUrl() {
+  const host = location.hostname || "";
+  if (!host || host === "localhost" || host === "127.0.0.1") {
+    return "https://tienda.comerciando-andes.vercel.app";
+  }
+  if (host.startsWith("tienda.") || host.startsWith("catalogo.")) {
+    return location.origin;
+  }
+  return `${location.protocol}//tienda.${host}`;
+}
 function preview() {
   const items = state.products.filter((p) => p.published);
+  const publicUrl = getPublicCatalogUrl();
   openModal(
     "Catálogo virtual Lite",
-    "Vista previa del catálogo público de productos.",
-    `<div class="lite-catalog-preview">${items.map((p) => `<div class="lite-preview-item">${avatar(p)}<b>${esc(p.name)}</b><small>${money(p.price)}</small></div>`).join("") || '<p class="lite-empty">No hay productos publicados.</p>'}</div>`,
-    `<button class="btn" data-action="close-modal">Cerrar</button>`,
+    "Compartí el link público con tus clientes o abrí la tienda online.",
+    `<div class="lite-catalog-link-box">
+       <label for="catalogPublicUrl">Link público del catálogo (subdominio)</label>
+       <div class="lite-catalog-link-row">
+         <input id="catalogPublicUrl" type="text" readonly value="${esc(publicUrl)}" aria-label="Link público del catálogo" />
+         <button type="button" class="btn sm" data-action="copy-catalog-url">Copiar link</button>
+       </div>
+       <small class="lite-note">Si aún no configuraste el subdominio en Vercel, podés acceder directo en <code>/catalogo</code>.</small>
+     </div>
+     <div class="lite-catalog-preview">${items.map((p) => `<div class="lite-preview-item">${avatar(p)}<b>${esc(p.name)}</b><small>${money(p.price)}</small></div>`).join("") || '<p class="lite-empty">No hay productos publicados.</p>'}</div>`,
+    `<button class="btn g" data-action="close-modal">Cerrar</button>
+     <a class="btn" href="catalogo.html" target="_blank" rel="noopener noreferrer">Abrir catálogo</a>`,
   );
 }
 function saveSettings() {
@@ -3069,6 +3130,23 @@ document.addEventListener("click", (e) => {
     );
   }
   if (code === "preview") return preview();
+  if (code === "copy-catalog-url") {
+    const url = $("#catalogPublicUrl")?.value || getPublicCatalogUrl();
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(
+        () => toast("Link público copiado"),
+        () => toast("No se pudo copiar automáticamente"),
+      );
+    } else {
+      const inp = $("#catalogPublicUrl");
+      if (inp) {
+        inp.select();
+        document.execCommand("copy");
+      }
+      toast("Link público copiado");
+    }
+    return;
+  }
   if (code === "save-settings") return saveSettings();
   if (code === "reset-demo") {
     if (

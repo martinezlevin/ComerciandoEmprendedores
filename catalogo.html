@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es-AR" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f5f5f7" />
+    <script>
+      try {
+        const savedTheme = localStorage.getItem(
+          "comerciando_emprendedores_theme_v1",
+        );
+        if (savedTheme === "dark" || savedTheme === "light") {
+          document.documentElement.dataset.theme = savedTheme;
+        }
+      } catch {}
+    </script>
+    <link rel="icon" href="img/favicon.ico" sizes="any" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>Catálogo Online — Comerciando</title>
+    <meta
+      name="description"
+      content="Catálogo online estilo market para explorar categorías, buscar productos y realizar tu compra."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="catalogo.css" />
+  </head>
+  <body class="storefront-body">
+    <header class="store-top">
+      <div class="store-top-inner">
+        <a href="#catalogo" class="store-brand" aria-label="Inicio del catálogo">
+          <div class="logo">
+            <img src="img/logo.png" alt="Comerciando" />
+          </div>
+          <div class="store-brand-copy">
+            <b id="storeName">Mi emprendimiento</b>
+            <small>Catálogo Online</small>
+          </div>
+        </a>
+
+        <div class="store-search-wrap">
+          <svg
+            class="store-search-ic"
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input
+            type="search"
+            id="storeSearch"
+            class="store-search-input"
+            placeholder="Buscar productos, marcas o categorías..."
+            aria-label="Buscar productos en el catálogo"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="store-top-actions">
+          <button
+            type="button"
+            class="btn g sm store-auth-btn"
+            id="storeAuthBtn"
+            aria-label="Iniciar sesión"
+          ></button>
+
+          <button
+            type="button"
+            class="btn g sm store-theme-btn"
+            id="themeToggleBtn"
+            aria-label="Cambiar tema claro u oscuro"
+            title="Cambiar tema"
+          >
+            <span id="themeToggleIcon" aria-hidden="true"></span>
+            <span id="themeToggleLabel">Oscuro</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn sm store-cart-nav-btn"
+            id="storeCartNavBtn"
+            aria-label="Abrir tu carrito"
+            aria-controls="storeCartPanel"
+            aria-expanded="false"
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="8" cy="21" r="1" />
+              <circle cx="19" cy="21" r="1" />
+              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57L22 6H5.12" />
+            </svg>
+            <span class="store-cart-nav-label">Carrito</span>
+            <span class="store-cart-badge" id="storeCartBadge">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="store-main" id="catalogo">
+      <div class="store-layout">
+        <section class="store-catalog-col" aria-label="Listado de productos">
+          <div class="store-market-banner">
+            <div class="store-market-meta">
+              <div class="store-market-badges">
+                <span class="store-status-pill">
+                  <span class="store-status-dot"></span> Abierto ahora
+                </span>
+                <span class="store-delivery-pill">Retiro en local · Envío a domicilio</span>
+              </div>
+              <h1 id="storeHeroTitle">Comprá online en minutos</h1>
+              <p id="storeHeroSub">
+                Explorá las categorías, sumá productos con un toque y confirmá tu pedido al instante.
+              </p>
+            </div>
+            <div class="store-view-toggle" role="group" aria-label="Vista de productos">
+              <button
+                type="button"
+                class="on"
+                data-store-view="cards"
+                title="Vista en tarjetas"
+              >
+                Tarjetas
+              </button>
+              <button
+                type="button"
+                data-store-view="list"
+                title="Vista en lista"
+              >
+                Lista
+              </button>
+            </div>
+          </div>
+
+          <div class="store-cats-section">
+            <div class="store-section-head">
+              <h2>Categorías</h2>
+              <span id="storeCountLabel" class="store-count-label"></span>
+            </div>
+            <div
+              class="store-cat-strip"
+              id="storeChips"
+              role="tablist"
+              aria-label="Categorías de productos"
+            ></div>
+          </div>
+
+          <div id="storeGrid" class="store-products-sections"></div>
+        </section>
+
+        <div class="store-cart-backdrop" id="storeCartBackdrop" aria-hidden="true"></div>
+        <aside
+          class="card cart store-cart"
+          id="storeCartPanel"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Tu carrito"
+        >
+          <div class="ch" id="storeCartHeader">
+            <div class="ch-info">
+              <h2>Tu carrito</h2>
+              <p id="storeCartSummary">
+                0 unidades · <b class="cart-ch-total">$ 0</b>
+              </p>
+            </div>
+            <div class="ch-actions">
+              <button
+                type="button"
+                class="btn g sm store-cart-close-btn"
+                id="storeCartCloseBtn"
+                aria-label="Cerrar tu carrito"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <div class="cart-body">
+            <div class="lines" id="storeCartLines">
+              <p class="lite-empty">
+                Tocá un producto para agregarlo a tu carrito.
+              </p>
+            </div>
+
+            <div class="tot">
+              <div class="row">
+                <span>Subtotal</span>
+                <b class="num" id="storeCartSubtotal">$ 0</b>
+              </div>
+              <div class="row">
+                <span>Productos</span>
+                <span id="storeCartQty">0</span>
+              </div>
+              <div class="row t2">
+                <span>Total</span>
+                <b class="num" id="storeCartTotal">$ 0</b>
+              </div>
+              <p class="lite-note">
+                Elegí retiro o envío al finalizar tu compra.
+              </p>
+              <div class="cart-tot-actions">
+                <button
+                  type="button"
+                  class="btn-clear-cart"
+                  id="storeClearCartBtn"
+                  disabled
+                  aria-label="Vaciar carrito"
+                  title="Vaciar carrito"
+                ></button>
+                <button
+                  type="button"
+                  class="btn"
+                  id="storeCheckoutBtn"
+                  disabled
+                >
+                  Realizar compra
+                </button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <div id="storeModal" class="lite-modal" role="presentation">
+      <section
+        class="lite-modal-window store-modal-window"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="storeModalTitle"
+      >
+        <div class="lite-modal-head">
+          <div>
+            <h2 id="storeModalTitle"></h2>
+            <p class="lite-note" id="storeModalSubtitle"></p>
+          </div>
+          <button
+            type="button"
+            class="btn g sm"
+            id="storeModalClose"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="lite-modal-content" id="storeModalBody"></div>
+        <div class="lite-modal-foot" id="storeModalFoot"></div>
+      </section>
+    </div>
+
+    <div class="toast" id="storeToast" role="status" aria-live="polite"></div>
+
+    <script src="catalogo.js"></script>
+  </body>
+</html>

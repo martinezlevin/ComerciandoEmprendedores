@@ -1,0 +1,32 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "tienda\\..*"
+        }
+      ],
+      "destination": "/catalogo.html"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "catalogo\\..*"
+        }
+      ],
+      "destination": "/catalogo.html"
+    },
+    {
+      "source": "/catalogo",
+      "destination": "/catalogo.html"
+    },
+    {
+      "source": "/tienda",
+      "destination": "/catalogo.html"
+    }
+  ]
+}
