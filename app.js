@@ -231,7 +231,20 @@ const SEED = [
     "img/Products/chocolate.webp",
   ],
 ];
+// Opciones curadas para mantener el catálogo ordenado y asociadas a los íconos
+// disponibles en la tienda pública.
+const PREDEFINED_CATEGORIES = [
+  "Almacén", "Desayuno", "Bebidas", "Bebidas alcohólicas", "Golosinas",
+  "Caramelos", "Lácteos", "Panadería", "Panadería dulce", "Postres",
+  "Frutas y Verduras", "Carnes", "Pollería", "Congelados", "Sin gluten",
+  "Limpieza", "Cuidado personal", "Farmacia", "Bebé", "Mascotas", "Hogar",
+  "Ferretería", "Automotor", "Tecnología", "Librería", "Juguetes", "Regalos",
+  "Navidad", "Indumentaria", "Abrigos", "Buzo", "Sweater", "Pantalones",
+  "Bermudas", "Shorts", "Calzas", "Vestidos", "Calzado", "Sombreros",
+  "Lencería", "Ropa interior",
+];
 const state = {
+  categoryCatalogVersion: 1,
   products: SEED.map((p, i) => ({
     id: i + 1,
     name: p[0],
@@ -245,48 +258,7 @@ const state = {
     published: true,
     image: p[8] || "",
   })),
-  categories: [
-    ...new Set([
-      ...SEED.map((p) => p[1]),
-      "Bebidas alcohólicas",
-      "Caramelos",
-      "Lácteos",
-      "Panadería",
-      "Panadería dulce",
-      "Postres",
-      "Frutas y Verduras",
-      "Carnes",
-      "Pollería",
-      "Congelados",
-      "Sin gluten",
-      "Limpieza",
-      "Cuidado personal",
-      "Farmacia",
-      "Bebé",
-      "Mascotas",
-      "Hogar",
-      "Ferretería",
-      "Automotor",
-      "Tecnología",
-      "Librería",
-      "Juguetes",
-      "Regalos",
-      "Navidad",
-      "Indumentaria",
-      "Abrigos",
-      "Buzo",
-      "Sweater",
-      "Pantalones",
-      "Bermudas",
-      "Shorts",
-      "Calzas",
-      "Vestidos",
-      "Calzado",
-      "Sombreros",
-      "Lencería",
-      "Ropa interior",
-    ]),
-  ],
+  categories: [...new Set(SEED.map((p) => p[1]))],
   sales: [
     {
       id: "V-1001",
@@ -328,6 +300,15 @@ const state = {
   sound: true,
   theme: "light",
   store: "Mi emprendimiento",
+  storeConfig: {
+    address: "Av. Corrientes 1234, CABA",
+    lat: -34.603722,
+    lng: -58.381592,
+    hours: "Lunes a Viernes de 9:00 a 19:00 · Sábados de 9:00 a 14:00",
+    alias: "comerciando.demo.mp",
+    cbu: "0000003100012345678901",
+    whatsapp: "5491123456789",
+  },
   users: [
     {
       id: "usr_1",
@@ -404,6 +385,7 @@ function saveState() {
     const payload = {
       products: state.products,
       categories: state.categories,
+      categoryCatalogVersion: state.categoryCatalogVersion,
       sales: state.sales,
       deliveries: state.deliveries,
       movements: state.movements,
@@ -412,6 +394,7 @@ function saveState() {
       soundStyle,
       theme: state.theme,
       store: state.store,
+      storeConfig: state.storeConfig,
       users: state.users,
       stockViewMode,
       posViewMode,
@@ -447,8 +430,13 @@ function loadState() {
       });
     }
     if (Array.isArray(data.categories) && data.categories.length) {
-      state.categories = data.categories;
+      // La versión anterior precargaba todas las opciones como si ya estuvieran
+      // creadas. Al migrar, dejamos sólo las categorías realmente usadas.
+      state.categories = data.categoryCatalogVersion
+        ? data.categories
+        : [...new Set(state.products.map((p) => p.cat).filter(Boolean))];
     }
+    state.categoryCatalogVersion = 1;
     if (Array.isArray(data.sales)) state.sales = data.sales;
     if (Array.isArray(data.deliveries)) state.deliveries = data.deliveries;
     if (Array.isArray(data.movements)) state.movements = data.movements;
@@ -461,6 +449,9 @@ function loadState() {
       document.documentElement.dataset.theme = state.theme;
     }
     if (data.store) state.store = data.store;
+    if (data.storeConfig && typeof data.storeConfig === "object") {
+      state.storeConfig = { ...state.storeConfig, ...data.storeConfig };
+    }
     if (Array.isArray(data.users) && data.users.length) {
       const filtered = data.users.filter((u) => {
         const uName = (typeof u === "string" ? u : u.name || "")
@@ -517,7 +508,9 @@ function loadState() {
         ];
       }
     }
-    const authSessionRaw = localStorage.getItem("comerciando_auth_session");
+    // Las sesiones del dashboard se validan exclusivamente con la cookie HttpOnly
+    // emitida por el servidor; no se importa una sesión local del navegador.
+    const authSessionRaw = null;
     if (authSessionRaw) {
       try {
         const authSession = JSON.parse(authSessionRaw);
@@ -560,6 +553,36 @@ loadState();
 syncCategories();
 restoreCart();
 saveState();
+async function hydrateSellerSession() {
+  try {
+    const response = await fetch("/api/auth/session?audience=seller", { credentials: "same-origin", cache: "no-store" });
+    if (!response.ok) {
+      location.replace("login.html?authError=session_required");
+      return;
+    }
+    const data = await response.json();
+    const profile = data.user;
+    if (!profile) throw new Error("missing_profile");
+    const seller = {
+      id: profile.id,
+      name: profile.name,
+      firstName: profile.givenName || profile.name?.split(" ")[0] || "",
+      lastName: profile.familyName || "",
+      email: profile.email,
+      role: profile.role,
+      photo: profile.picture || "",
+      verified: true,
+      authProvider: "google",
+    };
+    const index = state.users.findIndex((user) => user.email?.toLowerCase() === seller.email.toLowerCase());
+    if (index >= 0) state.users[index] = { ...state.users[index], ...seller };
+    else state.users.unshift(seller);
+    saveState();
+    render();
+  } catch {
+    location.replace("login.html?authError=session_required");
+  }
+}
 const THEME_PREF_KEY = "comerciando_emprendedores_theme_v1";
 try {
   const savedTheme = localStorage.getItem(THEME_PREF_KEY);
@@ -989,6 +1012,7 @@ function render() {
     mod: reports,
     cfg: settings,
   }[view]();
+  if (view === "cfg") initCfgStoreMap();
   if (uiMotion) {
     const { type, id } = uiMotion;
     uiMotion = null;
@@ -1171,10 +1195,48 @@ function shipView() {
         `<div class="v8-lane ${["amber", "sky", "mint"][i]}"><div class="v8-lane-title"><b>${step}</b>${label(state.deliveries.filter((d) => d.status === step).length)}</div><div class="v8-lane-cards">${
           state.deliveries
             .filter((d) => d.status === step)
-            .map(
-              (d) =>
-                `<article class="v8-delivery-card"><div class="v8-del-head"><b>${d.id}</b><small>${d.sale}</small></div><b class="v8-del-name">${esc(d.customer)}</b><small>${esc(d.type)}${d.address ? " · " + esc(d.address) : ""}</small><div class="v8-del-foot">${i < 2 ? action(i === 0 ? "Preparar" : "Entregar", "advance:" + d.id, "") : '<span class="v8-label ok">Completado</span>'}</div></article>`,
-            )
+            .map((d) => {
+              const itemsCount = Array.isArray(d.items)
+                ? d.items.reduce((acc, it) => acc + (Number(it.qty) || 0), 0)
+                : 0;
+              const itemsPreview = Array.isArray(d.items) && d.items.length
+                ? d.items
+                    .slice(0, 2)
+                    .map((it) => `${it.qty}× ${esc(it.name)}`)
+                    .join(", ") + (d.items.length > 2 ? ` +${d.items.length - 2} más` : "")
+                : "";
+              const hasCoords =
+                typeof d.lat === "number" &&
+                typeof d.lng === "number" &&
+                !Number.isNaN(d.lat) &&
+                !Number.isNaN(d.lng);
+              const mapsUrl = hasCoords
+                ? `https://www.google.com/maps?q=${d.lat},${d.lng}`
+                : d.address
+                  ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.address)}`
+                  : "";
+              const payText = d.paymentMethod || d.payment || "";
+              return `<article class="v8-delivery-card">
+                <div class="v8-del-head">
+                  <b>${esc(d.id)}</b>
+                  <small>${esc(d.sale || "")}${d.source === "Catálogo online" ? ' · <span class="ce-del-source">Catálogo</span>' : ""}</small>
+                </div>
+                <b class="v8-del-name">${esc(d.customer)}</b>
+                ${d.phone || d.email ? `<small class="ce-del-contact">${[d.phone ? esc(d.phone) : "", d.email ? esc(d.email) : ""].filter(Boolean).join(" · ")}</small>` : ""}
+                <div class="ce-del-badges">
+                  <span class="ce-del-pill">${esc(d.type || "Retiro")}</span>
+                  ${payText ? `<span class="ce-del-pill pay">${esc(payText)}</span>` : ""}
+                  ${typeof d.total === "number" ? `<span class="ce-del-pill total">${money(d.total)}</span>` : ""}
+                </div>
+                ${d.address ? `<small class="ce-del-addr">${esc(d.address)}</small>` : ""}
+                ${itemsPreview ? `<small class="ce-del-items">${itemsCount} u.: ${itemsPreview}</small>` : ""}
+                ${d.type === "Envío" && mapsUrl ? `<a class="ce-del-map-link" href="${mapsUrl}" target="_blank" rel="noopener noreferrer">Ver ubicación en mapa ↗</a>` : ""}
+                <div class="v8-del-foot">
+                  ${action("Detalle", "delivery-detail:" + d.id, "g sm")}
+                  ${i < 2 ? action(i === 0 ? "Preparar" : "Entregar", "advance:" + d.id, "") : '<span class="v8-label ok">Completado</span>'}
+                </div>
+              </article>`;
+            })
             .join("") || '<p class="v8-empty">Sin pedidos</p>'
         }</div></div>`,
     )
@@ -1597,7 +1659,13 @@ function liteReportExport() {
 function settings() {
   const userCount = state.users.length;
   const isLimit = userCount >= 3;
-  return `<div class="v8-screen">${title("Configuración", "Preferencias del emprendimiento y gestión de usuarios.")}<div class="lite-summary"><div class="v8-panel"><div class="v8-panelhead"><h2>Datos del comercio</h2><p>Configuración general y preferencias de tu comercio.</p></div><div class="v8-panel-inner"><div class="lite-form"><label class="full">Nombre del negocio<input id="storeEdit" class="lite-input" value="${esc(state.store)}" maxlength="60"></label><label>Tema<select id="themeEdit" class="lite-input"><option value="dark" ${state.theme === "dark" ? "selected" : ""}>Oscuro</option><option value="light" ${state.theme === "light" ? "selected" : ""}>Claro</option></select></label><label>Sonidos<select id="soundEdit" class="lite-input"><option value="true" ${state.sound ? "selected" : ""}>Activados</option><option value="false" ${!state.sound ? "selected" : ""}>Desactivados</option></select></label><label>Estilo de sonido<select id="soundStyleEdit" class="lite-input"><option value="suave" ${soundStyle === "suave" ? "selected" : ""}>Suave · Campanillas discretas</option><option value="digital" ${soundStyle === "digital" ? "selected" : ""}>Digital · Tonos breves</option></select></label></div><div class="lite-sound-tools"><h3>Probar sonidos de Emprendedores</h3><p>Ya no hay bip al navegar ni al tocar cada botón. Los avisos acompañan sólo acciones importantes.</p><div class="lite-sound-examples"><button class="btn g sm" data-action="sound-preview:add">Agregar producto</button><button class="btn g sm" data-action="sound-preview:success">Venta confirmada</button><button class="btn g sm" data-action="sound-preview:warning">Advertencia</button></div><small class="lite-sound-hint">Elegí el estilo y presioná un botón para escucharlo. Si están silenciados no sonará.</small></div><div style="margin-top:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">${action("Guardar preferencias", "save-settings", "")}${action("Restablecer demo", "reset-demo", "g sm")}<button type="button" class="btn g sm" data-action="logout" style="color:#dc2626;margin-left:auto">Cerrar sesión</button></div></div></div><div class="v8-panel"><div class="v8-panelhead"><div><h2>Usuarios · máximo 3</h2><p>Tope de usuarios permitido por el plan Emprendedores.</p></div><span class="pill premium-pill">${userCount}/3 activos</span></div><div class="v8-panel-inner"><div class="lite-rows">${state.users.map((u, i) => {
+  const cfg = state.storeConfig || {};
+  const hasCoords =
+    typeof cfg.lat === "number" &&
+    typeof cfg.lng === "number" &&
+    !Number.isNaN(cfg.lat) &&
+    !Number.isNaN(cfg.lng);
+  return `<div class="v8-screen">${title("Configuración", "Preferencias del emprendimiento, local físico, cobros y usuarios.")}<div class="lite-summary"><div class="v8-panel"><div class="v8-panelhead"><h2>Datos del comercio</h2><p>Configuración general y preferencias de tu comercio.</p></div><div class="v8-panel-inner"><div class="lite-form"><label class="full">Nombre del negocio<input id="storeEdit" class="lite-input" value="${esc(state.store)}" maxlength="60"></label><label>Tema<select id="themeEdit" class="lite-input"><option value="dark" ${state.theme === "dark" ? "selected" : ""}>Oscuro</option><option value="light" ${state.theme === "light" ? "selected" : ""}>Claro</option></select></label><label>Sonidos<select id="soundEdit" class="lite-input"><option value="true" ${state.sound ? "selected" : ""}>Activados</option><option value="false" ${!state.sound ? "selected" : ""}>Desactivados</option></select></label><label>Estilo de sonido<select id="soundStyleEdit" class="lite-input"><option value="suave" ${soundStyle === "suave" ? "selected" : ""}>Suave · Campanillas discretas</option><option value="digital" ${soundStyle === "digital" ? "selected" : ""}>Digital · Tonos breves</option></select></label></div><div class="lite-sound-tools"><h3>Probar sonidos de Emprendedores</h3><p>Ya no hay bip al navegar ni al tocar cada botón. Los avisos acompañan sólo acciones importantes.</p><div class="lite-sound-examples"><button class="btn g sm" data-action="sound-preview:add">Agregar producto</button><button class="btn g sm" data-action="sound-preview:success">Venta confirmada</button><button class="btn g sm" data-action="sound-preview:warning">Advertencia</button></div><small class="lite-sound-hint">Elegí el estilo y presioná un botón para escucharlo. Si están silenciados no sonará.</small></div><div style="margin-top:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">${action("Guardar preferencias", "save-settings", "")}${action("Restablecer demo", "reset-demo", "g sm")}<button type="button" class="btn g sm" data-action="logout" style="color:#dc2626;margin-left:auto">Cerrar sesión</button></div></div></div><div class="v8-panel"><div class="v8-panelhead"><div><h2>Local físico, horarios y pagos</h2><p>Estos datos se muestran automáticamente en el checkout de tu catálogo online.</p></div></div><div class="v8-panel-inner"><div class="lite-form"><label class="full">Dirección del local físico<div class="ce-address-row"><input id="cfgStoreAddress" class="lite-input" value="${esc(cfg.address || "")}" placeholder="Ej: Av. Corrientes 1234, CABA"><button type="button" class="btn g sm" id="cfgFindAddressBtn">Ubicar en mapa</button></div></label><div class="full"><div id="cfgStoreMap" class="ce-map-box" aria-label="Mapa de ubicación del local"></div><div class="ce-map-coords"><span id="cfgStoreCoordsText">${hasCoords ? `Ubicación marcada: ${cfg.lat.toFixed(5)}, ${cfg.lng.toFixed(5)}` : "Buscá la dirección o arrastrá el marcador para fijar la ubicación exacta del local."}</span></div><input type="hidden" id="cfgStoreLat" value="${hasCoords ? cfg.lat : ""}"><input type="hidden" id="cfgStoreLng" value="${hasCoords ? cfg.lng : ""}"></div><label class="full">Horarios de atención para retiro<input id="cfgStoreHours" class="lite-input" value="${esc(cfg.hours || "")}" placeholder="Ej: Lun a Vie 9 a 18 hs · Sáb 9 a 13 hs"></label><label>Alias para transferencias<input id="cfgStoreAlias" class="lite-input" value="${esc(cfg.alias || "")}" placeholder="Ej: mi.comercio.mp"></label><label>CVU / CBU<input id="cfgStoreCbu" class="lite-input" value="${esc(cfg.cbu || "")}" placeholder="22 dígitos"></label><label class="full">WhatsApp del local (para recibir comprobantes)<input id="cfgStoreWhatsapp" type="tel" class="lite-input" value="${esc(cfg.whatsapp || "")}" placeholder="Ej: 5491112345678 (con código de país y área)"></label></div><div style="margin-top:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">${action("Guardar datos del local", "save-settings", "")}</div></div></div><div class="v8-panel"><div class="v8-panelhead"><div><h2>Usuarios · máximo 3</h2><p>Tope de usuarios permitido por el plan Emprendedores.</p></div><span class="pill premium-pill">${userCount}/3 activos</span></div><div class="v8-panel-inner"><div class="lite-rows">${state.users.map((u, i) => {
     const nameStr = u.name || `${u.firstName || ""} ${u.lastName || ""}`.trim() || "Usuario";
     const initials = ((u.firstName?.[0] || nameStr[0] || "U") + (u.lastName?.[0] || "")).toUpperCase();
     const avatarContent = u.photo
@@ -2521,17 +2589,22 @@ function saveProduct() {
 }
 function categoryModal() {
   syncCategories();
+  const available = PREDEFINED_CATEGORIES.filter(
+    (name) => !state.categories.some((cat) => cat.toLowerCase() === name.toLowerCase()),
+  );
   openModal(
     "Categorías",
-    "Agregá, editá o suprimí categorías para organizar tu Stock Lite.",
-    `<div class="lite-inline-row" style="margin-bottom:14px"><label class="grow">Nueva categoría<input id="categoryName" class="lite-input" maxlength="50" placeholder="Ej. Limpieza"></label><button type="button" class="btn" data-action="add-category">Agregar categoría</button></div><div class="lite-rows">${state.categories.map((cat) => `<div class="lite-category-head"><div><b>${esc(cat)}</b><small style="display:block;color:var(--muted)">${state.products.filter((p) => p.cat === cat).length} producto(s)</small></div><div class="lite-category-actions"><button class="btn g sm" data-action="edit-category:${encodeURIComponent(cat)}">Editar</button><button class="btn g sm" data-action="delete-category:${encodeURIComponent(cat)}">Suprimir</button></div></div>`).join("") || '<p class="lite-note">Todavía no hay categorías.</p>'}</div>`,
+    "Elegí una categoría predefinida para organizar tu Stock Lite.",
+    `<div class="lite-inline-row" style="margin-bottom:14px"><label class="grow">Nueva categoría<select id="categoryName" class="lite-input" ${available.length ? "" : "disabled"}><option value="">Seleccioná una categoría</option>${available.map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join("")}</select></label><button type="button" class="btn" data-action="add-category" ${available.length ? "" : "disabled"}>Agregar categoría</button></div>${available.length ? "" : '<p class="lite-note">Ya agregaste todas las categorías disponibles.</p>'}<div class="lite-rows">${state.categories.map((cat) => `<div class="lite-category-head"><div><b>${esc(cat)}</b><small style="display:block;color:var(--muted)">${state.products.filter((p) => p.cat === cat).length} producto(s)</small></div><div class="lite-category-actions"><button class="btn g sm" data-action="delete-category:${encodeURIComponent(cat)}">Suprimir</button></div></div>`).join("") || '<p class="lite-note">Todavía no hay categorías.</p>'}</div><div class="lite-category-suggestion"><b>¿No encontrás la categoría que necesitás?</b><p class="lite-note">Sugerila y la enviaremos al equipo para evaluarla.</p><div class="lite-inline-row"><label class="grow">Sugerencia<input id="categorySuggestion" class="lite-input" maxlength="50" placeholder="Ej. Plantas y jardinería"></label><button type="button" class="btn g" data-action="suggest-category">Enviar sugerencia</button></div></div>`,
     `<button class="btn g" data-action="close-modal">Cerrar</button>`,
   );
 }
 function addCategory() {
   const input = $("#categoryName");
   const name = (input?.value || "").trim();
-  if (!name) return toast("Ingresá el nombre de la categoría.", true);
+  if (!name) return toast("Seleccioná una categoría.", true);
+  if (!PREDEFINED_CATEGORIES.includes(name))
+    return toast("Elegí una categoría de la lista disponible.", true);
   if (state.categories.some((c) => c.toLowerCase() === name.toLowerCase()))
     return toast("Esa categoría ya existe.", true);
   state.categories.push(name);
@@ -2539,6 +2612,16 @@ function addCategory() {
   saveState();
   categoryModal();
   toast("Categoría agregada");
+}
+function suggestCategory() {
+  const suggestion = ($("#categorySuggestion")?.value || "").trim();
+  if (!suggestion) return toast("Ingresá una categoría para sugerir.", true);
+  const sender = state.users?.find((user) => user.role === "Administrador") || state.users?.[0];
+  const senderName = sender?.name || "Comercio sin usuario identificado";
+  const subject = "Sugerencia de categoría para Comerciando";
+  const body = `Comercio: ${state.store || "Sin nombre"}\nUsuario: ${senderName}\nCategoría sugerida: ${suggestion}`;
+  window.location.href = `mailto:contacto@andessolutions.com.ar?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  toast("Abrimos tu correo con la sugerencia lista para enviar.");
 }
 function editCategory(oldName) {
   const current = decodeURIComponent(oldName);
@@ -2632,6 +2715,43 @@ function saveDelivery() {
   render();
   tone("success");
   toast("Pedido creado con éxito");
+}
+function deliveryDetail(id) {
+  const d = state.deliveries.find((x) => x.id === id);
+  if (!d) return;
+  const hasCoords =
+    typeof d.lat === "number" &&
+    typeof d.lng === "number" &&
+    !Number.isNaN(d.lat) &&
+    !Number.isNaN(d.lng);
+  const mapQuery = hasCoords
+    ? `${d.lat},${d.lng}`
+    : d.address
+      ? encodeURIComponent(d.address)
+      : "";
+  const itemsHtml =
+    Array.isArray(d.items) && d.items.length
+      ? `<div class="lite-rows" style="margin-top:12px">${d.items.map((it) => `<div class="lite-row"><span>${esc(it.name)} · ${it.qty} u.</span><b>${money((it.price || 0) * (it.qty || 1))}</b></div>`).join("")}</div>`
+      : "";
+  const mapHtml =
+    d.type === "Envío" && mapQuery
+      ? `<div style="margin-top:12px"><iframe class="ce-minimap-frame" title="Ubicación de entrega" loading="lazy" src="https://maps.google.com/maps?q=${mapQuery}&z=16&output=embed"></iframe><a class="ce-del-map-link" style="margin-top:6px;display:inline-block" href="https://www.google.com/maps?q=${mapQuery}" target="_blank" rel="noopener noreferrer">Abrir en Google Maps ↗</a></div>`
+      : "";
+  openModal(
+    `Pedido ${d.id}`,
+    `${d.sale ? `Operación ${d.sale} · ` : ""}${d.status}`,
+    `<div class="lite-row"><span>Cliente</span><b>${esc(d.customer || "—")}</b></div>
+     ${d.phone ? `<div class="lite-row"><span>Teléfono</span><b>${esc(d.phone)}</b></div>` : ""}
+     ${d.email ? `<div class="lite-row"><span>Mail</span><b>${esc(d.email)}</b></div>` : ""}
+     <div class="lite-row"><span>Entrega</span><b>${esc(d.type || "Retiro")}</b></div>
+     ${d.paymentMethod || d.payment ? `<div class="lite-row"><span>Pago</span><b>${esc(d.paymentMethod || d.payment)}</b></div>` : ""}
+     ${d.address ? `<div class="lite-row"><span>Dirección</span><b>${esc(d.address)}</b></div>` : ""}
+     ${itemsHtml}
+     ${typeof d.total === "number" ? `<div class="lite-total" style="margin-top:12px"><span>Total</span><strong>${money(d.total)}</strong></div>` : ""}
+     ${mapHtml}`,
+    `<button class="btn" data-action="close-modal">Cerrar</button>`,
+  );
+  $("#modal").classList.add("lite-detail-drawer");
 }
 function saleDetail(id) {
   const s = state.sales.find((s) => s.id === id);
@@ -2731,7 +2851,6 @@ function getPublicCatalogUrl() {
   return `${location.protocol}//tienda.${host}`;
 }
 function preview() {
-  const items = state.products.filter((p) => p.published);
   const publicUrl = getPublicCatalogUrl();
   openModal(
     "Catálogo virtual Lite",
@@ -2744,22 +2863,127 @@ function preview() {
        </div>
        <small class="lite-note">Si aún no configuraste el subdominio en Vercel, podés acceder directo en <code>/catalogo</code>.</small>
      </div>
-     <div class="lite-catalog-preview">${items.map((p) => `<div class="lite-preview-item">${avatar(p)}<b>${esc(p.name)}</b><small>${money(p.price)}</small></div>`).join("") || '<p class="lite-empty">No hay productos publicados.</p>'}</div>`,
+     <div class="lite-public-preview"><iframe src="catalogo.html?preview=1" title="Vista previa del catálogo público" loading="eager"></iframe></div>`,
     `<button class="btn g" data-action="close-modal">Cerrar</button>
      <a class="btn" href="catalogo.html" target="_blank" rel="noopener noreferrer">Abrir catálogo</a>`,
   );
 }
 function saveSettings() {
-  state.store = ($("#storeEdit").value || "Mi emprendimiento").trim();
-  state.theme = $("#themeEdit").value;
-  state.sound = $("#soundEdit").value === "true";
-  soundStyle = $("#soundStyleEdit").value;
+  state.store = ($("#storeEdit")?.value || "Mi emprendimiento").trim();
+  state.theme = $("#themeEdit")?.value || state.theme;
+  state.sound = $("#soundEdit")?.value === "true";
+  soundStyle = $("#soundStyleEdit")?.value || soundStyle;
+  const addrEl = $("#cfgStoreAddress");
+  if (addrEl) {
+    const latVal = parseFloat($("#cfgStoreLat")?.value);
+    const lngVal = parseFloat($("#cfgStoreLng")?.value);
+    state.storeConfig = {
+      address: addrEl.value.trim(),
+      lat: Number.isFinite(latVal) ? latVal : null,
+      lng: Number.isFinite(lngVal) ? lngVal : null,
+      hours: ($("#cfgStoreHours")?.value || "").trim(),
+      alias: ($("#cfgStoreAlias")?.value || "").trim(),
+      cbu: ($("#cfgStoreCbu")?.value || "").trim(),
+      whatsapp: ($("#cfgStoreWhatsapp")?.value || "").trim(),
+    };
+  }
   saveThemePreference();
   saveSoundPreference();
   saveState();
   document.documentElement.dataset.theme = state.theme;
   render();
-  toast("Preferencias actualizadas");
+  toast("Preferencias y datos del local actualizados");
+}
+
+let cfgMapInstance = null;
+function initCfgStoreMap() {
+  const mapEl = $("#cfgStoreMap");
+  if (!mapEl) return;
+  if (typeof L === "undefined") {
+    mapEl.innerHTML =
+      '<div class="ce-map-fallback">No se pudo cargar el mapa interactivo. Verificá tu conexión a internet.</div>';
+    return;
+  }
+  if (cfgMapInstance) {
+    try {
+      cfgMapInstance.remove();
+    } catch {}
+    cfgMapInstance = null;
+  }
+  const cfg = state.storeConfig || {};
+  const hasCoords =
+    typeof cfg.lat === "number" &&
+    typeof cfg.lng === "number" &&
+    !Number.isNaN(cfg.lat) &&
+    !Number.isNaN(cfg.lng);
+  const defaultLat = hasCoords ? cfg.lat : -34.603722;
+  const defaultLng = hasCoords ? cfg.lng : -58.381592;
+  const zoom = hasCoords ? 16 : 12;
+
+  cfgMapInstance = L.map(mapEl).setView([defaultLat, defaultLng], zoom);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap",
+    maxZoom: 19,
+  }).addTo(cfgMapInstance);
+
+  const marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(
+    cfgMapInstance,
+  );
+
+  const updateCoords = (lat, lng) => {
+    const latInput = $("#cfgStoreLat");
+    const lngInput = $("#cfgStoreLng");
+    const textEl = $("#cfgStoreCoordsText");
+    if (latInput) latInput.value = String(lat);
+    if (lngInput) lngInput.value = String(lng);
+    if (textEl) {
+      textEl.textContent = `Ubicación marcada: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
+  };
+
+  marker.on("dragend", () => {
+    const pos = marker.getLatLng();
+    updateCoords(pos.lat, pos.lng);
+  });
+
+  cfgMapInstance.on("click", (ev) => {
+    marker.setLatLng(ev.latlng);
+    updateCoords(ev.latlng.lat, ev.latlng.lng);
+  });
+
+  const geocodeCfgAddress = async () => {
+    const query = ($("#cfgStoreAddress")?.value || "").trim();
+    if (!query) return toast("Ingresá una dirección para buscar en el mapa.", true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`,
+      );
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lng = parseFloat(data[0].lon);
+        marker.setLatLng([lat, lng]);
+        cfgMapInstance.setView([lat, lng], 16);
+        updateCoords(lat, lng);
+        toast("Ubicación encontrada. Podés arrastrar el marcador para ajustar.");
+      } else {
+        toast("No encontramos esa dirección exacta. Arrastrá el marcador manualmente.", true);
+      }
+    } catch {
+      toast("No se pudo buscar la dirección. Arrastrá el marcador manualmente.", true);
+    }
+  };
+
+  $("#cfgFindAddressBtn")?.addEventListener("click", geocodeCfgAddress);
+  let debounceTimer = null;
+  $("#cfgStoreAddress")?.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const val = ($("#cfgStoreAddress")?.value || "").trim();
+      if (val.length >= 8) geocodeCfgAddress();
+    }, 900);
+  });
+  setTimeout(() => cfgMapInstance?.invalidateSize(), 150);
 }
 function modalAction(code) {
   if (code === "close-modal") return closeModal();
@@ -3041,6 +3265,7 @@ document.addEventListener("click", (e) => {
   }
   if (code === "new-product") return productModal(null);
   if (code === "categories") return categoryModal();
+  if (code === "suggest-category") return suggestCategory();
   if (code.startsWith("edit-category:"))
     return editCategory(code.split(":")[1]);
   if (code.startsWith("delete-category:"))
@@ -3111,13 +3336,16 @@ document.addEventListener("click", (e) => {
     return toast("Caja cerrada.");
   }
   if (code.startsWith("sale:")) return saleDetail(code.slice(5));
+  if (code.startsWith("delivery-detail:")) return deliveryDetail(code.slice(16));
   if (code.startsWith("advance:")) {
     const d = state.deliveries.find((d) => d.id === code.slice(8));
-    d.status = d.status === "Pendiente" ? "En preparación" : "Entregado";
-    saveState();
-    render();
-    tone("notice");
-    return toast("Estado de pedido actualizado");
+    if (d) {
+      d.status = d.status === "Pendiente" ? "En preparación" : "Entregado";
+      saveState();
+      render();
+      tone("notice");
+      return toast("Estado de pedido actualizado");
+    }
   }
   if (code.startsWith("publish:")) {
     const p = state.products.find((p) => p.id === Number(code.slice(8)));
@@ -3206,9 +3434,7 @@ document.addEventListener("click", (e) => {
   }
   if (code === "confirm-invite-user-extra") return confirmInviteUser(true);
   if (code === "logout") {
-    try {
-      localStorage.removeItem("comerciando_auth_session");
-    } catch {}
+    fetch("/api/auth/logout?audience=seller", { method: "POST", credentials: "same-origin" }).catch(() => {});
     closeModal();
     toast("Cerrando sesión…");
     setTimeout(() => {
@@ -3370,6 +3596,7 @@ if (initialHash in NAME) {
 } else {
   render();
 }
+hydrateSellerSession();
 
 /* ==========================================================================
    TUTORIAL GUIADO INTERACTIVO (PRIMERA VISITA)

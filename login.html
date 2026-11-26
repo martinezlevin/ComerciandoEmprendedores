@@ -474,7 +474,7 @@
         <img src="img/logo.png" alt="Comerciando Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'44\' height=\'44\' viewBox=\'0 0 24 24\' fill=\'%23175bdf\'><rect width=\'24\' height=\'24\' rx=\'6\' fill=\'%23175bdf\'/><text x=\'12\' y=\'16\' font-size=\'12\' fill=\'white\' font-family=\'sans-serif\' text-anchor=\'middle\' font-weight=\'bold\'>C</text></svg>'" />
         <div class="brand-text">
           <h1>Comerciando <span class="plan-tag">PLAN EMPRENDEDOR</span></h1>
-          <p>por Andes Solutions · Acceso Seguro</p>
+          <p>Bienvenido a Comerciando</p>
         </div>
       </div>
 
@@ -760,17 +760,19 @@
         }
       }
 
-      function checkExistingSession() {
+      async function checkExistingSession() {
+        const error = new URLSearchParams(window.location.search).get("authError");
+        if (error === "not_authorized") {
+          showAlert("Esta cuenta de Google no está autorizada para administrar un comercio.", "error");
+        } else if (error === "session_required") {
+          showAlert("Tu sesión de vendedor venció. Iniciá sesión con Google para continuar.", "info");
+        }
         try {
-          const sessionRaw = localStorage.getItem(AUTH_STORAGE_SESSION);
-          if (sessionRaw) {
-            const session = JSON.parse(sessionRaw);
-            if (session && session.user && session.user.verified) {
-              showAlert(`Sesión activa como ${session.user.name}. Redirigiendo al panel…`, "info");
-              setTimeout(() => {
-                window.location.href = "index.html";
-              }, 1200);
-            }
+          const response = await fetch("/api/auth/session?audience=seller", { credentials: "same-origin", cache: "no-store" });
+          const data = response.ok ? await response.json() : null;
+          if (data?.authenticated && data.user) {
+            showAlert(`Sesión activa como ${data.user.name}. Redirigiendo al panel…`, "info");
+            setTimeout(() => { window.location.href = "index.html"; }, 500);
           }
         } catch {}
       }
@@ -1212,6 +1214,11 @@
 
       async function handleSocialAuth(provider) {
         hideAlert();
+        if (provider === "Google") {
+          showAlert("Redirigiendo a Google…", "info");
+          window.location.assign("/api/auth/start?audience=seller&returnTo=" + encodeURIComponent("/index.html"));
+          return;
+        }
         const cfg = getOAuthConfig();
 
         if (provider === "Google") {

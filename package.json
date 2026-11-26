@@ -1,0 +1,8 @@
+{
+  "name": "comerciando-emprendedores",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "google-auth-library": "^11.3.4"
+  }
+}
