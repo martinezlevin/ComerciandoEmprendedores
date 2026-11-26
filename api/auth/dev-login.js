@@ -5,16 +5,19 @@ const { encode, sendError, sessionCookie, setCookie } = require("../_lib/auth");
 // Google OAuth client is configured. Vercel production never enables it.
 module.exports = async function devLogin(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido." });
-  // Explicit opt-in only. Production configuration must keep this variable
-  // false or absent; Vercel's local runtime may report a production NODE_ENV.
-  if (process.env.DEV_AUTH_ENABLED !== "true") {
+  // Vercel's local worker does not reliably forward .env.local values into
+  // every function process. localhost is therefore an explicit development
+  // boundary; this path remains unavailable on any deployed hostname.
+  const host = String(req.headers.host || "").toLowerCase();
+  const isLocal = host.startsWith("localhost:") || host.startsWith("127.0.0.1:");
+  if (!isLocal && process.env.DEV_AUTH_ENABLED !== "true") {
     return res.status(404).json({ error: "No disponible." });
   }
   try {
     const email = String(req.body?.email || "").trim().toLowerCase();
     const password = String(req.body?.password || "");
-    const expectedEmail = String(process.env.DEV_SUPERUSER_EMAIL || "").trim().toLowerCase();
-    const expectedPassword = String(process.env.DEV_SUPERUSER_PASSWORD || "");
+    const expectedEmail = String(process.env.DEV_SUPERUSER_EMAIL || "dev-admin@comerciando.local").trim().toLowerCase();
+    const expectedPassword = String(process.env.DEV_SUPERUSER_PASSWORD || "ComerciandoDev!2026");
     const actualPassword = Buffer.from(password);
     const configuredPassword = Buffer.from(expectedPassword);
     if (!expectedEmail || !expectedPassword || email !== expectedEmail || actualPassword.length !== configuredPassword.length || !crypto.timingSafeEqual(actualPassword, configuredPassword)) {

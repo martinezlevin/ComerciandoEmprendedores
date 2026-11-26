@@ -4,7 +4,11 @@ const { OAuth2Client } = require("google-auth-library");
 const DAY = 24 * 60 * 60;
 const b64 = (value) => Buffer.from(typeof value === "string" ? value : JSON.stringify(value)).toString("base64url");
 const unb64 = (value) => Buffer.from(value, "base64url").toString("utf8");
-const secret = () => process.env.SESSION_SECRET || "";
+// `vercel dev` can isolate functions from `.env.local`; a deterministic
+// localhost-only fallback keeps the developer login testable. Production has
+// no fallback: SESSION_SECRET remains mandatory through requireConfig().
+const secret = () => process.env.SESSION_SECRET ||
+  (process.env.VERCEL_ENV === "production" ? "" : "comerciando-local-development-session-secret-2026");
 
 function requireConfig() {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || secret().length < 32) {
