@@ -19,14 +19,18 @@ async function validSeller(cookie) {
 }
 export default async function middleware(request) {
   const host = request.headers.get("host") || "";
-  if (host.startsWith("tienda.") || host.startsWith("catalogo.")) return;
+  // Vercel's equivalent of NextResponse.next(), without bringing Next.js into
+  // this static application. Returning undefined in `vercel dev` emits an
+  // empty 200 response, which looks like a blank dashboard.
+  const next = () => new Response(null, { headers: { "x-middleware-next": "1" } });
+  if (host.startsWith("tienda.") || host.startsWith("catalogo.")) return next();
   // Vercel production provides request.cookies; `vercel dev` may provide the
   // Node-compatible request shape instead, so parse Cookie as a safe fallback.
   const cookieHeader = request.headers.get("cookie") || "";
   const rawCookieValue = request.cookies?.get?.("ce_seller_session")?.value ||
     cookieHeader.split(/;\s*/).find((item) => item.startsWith("ce_seller_session="))?.slice("ce_seller_session=".length);
   const cookieValue = rawCookieValue ? decodeURIComponent(rawCookieValue) : "";
-  if (await validSeller(cookieValue)) return;
+  if (await validSeller(cookieValue)) return next();
   const url = new URL("/login.html?authError=session_required", request.url);
   return Response.redirect(url, 302);
 }
