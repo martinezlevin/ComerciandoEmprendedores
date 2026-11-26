@@ -18,7 +18,12 @@ async function validSeller(cookie) {
 export default async function middleware(request) {
   const host = request.headers.get("host") || "";
   if (host.startsWith("tienda.") || host.startsWith("catalogo.")) return;
-  if (await validSeller(request.cookies.get("ce_seller_session")?.value)) return;
+  // Vercel production provides request.cookies; `vercel dev` may provide the
+  // Node-compatible request shape instead, so parse Cookie as a safe fallback.
+  const cookieHeader = request.headers.get("cookie") || "";
+  const cookieValue = request.cookies?.get?.("ce_seller_session")?.value ||
+    cookieHeader.split(/;\s*/).find((item) => item.startsWith("ce_seller_session="))?.slice("ce_seller_session=".length);
+  if (await validSeller(cookieValue)) return;
   const url = new URL("/login.html?authError=session_required", request.url);
   return Response.redirect(url, 302);
 }
