@@ -43,7 +43,10 @@ function cookies(req) {
 }
 
 function isSecure(req) {
-  return process.env.NODE_ENV === "production" || req.headers["x-forwarded-proto"] === "https";
+  // `vercel dev` reports NODE_ENV=production even while serving HTTP on
+  // localhost. Secure cookies would then be dropped by the browser. Detect
+  // the actual request/public URL instead.
+  return req.headers["x-forwarded-proto"] === "https" || String(process.env.APP_BASE_URL || "").startsWith("https://");
 }
 
 function setCookie(res, req, name, value, maxAge = DAY) {

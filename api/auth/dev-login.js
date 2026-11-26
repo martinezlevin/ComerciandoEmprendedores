@@ -5,7 +5,9 @@ const { encode, sendError, sessionCookie, setCookie } = require("../_lib/auth");
 // Google OAuth client is configured. Vercel production never enables it.
 module.exports = async function devLogin(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido." });
-  if (process.env.NODE_ENV === "production" || process.env.DEV_AUTH_ENABLED !== "true") {
+  // Explicit opt-in only. Production configuration must keep this variable
+  // false or absent; Vercel's local runtime may report a production NODE_ENV.
+  if (process.env.DEV_AUTH_ENABLED !== "true") {
     return res.status(404).json({ error: "No disponible." });
   }
   try {
