@@ -948,6 +948,29 @@
         }
 
         setButtonLoading(btn, true);
+        // Desarrollo local: el servidor decide si esta ruta está habilitada y
+        // emite la misma cookie HttpOnly usada por Google OAuth.
+        try {
+          const devLogin = await fetch("/api/auth/dev-login", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: emailInput, password: pwdInput })
+          });
+          if (devLogin.ok) {
+            showAlert("Sesión de desarrollo iniciada. Redirigiendo al panel…", "success");
+            setTimeout(() => { window.location.href = "index.html"; }, 350);
+            return;
+          }
+          if (devLogin.status === 401) {
+            setButtonLoading(btn, false, "Iniciar sesión");
+            showAlert("Credenciales de desarrollo inválidas.", "error");
+            return;
+          }
+        } catch {
+          // Si las funciones no están disponibles, se conserva el flujo demo
+          // existente para abrir el diseño sin un servidor local.
+        }
         await new Promise(r => setTimeout(r, 600));
 
         try {

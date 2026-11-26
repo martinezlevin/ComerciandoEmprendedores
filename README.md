@@ -28,6 +28,15 @@ npx vercel dev
 2. Vendedor: abrí `/login.html` y elegí **Google**. Usá el correo configurado en `VENDOR_OWNER_EMAIL` o colaboradores. El dueño obtiene rol Administrador y un colaborador, Colaborador.
 3. Bloqueo: iniciá Google sólo como cliente e intentá abrir `/index.html`. El middleware y la API de sesión exigen una cookie de vendedor; se redirige al login. El endpoint `POST /api/orders` exige por separado la cookie de cliente.
 
+### Superusuario de desarrollo
+
+El archivo local ignorado `.env.local` ya crea una sesión de desarrollo, disponible únicamente cuando `DEV_AUTH_ENABLED=true` y nunca en producción. Para probar el dashboard sin configurar Google todavía, usá:
+
+- Correo: `dev-admin@comerciando.local`
+- Contraseña: `ComerciandoDev!2026`
+
+Ejecutá `npx vercel dev` y usá el formulario normal de `/login.html`. Cambiá estas dos variables antes de compartir una instancia de desarrollo.
+
 ## Referencias
 
 - [Google Identity: modelo de código OAuth](https://developers.google.com/identity/oauth2/web/guides/use-code-model)
