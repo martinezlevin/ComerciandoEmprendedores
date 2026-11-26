@@ -2730,7 +2730,12 @@ document.addEventListener("click", (e) => {
   }
   if (target === $("#navSearchBtn") || target.closest("#navSearchBtn")) {
     e.preventDefault();
-    const val = $("#navSearchInput")?.value || "";
+    const inp = $("#navSearchInput");
+    const val = inp?.value || "";
+    if (inp && document.activeElement !== inp && !val.trim()) {
+      inp.focus();
+      return;
+    }
     openGlobalSearch(val);
     return;
   }
@@ -2983,6 +2988,7 @@ document.addEventListener("click", (e) => {
   if (code === "move") return moveModal();
   if (code === "new-delivery") return deliveryModal();
   if (code === "go-pos") return go("pos");
+  if (code === "start-tour") return startTour(true);
   if (code === "checkout") return checkout();
   if (code === "prompt-clear-cart") {
     const qty = Object.values(cart).reduce((a, b) => a + b, 0);
@@ -3227,6 +3233,23 @@ document.addEventListener("keydown", (e) => {
     tone("add");
     return;
   }
+  if (tourActive) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      endTour(true);
+      return;
+    }
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      nextTourStep();
+      return;
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      prevTourStep();
+      return;
+    }
+  }
   if (e.key === "Escape") {
     closeModal();
     closeNav();
@@ -3269,3 +3292,352 @@ if (initialHash in NAME) {
 } else {
   render();
 }
+
+/* ==========================================================================
+   TUTORIAL GUIADO INTERACTIVO (PRIMERA VISITA)
+   ========================================================================== */
+const TOUR_STORAGE_KEY = "comerciando_emprendedores_tour_done_v1";
+let tourActive = false;
+let tourIndex = 0;
+let tourRepositionTimer = null;
+
+const TOUR_STEPS = [
+  {
+    view: "home",
+    target: null,
+    badge: "Bienvenida",
+    title: "¡Bienvenido a Comerciando Emprendedores!",
+    body: "En menos de un minuto te mostramos qué hace cada sección de la web y cómo empezar a vender paso a paso.",
+    tip: "Podés avanzar con las flechas del teclado o volver a abrir esta guía cuando quieras desde el botón «Guía» arriba a la derecha.",
+  },
+  {
+    view: "home",
+    target: "#cashHeader",
+    badge: "Paso clave · Caja",
+    title: "1. Abrí la caja antes de vender",
+    body: "Este botón superior te muestra si la caja está abierta o cerrada. Para poder cobrar en el Punto de Venta, primero tenés que abrirla.",
+    tip: "Al hacer clic acá (o en «Abrir caja» en el panel de Inicio), se inicia la jornada y quedan habilitados los cobros.",
+  },
+  {
+    view: "home",
+    target: ".premium-kpis",
+    badge: "Inicio",
+    title: "2. Tu resumen diario en un vistazo",
+    body: "En Inicio ves las ventas del día, operaciones realizadas, productos con stock crítico y pedidos pendientes de entrega.",
+    tip: "Cada tarjeta es un acceso directo: tocalas para ir directo a Ventas, Stock o Entregas.",
+  },
+  {
+    view: "home",
+    target: ".premium-quick-actions",
+    badge: "Accesos rápidos",
+    title: "3. Atajos a las tareas principales",
+    body: "Desde acá podés saltar en un clic a Registrar venta, Administrar productos, Ver entregas o Consultar reportes.",
+    tip: "También podés usar el menú lateral izquierdo para moverte entre todas las pantallas.",
+  },
+  {
+    view: "pos",
+    target: "#posSearch",
+    badge: "Punto de venta",
+    title: "4. Buscá y filtrá tus productos",
+    body: "Ya estamos en el Punto de venta Lite. Escribí el nombre o código de barras del producto, o usá las categorías y la vista en Tarjetas o Lista.",
+    tip: "Atajo rápido: presioná la tecla «N» desde cualquier pantalla para venir directo a vender.",
+  },
+  {
+    view: "pos",
+    target: "#grid .pro-card, #grid .pro-list-row",
+    badge: "Punto de venta",
+    title: "5. Sumá productos al carrito",
+    body: "Tocá cualquier producto del catálogo para agregar una unidad a «Venta actual».",
+    tip: "Cada clic suma 1 unidad y descuenta visualmente según el stock disponible.",
+  },
+  {
+    view: "pos",
+    target: "#v .cart",
+    badge: "Cobro rápido",
+    title: "6. Revisá el carrito y cobrá la venta",
+    body: "Acá ajustás cantidades con + / -, vaciás el carrito si hace falta y tocás «Cobrar venta» para elegir medio de pago (Efectivo, Transferencia, etc.) y entrega.",
+    tip: "Recordá: el botón «Cobrar venta» se habilita cuando la caja está abierta y hay al menos 1 producto en el carrito.",
+  },
+  {
+    view: "sales",
+    target: ".lite-filterbar",
+    badge: "Ventas y cobros",
+    title: "7. Historial de ventas y comprobantes",
+    body: "Cada cobro que confirmás queda guardado acá. Podés filtrar por medio de pago, ver el ticket promedio y abrir el detalle de cada operación.",
+    tip: "Usá «+ Nueva venta» arriba a la derecha para volver al mostrador al instante.",
+  },
+  {
+    view: "ship",
+    target: ".v8-board",
+    badge: "Entregas y despacho",
+    title: "8. Seguimiento de pedidos y envíos",
+    body: "Organizá tus entregas en tres columnas: Pendiente, En preparación y Entregado. Avanzá cada pedido con un solo clic.",
+    tip: "Ideal si hacés envíos a domicilio o preparás pedidos para retirar en el local.",
+  },
+  {
+    view: "stock",
+    target: '[data-action="new-product"]',
+    badge: "Stock Lite",
+    title: "9. Cargá productos y controlá tu stock",
+    body: "Desde Stock Lite creás nuevos productos con foto, precio de compra/venta, ganancia automática, categorías y alertas de reposición.",
+    tip: "También podés registrar ingresos o egresos manuales de mercadería con «Registrar movimiento».",
+  },
+  {
+    view: "virtual",
+    target: '[data-action="preview"]',
+    badge: "Catálogo virtual",
+    title: "10. Publicá tu catálogo online",
+    body: "Elegí qué productos mostrar u ocultar para tus clientes y tocá «Vista previa» para ver cómo luce tu vidriera digital.",
+    tip: "Cada producto tiene su botón «Publicar / Ocultar» para actualizar tu catálogo al instante.",
+  },
+  {
+    view: "mod",
+    target: ".v8-screen",
+    badge: "Reportes Lite",
+    title: "11. Analizá el rendimiento del negocio",
+    body: "En Reportes de negocio Lite consultás tus ingresos, productos más vendidos y evolución por rango de fechas.",
+    tip: "Los datos se calculan automáticamente a partir de tus ventas registradas.",
+  },
+  {
+    view: "cfg",
+    target: ".v8-screen",
+    badge: "Configuración",
+    title: "12. Personalizá tu comercio y equipo",
+    body: "Cambiá el nombre de tu negocio, elegí tema claro u oscuro, ajustá los sonidos de aviso y administrá hasta 3 usuarios.",
+    tip: "Si estás probando el sistema, desde acá también podés restablecer los datos demo cuando quieras.",
+  },
+  {
+    view: "home",
+    target: "#navSearchInput",
+    badge: "Buscador global",
+    title: "13. Encontrá todo al instante",
+    body: "Desde la barra superior buscás productos, ventas, clientes o entregas sin importar en qué sección estés.",
+    tip: "Atajo profesional: presioná «Ctrl + K» (o «/») en cualquier momento para buscar.",
+  },
+  {
+    view: "home",
+    target: null,
+    badge: "¡Listo para vender!",
+    title: "Ya conocés todo Comerciando Emprendedores",
+    body: "Resumen para tu primera venta: 1) Abrí la caja arriba a la derecha, 2) Entrá a Punto de venta y tocá tus productos, 3) Presioná «Cobrar venta».",
+    tip: "Si necesitás repasar algún paso, tocá el botón «Guía» en la barra superior en cualquier momento.",
+  },
+];
+
+function ensureTourDom() {
+  let root = $("#tourRoot");
+  if (root) return root;
+  root = document.createElement("div");
+  root.id = "tourRoot";
+  root.className = "tour-root";
+  root.hidden = true;
+  root.innerHTML = `
+    <div class="tour-backdrop" id="tourBackdrop"></div>
+    <div class="tour-spotlight" id="tourSpotlight" hidden></div>
+    <section class="tour-card" id="tourCard" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
+      <div class="tour-card-head">
+        <span class="tour-step-badge" id="tourBadge"></span>
+        <button type="button" class="tour-close-btn" id="tourCloseBtn" aria-label="Cerrar tutorial" title="Cerrar tutorial">✕</button>
+      </div>
+      <h3 class="tour-title" id="tourTitle"></h3>
+      <p class="tour-body" id="tourBody"></p>
+      <div class="tour-tip" id="tourTip" hidden></div>
+      <div class="tour-progress"><div class="tour-progress-bar" id="tourProgressBar"></div></div>
+      <div class="tour-actions">
+        <button type="button" class="tour-skip-btn" id="tourSkipBtn">Omitir</button>
+        <div class="tour-actions-right">
+          <button type="button" class="btn g sm" id="tourPrevBtn">Anterior</button>
+          <button type="button" class="btn sm" id="tourNextBtn">Siguiente</button>
+        </div>
+      </div>
+    </section>
+  `;
+  document.body.appendChild(root);
+
+  $("#tourCloseBtn").addEventListener("click", () => endTour(true));
+  $("#tourSkipBtn").addEventListener("click", () => endTour(true));
+  $("#tourPrevBtn").addEventListener("click", prevTourStep);
+  $("#tourNextBtn").addEventListener("click", nextTourStep);
+  $("#tourBackdrop").addEventListener("click", (e) => {
+    if (e.target.id === "tourBackdrop") endTour(true);
+  });
+  window.addEventListener("resize", scheduleTourReposition);
+  $("#m")?.addEventListener("scroll", scheduleTourReposition, { passive: true });
+  return root;
+}
+
+function scheduleTourReposition() {
+  if (!tourActive) return;
+  if (tourRepositionTimer) clearTimeout(tourRepositionTimer);
+  tourRepositionTimer = setTimeout(() => {
+    if (tourActive) positionTourStep();
+  }, 60);
+}
+
+function startTour(manual = false) {
+  if (manual) closeModal();
+  closeNav();
+  ensureTourDom();
+  tourActive = true;
+  tourIndex = 0;
+  $("#tourRoot").hidden = false;
+  renderTourStep();
+}
+
+function endTour(markSeen = true) {
+  tourActive = false;
+  if (tourRepositionTimer) {
+    clearTimeout(tourRepositionTimer);
+    tourRepositionTimer = null;
+  }
+  const root = $("#tourRoot");
+  if (root) root.hidden = true;
+  if (markSeen) {
+    try {
+      localStorage.setItem(TOUR_STORAGE_KEY, "1");
+    } catch {}
+  }
+}
+
+function nextTourStep() {
+  if (tourIndex >= TOUR_STEPS.length - 1) {
+    endTour(true);
+    toast("¡Tutorial completado! Ya podés empezar a vender.");
+    return;
+  }
+  tourIndex += 1;
+  renderTourStep();
+}
+
+function prevTourStep() {
+  if (tourIndex <= 0) return;
+  tourIndex -= 1;
+  renderTourStep();
+}
+
+function renderTourStep() {
+  const step = TOUR_STEPS[tourIndex];
+  if (!step) return endTour(true);
+
+  if (step.view && view !== step.view) {
+    go(step.view);
+  }
+
+  const total = TOUR_STEPS.length;
+  const isFirst = tourIndex === 0;
+  const isLast = tourIndex === total - 1;
+
+  $("#tourBadge").textContent = `${step.badge} · ${tourIndex + 1}/${total}`;
+  $("#tourTitle").textContent = step.title;
+  $("#tourBody").textContent = step.body;
+
+  const tipEl = $("#tourTip");
+  if (step.tip) {
+    tipEl.hidden = false;
+    tipEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lightbulb" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg><span>${esc(step.tip)}</span>`;
+  } else {
+    tipEl.hidden = true;
+    tipEl.innerHTML = "";
+  }
+
+  $("#tourProgressBar").style.width = `${Math.round(((tourIndex + 1) / total) * 100)}%`;
+  $("#tourPrevBtn").hidden = isFirst;
+  $("#tourSkipBtn").hidden = isLast;
+  $("#tourNextBtn").textContent = isFirst
+    ? "Comenzar"
+    : isLast
+      ? "¡Empezar a vender!"
+      : "Siguiente";
+
+  requestAnimationFrame(() => {
+    const target = step.target ? document.querySelector(step.target) : null;
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+      setTimeout(() => {
+        if (tourActive) positionTourStep();
+      }, 220);
+    }
+    positionTourStep();
+  });
+}
+
+function positionTourStep() {
+  const step = TOUR_STEPS[tourIndex];
+  if (!step) return;
+
+  const backdrop = $("#tourBackdrop");
+  const spotlight = $("#tourSpotlight");
+  const card = $("#tourCard");
+  const target = step.target ? document.querySelector(step.target) : null;
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const margin = 12;
+
+  if (!target) {
+    spotlight.hidden = true;
+    backdrop.hidden = false;
+    card.style.left = "50%";
+    card.style.top = "50%";
+    card.style.transform = "translate(-50%, -50%)";
+    return;
+  }
+
+  const rect = target.getBoundingClientRect();
+  if (rect.width === 0 && rect.height === 0) {
+    spotlight.hidden = true;
+    backdrop.hidden = false;
+    card.style.left = "50%";
+    card.style.top = "50%";
+    card.style.transform = "translate(-50%, -50%)";
+    return;
+  }
+
+  const pad = 6;
+  const sTop = Math.max(4, rect.top - pad);
+  const sLeft = Math.max(4, rect.left - pad);
+  const sWidth = Math.min(vw - sLeft - 4, rect.width + pad * 2);
+  const sHeight = Math.min(vh - sTop - 4, rect.height + pad * 2);
+
+  backdrop.hidden = true;
+  spotlight.hidden = false;
+  spotlight.style.top = `${sTop}px`;
+  spotlight.style.left = `${sLeft}px`;
+  spotlight.style.width = `${sWidth}px`;
+  spotlight.style.height = `${sHeight}px`;
+
+  card.style.transform = "none";
+  const cardRect = card.getBoundingClientRect();
+  const cw = cardRect.width || Math.min(390, vw - margin * 2);
+  const ch = cardRect.height || 240;
+  const gap = 14;
+
+  let top = sTop + sHeight + gap;
+  let left = sLeft + sWidth / 2 - cw / 2;
+
+  if (top + ch + margin > vh) {
+    const aboveTop = sTop - ch - gap;
+    if (aboveTop >= margin) {
+      top = aboveTop;
+    } else {
+      top = Math.max(margin, vh - ch - margin);
+    }
+  }
+
+  left = Math.max(margin, Math.min(vw - cw - margin, left));
+  top = Math.max(margin, Math.min(vh - ch - margin, top));
+
+  card.style.left = `${Math.round(left)}px`;
+  card.style.top = `${Math.round(top)}px`;
+}
+
+try {
+  if (localStorage.getItem(TOUR_STORAGE_KEY) !== "1") {
+    setTimeout(() => {
+      const modalOpen = $("#modal")?.classList.contains("open");
+      if (!modalOpen && !tourActive) {
+        startTour(false);
+      }
+    }, 500);
+  }
+} catch {}

@@ -166,29 +166,44 @@
           <span><b id="topUserName">Invitado</b><small id="topUserRole">Administrador</small></span>
         </div>
         <div class="crumb" id="crumb" style="display: none !important;"></div>
-        <div class="nav-search-wrap">
-          <form class="nav-search-form" id="navSearchForm" role="search" onsubmit="event.preventDefault();">
-            <input
-              type="text"
-              id="navSearchInput"
-              class="nav-search-input"
-              placeholder="Buscar producto, venta, cliente… (Ctrl+K)"
-              aria-label="Buscar producto, venta, cliente y entrega"
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <button
-              type="submit"
-              id="navSearchBtn"
-              class="nav-search-btn"
-              title="Buscar en el negocio (Ctrl+K o /)"
-              aria-label="Buscar"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
-            </button>
-          </form>
-        </div>
         <div class="top-right">
+          <div class="nav-search-wrap">
+            <form class="nav-search-form uiverse-search-wrapper" id="navSearchForm" role="search" onsubmit="event.preventDefault();">
+              <button
+                type="submit"
+                id="navSearchBtn"
+                class="nav-search-btn uiverse-search-icon"
+                title="Buscar en el negocio (Ctrl+K o /)"
+                aria-label="Buscar"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M11.5 21C16.7467 21 21 16.7467 21 11.5C21 6.25329 16.7467 2 11.5 2C6.25329 2 2 6.25329 2 11.5C2 16.7467 6.25329 21 11.5 21Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <path d="M22 22L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </button>
+              <input
+                type="text"
+                id="navSearchInput"
+                name="text"
+                class="nav-search-input uiverse-search-input"
+                placeholder="Buscar… (Ctrl+K)"
+                aria-label="Buscar producto, venta, cliente y entrega"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </form>
+          </div>
+          <button
+            class="btn g sm tour-launch-btn"
+            id="tourLaunchBtn"
+            type="button"
+            data-action="start-tour"
+            title="Iniciar tutorial guiado"
+            aria-label="Iniciar tutorial guiado"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            <span>Guía</span>
+          </button>
           <button class="btn g sm w" id="cashHeader" type="button">
             ○ Caja cerrada
           </button>
