@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/es_ES/appleid.auth.js" async defer></script>
 
     <style>
       /* Tipografía Poppins */
@@ -472,7 +474,7 @@
         <img src="img/logo.png" alt="Comerciando Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'44\' height=\'44\' viewBox=\'0 0 24 24\' fill=\'%23175bdf\'><rect width=\'24\' height=\'24\' rx=\'6\' fill=\'%23175bdf\'/><text x=\'12\' y=\'16\' font-size=\'12\' fill=\'white\' font-family=\'sans-serif\' text-anchor=\'middle\' font-weight=\'bold\'>C</text></svg>'" />
         <div class="brand-text">
           <h1>Comerciando <span class="plan-tag">PLAN EMPRENDEDOR</span></h1>
-          <p>by Andes Solutions · Acceso Seguro</p>
+          <p>por Andes Solutions · Acceso Seguro</p>
         </div>
       </div>
 
@@ -485,22 +487,22 @@
       <!-- Alertas de estado -->
       <div class="alert-box" id="authAlert" role="alert"></div>
 
-      <!-- VISTA 1: FORMULARIO DE INICIO DE SESIÓN (Uiverse.io by micaelgomestavares) -->
+      <!-- VISTA 1: FORMULARIO DE INICIO DE SESIÓN -->
       <form class="form" id="signInForm" onsubmit="handleSignInSubmit(event)">
         <div class="flex-column">
-          <label for="loginEmail">Email</label>
+          <label for="loginEmail">Correo electrónico</label>
         </div>
         <div class="inputForm">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-at-sign input-icon"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>
-          <input type="email" class="input" id="loginEmail" placeholder="Enter your Email" required autocomplete="email" />
+          <input type="email" class="input" id="loginEmail" placeholder="Ingresá tu correo electrónico" required autocomplete="email" />
         </div>
 
         <div class="flex-column">
-          <label for="loginPassword">Password</label>
+          <label for="loginPassword">Contraseña</label>
         </div>
         <div class="inputForm">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock input-icon"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input type="password" class="input" id="loginPassword" placeholder="Enter your Password" required autocomplete="current-password" />
+          <input type="password" class="input" id="loginPassword" placeholder="Ingresá tu contraseña" required autocomplete="current-password" />
           <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('loginPassword', this)" title="Mostrar / ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye eye-show"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off eye-hide" style="display:none;"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>
@@ -510,20 +512,20 @@
         <div class="flex-row">
           <div>
             <input type="checkbox" id="rememberMe" checked />
-            <label for="rememberMe">Remember me</label>
+            <label for="rememberMe">Recordarme</label>
           </div>
-          <span class="span" onclick="openForgotModal()">Forgot password?</span>
+          <span class="span" onclick="openForgotModal()">¿Olvidaste tu contraseña?</span>
         </div>
 
         <button type="submit" class="button-submit" id="signInSubmitBtn">
-          <span>Sign In</span>
+          <span>Iniciar sesión</span>
         </button>
 
         <p class="p">
-          Don't have an account? <span class="span" onclick="switchView('signup')">Sign Up</span>
+          ¿No tenés una cuenta? <span class="span" onclick="switchView('signup')">Registrate</span>
         </p>
 
-        <p class="p line">Or With</p>
+        <p class="p line">O continuá con</p>
 
         <div class="flex-row">
           <button type="button" class="btn google" onclick="handleSocialAuth('Google')">
@@ -556,11 +558,11 @@
         </div>
 
         <div class="flex-column">
-          <label for="regEmail">Email</label>
+          <label for="regEmail">Correo electrónico</label>
         </div>
         <div class="inputForm">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-at-sign input-icon"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>
-          <input type="email" class="input" id="regEmail" placeholder="Enter your Email" required autocomplete="email" />
+          <input type="email" class="input" id="regEmail" placeholder="Ingresá tu correo electrónico" required autocomplete="email" />
         </div>
 
         <div class="flex-column">
@@ -592,10 +594,10 @@
         </button>
 
         <p class="p">
-          ¿Ya tenés una cuenta? <span class="span" onclick="switchView('signin')">Sign In</span>
+          ¿Ya tenés una cuenta? <span class="span" onclick="switchView('signin')">Iniciá sesión</span>
         </p>
 
-        <p class="p line">Or With</p>
+        <p class="p line">O continuá con</p>
 
         <div class="flex-row">
           <button type="button" class="btn google" onclick="handleSocialAuth('Google')">
@@ -662,11 +664,40 @@
         </p>
         <div class="inputForm" style="margin-bottom: 16px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-at-sign input-icon"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>
-          <input type="email" class="input" id="forgotEmail" placeholder="Enter your Email" required />
+          <input type="email" class="input" id="forgotEmail" placeholder="Ingresá tu correo electrónico" required />
         </div>
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
           <button type="button" class="btn" style="width: auto; margin-top:0; padding: 0 16px;" onclick="closeForgotModal()">Cancelar</button>
           <button type="button" class="button-submit" style="width: auto; margin: 0; padding: 0 18px;" onclick="sendRecoveryEmail()">Enviar enlace</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: CONFIGURACIÓN OAUTH REAL (GOOGLE / APPLE) -->
+    <div class="lite-modal-backdrop" id="oauthConfigModal">
+      <div class="lite-modal-box" style="max-width: 460px;">
+        <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #151717;" id="oauthModalTitle">Configurar acceso real</h3>
+        <p style="margin: 0 0 14px 0; font-size: 13px; color: #52525b; line-height: 1.45;" id="oauthModalDesc">
+          Para iniciar sesión con una cuenta real, ingresá el Client ID de tu proyecto. Se guarda de forma local en tu navegador (también podés fijarlo en <code>AUTH_CONFIG</code> dentro de <code>login.html</code>).
+        </p>
+        <div class="flex-column" style="margin-bottom: 6px;">
+          <label for="oauthGoogleIdInput" style="font-size: 12.5px;">Google Client ID (Google Cloud Console)</label>
+        </div>
+        <div class="inputForm" style="margin-bottom: 12px; height: 44px;">
+          <input type="text" class="input" id="oauthGoogleIdInput" placeholder="Ej: 123456789-abc.apps.googleusercontent.com" style="margin-left: 8px; font-size: 12.5px;" />
+        </div>
+        <div class="flex-column" style="margin-bottom: 6px;">
+          <label for="oauthAppleIdInput" style="font-size: 12.5px;">Apple Services ID (Apple Developer)</label>
+        </div>
+        <div class="inputForm" style="margin-bottom: 12px; height: 44px;">
+          <input type="text" class="input" id="oauthAppleIdInput" placeholder="Ej: com.tuempresa.comerciando.web" style="margin-left: 8px; font-size: 12.5px;" />
+        </div>
+        <div style="display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; margin-top: 8px;">
+          <button type="button" class="btn" style="width: auto; margin-top: 0; padding: 0 12px; font-size: 12.5px;" onclick="runDemoSocialFallback()">Usar modo demo</button>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn" style="width: auto; margin-top: 0; padding: 0 14px;" onclick="closeOAuthConfigModal()">Cancelar</button>
+            <button type="button" class="button-submit" style="width: auto; margin: 0; padding: 0 16px;" onclick="saveOAuthConfigAndContinue()">Guardar y conectar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -924,15 +955,15 @@
           const user = users.find(u => u.email.toLowerCase() === emailInput);
 
           if (!user || user.passwordHash !== pwdInput) {
-            setButtonLoading(btn, false, "Sign In");
-            showAlert("Email o contraseña incorrectos. Verificá los datos ingresados.", "error");
+            setButtonLoading(btn, false, "Iniciar sesión");
+            showAlert("Correo o contraseña incorrectos. Verificá los datos ingresados.", "error");
             return;
           }
 
           // REGLA CLAVE: No permitir acceso si no está verificado
           if (!user.verified) {
             pendingEmail = user.email;
-            setButtonLoading(btn, false, "Sign In");
+            setButtonLoading(btn, false, "Iniciar sesión");
             showAlert("Tu cuenta aún no está verificada. Revisá tu bandeja de correo.", "error");
             setTimeout(() => {
               switchView("verify");
@@ -966,8 +997,8 @@
           }, 800);
         } catch (err) {
           console.error(err);
-          setButtonLoading(btn, false, "Sign In");
-          showAlert("Error al iniciar sesión. Intenta nuevamente.", "error");
+          setButtonLoading(btn, false, "Iniciar sesión");
+          showAlert("Error al iniciar sesión. Intentá nuevamente.", "error");
         }
       }
 
@@ -1031,65 +1062,246 @@
         showAlert(`Se ha reenviado el correo de activación a ${pendingEmail}.`, "info");
       }
 
-      /* ═══ AUTENTICACIÓN CON GOOGLE / APPLE ═══ */
+      /* ═══ AUTENTICACIÓN REAL CON GOOGLE / APPLE (OAuth 2.0 / OIDC) ═══ */
+      const OAUTH_CONFIG_STORAGE_KEY = "comerciando_oauth_config_v1";
+      // Podés fijar tus credenciales aquí directamente para producción:
+      const AUTH_CONFIG = {
+        googleClientId: "",
+        appleClientId: "",
+        appleRedirectUri: window.location.origin + window.location.pathname
+      };
+      let pendingOAuthProvider = "";
+
+      function getOAuthConfig() {
+        let saved = {};
+        try {
+          saved = JSON.parse(localStorage.getItem(OAUTH_CONFIG_STORAGE_KEY) || "{}") || {};
+        } catch {}
+        return {
+          googleClientId: (AUTH_CONFIG.googleClientId || saved.googleClientId || "").trim(),
+          appleClientId: (AUTH_CONFIG.appleClientId || saved.appleClientId || "").trim(),
+          appleRedirectUri: AUTH_CONFIG.appleRedirectUri || (window.location.origin + window.location.pathname)
+        };
+      }
+
+      function decodeJwtPayload(token) {
+        try {
+          const base64Url = token.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split("")
+              .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+              .join("")
+          );
+          return JSON.parse(jsonPayload);
+        } catch {
+          return null;
+        }
+      }
+
+      function completeSocialLogin(profile, provider, token) {
+        const usersRaw = localStorage.getItem(AUTH_STORAGE_USERS);
+        const users = usersRaw ? JSON.parse(usersRaw) : [];
+
+        const email = String(profile.email || "").trim().toLowerCase();
+        const fullName = String(profile.name || "").trim() || (provider === "Google" ? "Usuario Google" : "Usuario Apple");
+        const firstName = profile.firstName || fullName.split(" ")[0] || fullName;
+        const lastName = profile.lastName || fullName.split(" ").slice(1).join(" ") || "";
+
+        let user = users.find((u) => (u.email || "").toLowerCase() === email);
+        if (!user) {
+          const isFirst = users.length === 0;
+          user = {
+            id: "usr_" + (users.length + 1),
+            name: fullName,
+            firstName,
+            lastName,
+            email,
+            role: isFirst ? "Administrador" : "Colaborador",
+            photo: profile.photo || "",
+            verified: true,
+            authProvider: provider.toLowerCase(),
+            createdAt: new Date().toISOString()
+          };
+          users.push(user);
+        } else {
+          user = {
+            ...user,
+            name: fullName || user.name,
+            firstName: firstName || user.firstName,
+            lastName: lastName || user.lastName,
+            photo: profile.photo || user.photo || "",
+            verified: true,
+            authProvider: provider.toLowerCase()
+          };
+          const idx = users.findIndex((u) => (u.email || "").toLowerCase() === email);
+          if (idx !== -1) users[idx] = user;
+        }
+        localStorage.setItem(AUTH_STORAGE_USERS, JSON.stringify(users));
+
+        const session = {
+          user: {
+            id: user.id,
+            name: user.name,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+            photo: user.photo,
+            verified: true
+          },
+          provider,
+          token: token || ("oauth_" + Math.random().toString(36).substring(2, 12)),
+          timestamp: Date.now()
+        };
+
+        localStorage.setItem(AUTH_STORAGE_SESSION, JSON.stringify(session));
+        syncToAppState(user);
+
+        showAlert(`¡Autenticado con ${provider} como ${user.name}! Ingresando…`, "success");
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 700);
+      }
+
+      function openOAuthConfigModal(provider) {
+        pendingOAuthProvider = provider;
+        const cfg = getOAuthConfig();
+        document.getElementById("oauthModalTitle").textContent = `Conectar acceso real con ${provider}`;
+        document.getElementById("oauthGoogleIdInput").value = cfg.googleClientId;
+        document.getElementById("oauthAppleIdInput").value = cfg.appleClientId;
+        document.getElementById("oauthConfigModal").classList.add("show");
+      }
+
+      function closeOAuthConfigModal() {
+        document.getElementById("oauthConfigModal").classList.remove("show");
+      }
+
+      function saveOAuthConfigAndContinue() {
+        const googleClientId = document.getElementById("oauthGoogleIdInput").value.trim();
+        const appleClientId = document.getElementById("oauthAppleIdInput").value.trim();
+        try {
+          localStorage.setItem(
+            OAUTH_CONFIG_STORAGE_KEY,
+            JSON.stringify({ googleClientId, appleClientId })
+          );
+        } catch {}
+        closeOAuthConfigModal();
+        if (pendingOAuthProvider) {
+          handleSocialAuth(pendingOAuthProvider);
+        }
+      }
+
+      async function runDemoSocialFallback() {
+        const provider = pendingOAuthProvider || "Google";
+        closeOAuthConfigModal();
+        showAlert(`Ingresando en modo demo (${provider})…`, "info");
+        await new Promise((r) => setTimeout(r, 450));
+        completeSocialLogin(
+          {
+            name: provider === "Google" ? "Usuario Google (Demo)" : "Usuario Apple (Demo)",
+            firstName: "Usuario",
+            lastName: provider,
+            email: provider === "Google" ? "usuario.demo@gmail.com" : "usuario.demo@icloud.com",
+            photo: ""
+          },
+          provider
+        );
+      }
+
       async function handleSocialAuth(provider) {
         hideAlert();
-        showAlert(`Conectando con ${provider} OAuth…`, "info");
+        const cfg = getOAuthConfig();
 
-        await new Promise(r => setTimeout(r, 600));
-
-        // En Google y Apple el correo ya viene validado y verificado por el proveedor
-        const defaultName = provider === "Google" ? "Usuario Google" : "Usuario Apple";
-        const email = provider === "Google" ? "usuario@gmail.com" : "usuario@icloud.com";
-
-        try {
-          const usersRaw = localStorage.getItem(AUTH_STORAGE_USERS);
-          const users = usersRaw ? JSON.parse(usersRaw) : [];
-
-          let user = users.find(u => u.email === email);
-          if (!user) {
-            const isFirst = users.length === 0;
-            user = {
-              id: "usr_" + (users.length + 1),
-              name: defaultName,
-              firstName: defaultName.split(" ")[0],
-              lastName: defaultName.split(" ")[1] || "",
-              email,
-              role: isFirst ? "Administrador" : "Colaborador",
-              photo: "",
-              verified: true,
-              authProvider: provider.toLowerCase(),
-              createdAt: new Date().toISOString()
-            };
-            users.push(user);
-            localStorage.setItem(AUTH_STORAGE_USERS, JSON.stringify(users));
+        if (provider === "Google") {
+          if (!cfg.googleClientId) {
+            openOAuthConfigModal("Google");
+            return;
           }
+          if (!window.google?.accounts?.oauth2) {
+            showAlert("No se pudo cargar el SDK de Google. Verificá tu conexión a internet.", "error");
+            return;
+          }
+          showAlert("Abriendo ventana segura de Google…", "info");
+          try {
+            const tokenClient = window.google.accounts.oauth2.initTokenClient({
+              client_id: cfg.googleClientId,
+              scope: "openid email profile",
+              callback: async (tokenResponse) => {
+                if (tokenResponse.error || !tokenResponse.access_token) {
+                  showAlert("No se completó el inicio de sesión con Google.", "error");
+                  return;
+                }
+                try {
+                  const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+                  });
+                  if (!res.ok) throw new Error("userinfo_failed");
+                  const info = await res.json();
+                  completeSocialLogin(
+                    {
+                      name: info.name,
+                      firstName: info.given_name,
+                      lastName: info.family_name,
+                      email: info.email,
+                      photo: info.picture || ""
+                    },
+                    "Google",
+                    tokenResponse.access_token
+                  );
+                } catch {
+                  showAlert("No pudimos obtener los datos de tu cuenta de Google.", "error");
+                }
+              }
+            });
+            tokenClient.requestAccessToken({ prompt: "select_account" });
+          } catch (err) {
+            console.error(err);
+            showAlert("Error al iniciar Google OAuth. Verificá tu Client ID y origen autorizado.", "error");
+          }
+          return;
+        }
 
-          const session = {
-            user: {
-              id: user.id,
-              name: user.name,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              email: user.email,
-              role: user.role,
-              photo: user.photo,
-              verified: true
-            },
-            provider,
-            token: "oauth_" + Math.random().toString(36).substring(2, 12),
-            timestamp: Date.now()
-          };
-
-          localStorage.setItem(AUTH_STORAGE_SESSION, JSON.stringify(session));
-          syncToAppState(user);
-
-          showAlert(`¡Autenticado con ${provider}! Ingresando…`, "success");
-          setTimeout(() => {
-            window.location.href = "index.html";
-          }, 800);
-        } catch (e) {
-          showAlert(`Error al autenticar con ${provider}.`, "error");
+        if (provider === "Apple") {
+          if (!cfg.appleClientId) {
+            openOAuthConfigModal("Apple");
+            return;
+          }
+          if (!window.AppleID?.auth) {
+            showAlert("No se pudo cargar el SDK de Apple. Verificá tu conexión a internet.", "error");
+            return;
+          }
+          showAlert("Abriendo ventana segura de Apple…", "info");
+          try {
+            window.AppleID.auth.init({
+              clientId: cfg.appleClientId,
+              scope: "name email",
+              redirectURI: cfg.appleRedirectUri,
+              usePopup: true
+            });
+            const data = await window.AppleID.auth.signIn();
+            const idToken = data?.authorization?.id_token || "";
+            const claims = decodeJwtPayload(idToken) || {};
+            const appleName = data?.user?.name
+              ? `${data.user.name.firstName || ""} ${data.user.name.lastName || ""}`.trim()
+              : "";
+            const email = data?.user?.email || claims.email || `${claims.sub || "apple"}@privaterelay.appleid.com`;
+            completeSocialLogin(
+              {
+                name: appleName || email.split("@")[0],
+                firstName: data?.user?.name?.firstName || appleName.split(" ")[0] || "Usuario",
+                lastName: data?.user?.name?.lastName || "",
+                email,
+                photo: ""
+              },
+              "Apple",
+              idToken
+            );
+          } catch (err) {
+            console.error(err);
+            showAlert("No se completó el inicio de sesión con Apple.", "error");
+          }
         }
       }
 
