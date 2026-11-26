@@ -570,7 +570,25 @@ function openAuthModal() {
   );
 
   $("#authCancelBtn").addEventListener("click", closeModal);
-  $("#authGoogleBtn").addEventListener("click", () => {
+  $("#authGoogleBtn").addEventListener("click", async () => {
+    const button = $("#authGoogleBtn");
+    button.disabled = true;
+    button.innerHTML = `${SVG.google}<span>Preparando acceso seguro…</span>`;
+    try {
+      const response = await fetch("/api/auth/config", { cache: "no-store" });
+      const config = response.ok ? await response.json() : null;
+      if (!config?.googleEnabled) {
+        button.disabled = false;
+        button.innerHTML = `${SVG.google}<span>Continuar con Google</span>`;
+        showToast("El acceso con Google todavía no está configurado para este comercio. Probá nuevamente más tarde.");
+        return;
+      }
+    } catch {
+      button.disabled = false;
+      button.innerHTML = `${SVG.google}<span>Continuar con Google</span>`;
+      showToast("No pudimos verificar el acceso con Google. Revisá tu conexión e intentá nuevamente.");
+      return;
+    }
     saveCart();
     try { localStorage.setItem(STORE_CHECKOUT_AFTER_LOGIN_KEY, "0"); } catch {}
     location.assign("/api/auth/start?audience=customer&returnTo=" + encodeURIComponent("/catalogo.html"));
