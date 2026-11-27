@@ -1,5 +1,6 @@
 Tareas pendientes y pasos para llevar el repositorio a producción (demo sin autenticación de Google)
 
+
 ## Cambios recientes
 - Se deshabilitó la autenticación de Google forzando `googleEnabled: false` en `api/auth/config.js`. Con esto la API siempre indica que Google está desactivado, permitiendo ejecutar el proyecto en modo demo.
 
