@@ -16213,3 +16213,14 @@ html[data-theme="dark"] .tour-tip svg {
 
 
 
+
+
+/* ── Fix: quitar subrayado del enlace "Abrir catálogo" ─────────────────── */
+a.btn {
+  text-decoration: none;
+}
+a.btn:hover,
+a.btn:focus-visible {
+  text-decoration: none;
+}
+/* ─────────────────────────────────────────────────────────────────────────── */

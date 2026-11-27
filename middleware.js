@@ -18,6 +18,8 @@ async function validSeller(cookie) {
   } catch { return false; }
 }
 export default async function middleware(request) {
+  // Demo mode: skip authentication checks
+  if (process.env.NEXT_PUBLIC_DEMO === 'true') return new Response(null, { headers: { "x-middleware-next": "1" } });
   const host = request.headers.get("host") || "";
   // Vercel's equivalent of NextResponse.next(), without bringing Next.js into
   // this static application. Returning undefined in `vercel dev` emits an

@@ -187,7 +187,7 @@ body.storefront-body {
 /* Banner de tienda compacto estilo Rappi */
 .store-market-banner {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 20px;
@@ -218,11 +218,101 @@ body.storefront-body {
   font-weight: 600;
 }
 
+/* ── Estado del local: punto parpadeante (open) o rojo fijo (closed) ─────── */
 .store-status-dot {
   width: 7px;
   height: 7px;
   border-radius: 99px;
   background: var(--ok);
+}
+
+/* Pulso suave solo cuando el local está abierto */
+.store-status-dot.pulsing {
+  animation: storeStatusPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes storeStatusPulse {
+  0%   { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.5); }
+  50%  { opacity: 0.65; box-shadow: 0 0 0 5px rgba(52, 199, 89, 0); }
+  100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); }
+}
+
+/* Punto rojo para estado cerrado */
+.store-status-dot.closed {
+  background: #ff3b30;
+  animation: none;
+}
+
+/* Pill roja cuando está cerrado */
+.store-status-pill.closed {
+  background: rgba(255, 59, 48, 0.12);
+  color: #ff3b30;
+}
+
+/* ── Banner de aviso "fuera de horario" ─────────────────────────────────── */
+.store-closed-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 149, 0, 0.1);
+  border: 1px solid rgba(255, 149, 0, 0.28);
+  color: var(--fg);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  box-shadow: 0 2px 10px rgba(255, 149, 0, 0.08);
+}
+
+.store-closed-banner svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #ff9500;
+}
+
+.store-closed-banner b {
+  display: block;
+  margin-bottom: 3px;
+  color: #ff9500;
+  font-size: 13.5px;
+}
+
+/* Aviso dentro del checkout (paso 3) */
+.checkout-closed-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 9px;
+  background: rgba(255, 149, 0, 0.11);
+  border: 1px solid rgba(255, 149, 0, 0.28);
+  color: var(--fg);
+  font-size: 12.5px;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.checkout-closed-notice b {
+  display: block;
+  margin-bottom: 2px;
+  color: #ff9500;
+}
+
+/* Etiqueta "Fuera de horario" en las delivery cards */
+.ce-del-pill.off-hours {
+  background: rgba(255, 149, 0, 0.15);
+  color: #c47800;
+  border: 1px solid rgba(255, 149, 0, 0.3);
+}
+
+@media (max-width: 600px) {
+  .store-closed-banner {
+    font-size: 12.5px;
+    padding: 11px 13px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
 }
 
 .store-delivery-pill {
@@ -283,10 +373,16 @@ body.storefront-body {
 
 .store-section-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
+}
+
+.store-section-head-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .store-section-head h2 {

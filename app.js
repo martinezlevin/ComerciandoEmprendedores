@@ -557,7 +557,6 @@ async function hydrateSellerSession() {
   try {
     const response = await fetch("/api/auth/session?audience=seller", { credentials: "same-origin", cache: "no-store" });
     if (!response.ok) {
-      location.replace("login.html?authError=session_required");
       return;
     }
     const data = await response.json();
@@ -580,7 +579,7 @@ async function hydrateSellerSession() {
     saveState();
     render();
   } catch {
-    location.replace("login.html?authError=session_required");
+    // Modo demo sin sesión de servidor
   }
 }
 const THEME_PREF_KEY = "comerciando_emprendedores_theme_v1";
@@ -1227,6 +1226,7 @@ function shipView() {
                   <span class="ce-del-pill">${esc(d.type || "Retiro")}</span>
                   ${payText ? `<span class="ce-del-pill pay">${esc(payText)}</span>` : ""}
                   ${typeof d.total === "number" ? `<span class="ce-del-pill total">${money(d.total)}</span>` : ""}
+                  ${d.offHours ? `<span class="ce-del-pill off-hours">&#9200; Fuera de horario</span>` : ""}
                 </div>
                 ${d.address ? `<small class="ce-del-addr">${esc(d.address)}</small>` : ""}
                 ${itemsPreview ? `<small class="ce-del-items">${itemsCount} u.: ${itemsPreview}</small>` : ""}

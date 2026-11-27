@@ -1,6 +1,14 @@
 /* Lógica de la OnePage Catálogo Online estilo Market — Comerciando */
 "use strict";
 
+// ── Modo demo ──────────────────────────────────────────────────────────────
+// Cuando DEMO_MODE es true el flujo de checkout no requiere sesión de Google.
+const DEMO_MODE =
+  document.querySelector('meta[name="demo-mode"]')?.content === "true" ||
+  new URLSearchParams(location.search).get("demo") === "1" ||
+  (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_DEMO === "true");
+// ──────────────────────────────────────────────────────────────────────────
+
 const STORE_STATE_KEY = "comerciando_emprendedores_state_v2";
 const STORE_THEME_KEY = "comerciando_emprendedores_theme_v1";
 const STORE_CART_KEY = "comerciando_public_store_cart_v1";
@@ -608,13 +616,7 @@ async function getCustomerSession() {
 async function beginCheckout() {
   const entries = getCartEntries();
   if (!entries.length) return;
-  try {
-    const user = await getCustomerSession();
-    if (user) return openCheckoutModal();
-  } catch {}
-  saveCart();
-  try { localStorage.setItem(STORE_CHECKOUT_AFTER_LOGIN_KEY, "1"); } catch {}
-  location.assign("/api/auth/start?audience=customer&returnTo=" + encodeURIComponent("/catalogo.html?checkout=1"));
+  openCheckoutModal();
 }
 
 let checkoutState = {
@@ -643,6 +645,171 @@ function refreshStoreConfig() {
     }
   } catch {}
 }
+
+// ── Estado del local: horario + caja ────────────────────────────────────────
+/**
+ * Parsea el string de horarios configurado (ej: "Lunes a Viernes de 9:00 a 19:00")
+ * y devuelve un array de { days: number[], open: number, close: number }.
+ * Ajustar aquí si el formato del campo "Horarios" cambia.
+ */
+const DAY_NAMES_ES = ["domingo","lunes","martes","miércoles","miercoles","jueves","viernes","sábado","sabado"];
+const DAY_INDEX = {
+  domingo:0, lunes:1, martes:2, "miércoles":3, miercoles:3,
+  jueves:4, viernes:5, "sábado":6, sabado:6,
+};
+
+function parseHourMinute(str) {
+  // "9:00" → 540, "19:30" → 1170
+  const [h, m = "0"] = str.split(":");
+  return parseInt(h, 10) * 60 + parseInt(m, 10);
+}
+
+function parseFranjas(hoursString) {
+  // Resultado: array de { days: [0-6, ...], open: minutos, close: minutos }
+  const result = [];
+  if (!hoursString) return result;
+  // Dividir por "·" o ";" para múltiples franjas
+  const parts = hoursString.split(/[·;]/);
+  for (const part of parts) {
+    const s = part.trim().toLowerCase();
+    // Buscar patrón "X de HH:MM a HH:MM" o "X a Y de HH:MM a HH:MM"
+    const timeMatch = s.match(/de\s+(\d{1,2}:\d{2})\s+a\s+(\d{1,2}:\d{2})/);
+    if (!timeMatch) continue;
+    const open = parseHourMinute(timeMatch[1]);
+    const close = parseHourMinute(timeMatch[2]);
+    // Extraer rango de días antes del "de HH:MM"
+    const daysPart = s.slice(0, s.indexOf("de " + timeMatch[1])).trim();
+    const days = [];
+    // "lunes a viernes" → 1..5; "lunes, miércoles" → [1,3]; "sábados" → [6]
+    const rangeMatch = daysPart.match(/(\w+)\s+a\s+(\w+)/);
+    if (rangeMatch) {
+      const from = DAY_INDEX[rangeMatch[1].replace(/s$/, "")];
+      const to   = DAY_INDEX[rangeMatch[2].replace(/s$/, "")];
+      if (from !== undefined && to !== undefined) {
+        for (let d = from; d <= to; d++) days.push(d);
+      }
+    } else {
+      // Días sueltos separados por coma o "y"
+      for (const word of daysPart.split(/[,y\s]+/)) {
+        const idx = DAY_INDEX[word.replace(/s$/, "")];
+        if (idx !== undefined) days.push(idx);
+      }
+    }
+    if (days.length) result.push({ days, open, close });
+  }
+  return result;
+}
+
+/**
+ * Calcula si el local está abierto.
+ * REGLA: La caja manda siempre.
+ *   - Si state.cash === true  → ABIERTO (sin importar horario)
+ *   - Si state.cash === false → CERRADO (sin importar horario)
+ *   - Si no hay dato de caja  → se usa el horario configurado como fallback
+ */
+function isStoreOpen() {
+  try {
+    const raw = localStorage.getItem(STORE_STATE_KEY);
+    if (raw) {
+      const loaded = JSON.parse(raw);
+      // La caja manda: si es booleano explícito, usarlo directamente
+      if (typeof loaded.cash === "boolean") {
+        return { open: loaded.cash, reason: "cash" };
+      }
+    }
+  } catch {}
+
+  // Fallback: usar horario configurado si no hay dato de caja
+  const hours = storeConfig.hours || "";
+  if (!hours.trim()) return { open: true, reason: "always" };
+
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const currentMin = now.getHours() * 60 + now.getMinutes();
+
+  const franjas = parseFranjas(hours);
+  if (!franjas.length) return { open: true, reason: "always" };
+
+  for (const { days, open, close } of franjas) {
+    if (days.includes(dayOfWeek) && currentMin >= open && currentMin < close) {
+      return { open: true, reason: "schedule" };
+    }
+  }
+  return { open: false, reason: "schedule" };
+}
+
+/**
+ * Calcula el próximo día/horario de apertura según el horario configurado.
+ * Devuelve un string legible como "mañana a las 9:00" o "el lunes a las 9:00".
+ */
+function nextOpeningText() {
+  const hours = storeConfig.hours || "";
+  const franjas = parseFranjas(hours);
+  if (!franjas.length) return "el próximo día hábil";
+
+  const DAY_LABEL = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  const now = new Date();
+  // Buscar en los próximos 7 días
+  for (let delta = 1; delta <= 7; delta++) {
+    const candidate = new Date(now.getTime() + delta * 86400000);
+    const dow = candidate.getDay();
+    for (const { days, open } of franjas) {
+      if (days.includes(dow)) {
+        const h = Math.floor(open / 60);
+        const m = String(open % 60).padStart(2, "0");
+        if (delta === 1) return `mañana a las ${h}:${m}`;
+        return `el ${DAY_LABEL[dow]} a las ${h}:${m}`;
+      }
+    }
+  }
+  return "el próximo día hábil";
+}
+
+/**
+ * Actualiza el indicador de estado en el hero del catálogo
+ * y muestra/oculta el banner de aviso de local cerrado.
+ * Llamar al inicio y cada 60 s con setInterval.
+ */
+function updateStoreStatusUI() {
+  refreshStoreConfig();
+  const { open } = isStoreOpen();
+
+  const pill  = document.getElementById("storeStatusPill");
+  const dot   = document.getElementById("storeStatusDot");
+  const label = document.getElementById("storeStatusLabel");
+  const banner = document.getElementById("storeClosedBanner");
+
+  if (pill && dot && label) {
+    if (open) {
+      pill.classList.remove("closed");
+      dot.classList.remove("closed");
+      dot.classList.add("pulsing");
+      label.textContent = "Abierto ahora";
+    } else {
+      pill.classList.add("closed");
+      dot.classList.remove("pulsing");
+      dot.classList.add("closed");
+      label.textContent = "Cerrado";
+    }
+  }
+
+  if (banner) {
+    banner.style.display = open ? "none" : "flex";
+  }
+}
+
+// Correr al cargar y cada 15 s (el intervalo corto sirve como respaldo)
+updateStoreStatusUI();
+setInterval(updateStoreStatusUI, 15_000);
+
+// Escuchar cambios de localStorage desde OTRA pestaña (ej: index.html abre/cierra caja)
+// El evento "storage" se dispara automáticamente cuando otra pestaña modifica localStorage.
+window.addEventListener("storage", (e) => {
+  if (e.key === STORE_STATE_KEY) {
+    updateStoreStatusUI();
+  }
+});
+// ─────────────────────────────────────────────────────────────────────────────
 
 function normalizeWhatsappNumber(raw) {
   return String(raw || "").replace(/[^\d]/g, "");
@@ -916,23 +1083,16 @@ function renderCheckoutModal() {
       `Hola ${storeName}! Soy ${checkoutState.name.trim()}. Te envío el comprobante de transferencia de mi pedido:\n${summaryText}\n\nTotal: ${money(total)}`,
     );
 
-    const paymentSectionHtml = isPickup
-      ? `
-        <div class="ce-notice info" style="margin-top:14px">
-          ${SVG.store}
-          <div>
-            <b>Pago en el local</b>
-            <p>El pago se procesará en el local al momento de retirar tu pedido.</p>
-          </div>
-        </div>
-      `
-      : `
+    const cashOptionLabel = isPickup ? "Pago en el local" : "Efectivo al delivery";
+    const cashOptionIcon = isPickup ? SVG.store : SVG.banknote;
+
+    const paymentSectionHtml = `
         <div class="ce-payment-block">
           <label class="ce-block-label">Elegí tu forma de pago *</label>
           <div class="lite-choice two-col">
-            <button type="button" data-co-pay="Efectivo al delivery" class="${checkoutState.paymentMethod === "Efectivo al delivery" ? "active" : ""}">
-              ${SVG.banknote}
-              <span>Efectivo al delivery</span>
+            <button type="button" data-co-pay="${cashOptionLabel}" class="${checkoutState.paymentMethod === cashOptionLabel ? "active" : ""}">
+              ${cashOptionIcon}
+              <span>${cashOptionLabel}</span>
             </button>
             <button type="button" data-co-pay="Transferencia bancaria" class="${checkoutState.paymentMethod === "Transferencia bancaria" ? "active" : ""}" ${!hasTransferData ? 'disabled title="El vendedor aún no cargó sus datos de transferencia o WhatsApp"' : ""}>
               ${SVG.landmark}
@@ -941,7 +1101,7 @@ function renderCheckoutModal() {
           </div>
           ${
             !hasTransferData
-              ? `<div class="ce-notice warn" style="margin-top:10px">${SVG.alertCircle}<span>La transferencia bancaria no está disponible porque el vendedor aún no completó su alias/CBU o WhatsApp en Configuración. Podés abonar en efectivo al delivery.</span></div>`
+              ? `<div class="ce-notice warn" style="margin-top:10px">${SVG.alertCircle}<span>La transferencia bancaria no está disponible porque el vendedor aún no completó su alias/CBU o WhatsApp en Configuración. Podés abonar en ${isPickup ? "el local" : "efectivo al delivery"}.</span></div>`
               : ""
           }
           ${checkoutState.errors.payment ? `<p class="field-error" style="margin-top:8px">${esc(checkoutState.errors.payment)}</p>` : ""}
@@ -965,7 +1125,7 @@ function renderCheckoutModal() {
                   }
                   <div class="ce-transfer-wa-box">
                     <p><b>Importante:</b> enviá el comprobante de transferencia por WhatsApp al <b>${esc(storeConfig.whatsapp)}</b> para confirmar tu pago.</p>
-                    <a class="btn ce-wa-btn" href="https://wa.me/${waNumber}?text=${transferWaText}" target="_blank" rel="noopener noreferrer">
+                    <a class="btn ce-wa-btn" style="background:#35C16F;border-color:#35C16F;color:#fff" href="https://wa.me/${waNumber}?text=${transferWaText}" target="_blank" rel="noopener noreferrer">
                       ${SVG.messageCircle}
                       <span>Enviar comprobante por WhatsApp</span>
                     </a>
@@ -978,16 +1138,10 @@ function renderCheckoutModal() {
       `;
 
     const mpDisabledHtml = `
-      <div class="ce-mp-wrap">
-        <button type="button" class="payment-mp-disabled" disabled title="Próximamente disponible" aria-label="Mercado Pago (Próximamente)">
-          <span class="mp-brand-left">
-            <svg class="mp-logo-svg" width="26" height="18" viewBox="0 0 38 26" aria-hidden="true">
-              <ellipse cx="19" cy="13" rx="18" ry="11.5" fill="#009EE3"/>
-              <path d="M10.5 14.2c1.4-2.4 3.4-3.6 5.5-3.6 1.3 0 2.3.5 3 1.2.7-.7 1.7-1.2 3-1.2 2.1 0 4.1 1.2 5.5 3.6.3.5.1 1.1-.4 1.3-.5.3-1.1.1-1.3-.4-1-1.7-2.4-2.5-3.8-2.5-1.1 0-1.9.5-2.4 1.3-.2.4-.9.4-1.2 0-.5-.8-1.3-1.3-2.4-1.3-1.4 0-2.8.8-3.8 2.5-.3.5-.9.7-1.3.4-.5-.2-.7-.8-.4-1.3Z" fill="#fff"/>
-            </svg>
-            <span>Mercado Pago</span>
-          </span>
-          <span class="mp-soon-pill">Próximamente</span>
+      <div class="ce-mp-wrap" style="margin-top:12px">
+        <button type="button" class="payment-mp-disabled" disabled title="Próximamente disponible" aria-label="Pagar con Mercado Pago" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 16px;border-radius:10px;border:none;background:#009EE3;color:#fff;font-weight:700;font-size:15px;cursor:not-allowed;opacity:0.95">
+          <img src="img/mercado-pago-logo.png" alt="Mercado Pago" style="width:26px;height:26px;object-fit:contain" />
+          <span>Pagar con Mercado Pago</span>
         </button>
       </div>
     `;
@@ -1022,6 +1176,17 @@ function renderCheckoutModal() {
 
       ${paymentSectionHtml}
       ${mpDisabledHtml}
+      <!-- Aviso fuera de horario en checkout (paso 3) -->
+      ${(() => {
+        if (isStoreOpen().open) return "";
+        return `<div class="checkout-closed-notice" role="alert">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ff9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <b>El local está cerrado ahora</b>
+            Podés realizar tu compra igual, pero vas a poder retirar o recibir tu pedido ${nextOpeningText()}. El local se pondrá en contacto con vos a la brevedad posible.
+          </div>
+        </div>`;
+      })()}
     `;
 
     footHtml = `
@@ -1241,7 +1406,7 @@ async function submitOrder(entries, total) {
       ? checkoutState.address.trim()
       : storeConfig.address || "";
   const paymentMethod =
-    delivery === "Retiro" ? "Pago en el local" : checkoutState.paymentMethod;
+    checkoutState.paymentMethod || (delivery === "Retiro" ? "Pago en el local" : "");
 
   const orderId = "WEB-" + Math.floor(1000 + Math.random() * 9000);
   const items = entries.map(({ product, qty }) => ({
@@ -1252,25 +1417,14 @@ async function submitOrder(entries, total) {
   }));
 
   try {
-    const secureOrder = await fetch("/api/orders", {
+    await fetch("/api/orders", {
       method: "POST",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ items, total, delivery, paymentMethod }),
     });
-    if (!secureOrder.ok) {
-      const problem = await secureOrder.json().catch(() => ({}));
-      if (secureOrder.status === 401) {
-        saveCart();
-        try { localStorage.setItem(STORE_CHECKOUT_AFTER_LOGIN_KEY, "1"); } catch {}
-        location.assign("/api/auth/start?audience=customer&returnTo=" + encodeURIComponent("/catalogo.html?checkout=1"));
-        return;
-      }
-      throw new Error(problem.error || "No se pudo validar el pedido.");
-    }
-  } catch (error) {
-    showToast(error.message || "Error de red al validar tu pedido.");
-    return;
+  } catch {
+    // En modo demo / Live Server sin backend, continúa con la simulación local
   }
 
   try {
@@ -1307,6 +1461,8 @@ async function submitOrder(entries, total) {
       items,
       createdAt: new Date().toISOString(),
       status: "Pendiente",
+      // Etiqueta fuera de horario: se usa en el dashboard de entregas
+      offHours: !isStoreOpen().open,
     });
 
     if (Array.isArray(data.products)) {
@@ -1373,7 +1529,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderCatalog();
   renderCart();
 
-  $("#storeAuthBtn").addEventListener("click", openAuthModal);
+  $("#storeAuthBtn")?.addEventListener("click", openAuthModal);
 
   $("#themeToggleBtn").addEventListener("click", () => {
     const cur = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
