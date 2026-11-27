@@ -1,0 +1,57 @@
+Tareas pendientes y pasos para llevar el repositorio a producción (demo sin autenticación de Google)
+
+## Cambios recientes
+- Se deshabilitó la autenticación de Google forzando `googleEnabled: false` en `api/auth/config.js`. Con esto la API siempre indica que Google está desactivado, permitiendo ejecutar el proyecto en modo demo.
+
+## Lista de tareas (enumeración corregida)
+1. **Configurar backend con Supabase**
+   - Crear proyecto Supabase.
+   - Configurar tablas y políticas (usuarios, productos, pedidos).
+   - Añadir variables de entorno (`SUPABASE_URL`, `SUPABASE_ANON_KEY`) al proyecto.
+2. **Integrar autenticador de Apple** (placeholder para futuro).
+3. **Crear usuario de demostración “Comerciando”** en Supabase (registro manual o script).
+4. **Revisar y completar configuración de autenticación de Google y Apple** (comentada/placeholder).
+5. **Revisar variables de entorno requeridas** (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, etc.).
+6. **Actualizar documentación del README** con instrucciones de despliegue y configuración del backend.
+7. **Configurar CI/CD** para despliegue automático (GitHub Actions o similar).
+8. **Ejecutar pruebas de integración** del backend contra Supabase.
+9. **Desplegar a producción** (Vercel, Netlify o plataforma elegida) con variables de entorno configuradas.
+
+---
+
+## Prompt para Codex (pepe‑pc) – Backend Setup
+```markdown
+# Prompt para Codex - Configuración del backend y demo
+
+## Objetivo
+Configurar el proyecto "ComerciandoEmprendedores" para que funcione en modo demo sin autenticación de Google, con Supabase como backend y con soporte futuro para Apple Sign‑In. Además, crear un usuario de demostración llamado "Comerciando".
+
+## Pasos a ejecutar (Codex debe generar y ejecutar los scripts correspondientes)
+1. Crear proyecto Supabase (si no existe) y obtener `SUPABASE_URL` y `SUPABASE_ANON_KEY`.
+2. Añadir los siguientes archivos de configuración al proyecto:
+   - `.env.local` con las variables:
+     ```
+     NEXT_PUBLIC_SUPABASE_URL=<SUPABASE_URL>
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=<SUPABASE_ANON_KEY>
+     ```
+   - `supabase/functions/create-demo-user.sql` que inserte un registro en la tabla `users` con email `demo@comerciando.com` y nombre `Comerciando`.
+3. Ejecutar el script SQL en Supabase para crear la tabla `users` y la política "public read/write" (solo demo).
+4. Desactivar la lógica de autenticación de Google en `api/auth/config.js` (código ya modificado a `googleEnabled: false`).
+5. Añadir código placeholder para Apple Sign‑In en `src/lib/appleAuth.js` con comentarios TODO.
+6. Ejecutar `npm run supabase:start` (o el CLI correspondiente) para inicializar el entorno local.
+7. Ejecutar `npm run dev` y verificar que el flujo de registro y login funciona usando el usuario demo creado.
+8. Generar reporte de salida con los IDs de proyecto Supabase, claves y confirmación de creación del usuario.
+
+## Salida esperada
+- Archivo `.env.local` creado/actualizado.
+- Script SQL ejecutado sin errores.
+- Mensaje de consola indicando éxito y mostrando las credenciales usadas.
+- Usuario demo creado en la tabla `users`.
+
+## Notas
+- No habilitar autenticación de Google; el código está forzado a `false`.
+- Mantener todos los secretos fuera del repositorio (usar `.env.local`).
+- El comando debe ser idempotente: volver a ejecutarlo no debe crear duplicados.
+```
+
+Guarda este prompt en `backend-setup-prompt.txt` para que Pepe pueda copiar‑pegarlo en su terminal y ejecutarlo con Codex.
